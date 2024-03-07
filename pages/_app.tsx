@@ -68,9 +68,13 @@ const MyApp = (props: MyAppProps) => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           {loading ? (
-            <Layout>
+            isAuthenticated ? (
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+            ) :(
               <Component {...pageProps} />
-            </Layout>
+            ) 
           ) : (
             <Box
               sx={{
