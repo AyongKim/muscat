@@ -3,6 +3,8 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
 // import {  sendAuthEmail } from '../utils/commonFunctions'; // sendAuthEmail은 인증 이메일을 보내는 함수입니다.
+import { postLogin, saveForm } from '../src/store/login'
+import { nowEpoch } from '../src/utils/commonFunctions'
 
 interface LoginResponse {
   loginResult: number;
@@ -23,7 +25,7 @@ export default function Login() {
   const [authSent, setAuthSent] = useState(false);
   const [timer, setTimer] = useState<number>(0);
   const router = useRouter();
-
+  const dispatch = useDispatch()
  
 
   const resetLogin = () => {
@@ -66,23 +68,26 @@ export default function Login() {
     setLoading(true);
 
     try {
+      console.log(email, password);
       // postLogin은 로그인 요청을 보내는 비동기 함수입니다. 실제 구현 필요.
-      // const response: LoginResponse = await postLogin({ userEmail: email, userPasswd: password });
+       let response: { [key: string]: any } = await dispatch(postLogin({ email: email, password: password }));
+       console.log(response)
+       response = response.data;
 
-      // if (response.loginResult === 1 && response.authRequired) {
-      //   setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
-      //   setTimer(nowEpoch());
-      //   // sendAuthEmail은 인증번호를 이메일로 전송하는 함수입니다. 실제 구현 필요.
-      //   sendAuthEmail(email);
-      // } else if (response.loginResult === 1) {
-      //   // 로그인 성공 로직
-      //   localStorage.setItem('loginUser', response.userData!.userEmail);
-      //   sessionStorage.setItem('accessTime', nowEpoch().toString());
-      //   router.push('/');
-      // } else {
-      //   setLoginAttempts(prev => prev + 1);
-      //   setErrorMessage(`입력하신 정보가 맞지 않습니다.(남은 횟수: ${5 - loginAttempts}번)`);
-      // }
+       if (response.loginResult === 1 && response.authRequired) {
+         setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
+         setTimer(nowEpoch());
+         // sendAuthEmail은 인증번호를 이메일로 전송하는 함수입니다. 실제 구현 필요.
+         //sendAuthEmail(email);
+       } else if (response.loginResult === 1) {
+         // 로그인 성공 로직
+         localStorage.setItem('loginUser', response.userData!.userEmail);
+         sessionStorage.setItem('accessTime', nowEpoch().toString());
+         router.push('/');
+       } else {
+         setLoginAttempts(prev => prev + 1);
+         setErrorMessage(`입력하신 정보가 맞지 않습니다.(남은 횟수: ${5 - loginAttempts}번)`);
+       }
     } catch (error) {
       console.error('Login error', error);
       setErrorMessage('서버와의 연결에 실패했습니다.');
