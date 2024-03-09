@@ -19,11 +19,12 @@ import {
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { useSelector, useDispatch } from '../../../store/Store';
-import { fetchProducts } from '../../../store/apps/CompanySlice';
+import { fetchCompanies   } from '../../../store/apps/CompanySlice';
 import CustomCheckbox from '../../forms/theme-elements/CustomCheckbox'; 
 import {   IconSearch,   } from '@tabler/icons-react';
 import { CompanyType } from '../../../types/apps/company'; 
 import BlankCard from '../../shared/BlankCard';
+import AddCompany from '../notes/Addcompany';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -177,7 +178,8 @@ const CompanyTableToolbar = (props: CompanyTableToolbarProps) => {
         </Typography>
       )} 
       <Button type="submit" disabled={numSelected <= 0} color="warning" variant="contained"  sx={{mr:1,width:150}}>업체 삭제</Button> 
-      <Button type="submit" color="success" variant="contained" sx={{width:150}}>업체 등록</Button> 
+      
+      <AddCompany   />
    
     </Toolbar>
   );
@@ -195,20 +197,20 @@ const CompanyList = () => {
 
   //Fetch Products
   React.useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(fetchCompanies());
   }, [dispatch]);
 
-  const getProducts: CompanyType[] = useSelector((state) => state.companyReducer.products);
+  const getCompanies: CompanyType[] = useSelector((state) => state.companyReducer.companies);
 
-  const [rows, setRows] = React.useState<any>(getProducts);
+  const [rows, setRows] = React.useState<any>(getCompanies);
   const [search, setSearch] = React.useState('');
 
   React.useEffect(() => {
-    setRows(getProducts);
-  }, [getProducts]);
+    setRows(getCompanies);
+  }, [getCompanies]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows: CompanyType[] = getProducts.filter((row) => {
+    const filteredRows: CompanyType[] = getCompanies.filter((row) => {
       return row.title.toLowerCase().includes(event.target.value);
     });
     setSearch(event.target.value);

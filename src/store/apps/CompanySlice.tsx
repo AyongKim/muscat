@@ -1,168 +1,94 @@
 import axios from "../../utils/axios";
-import { filter, map } from "lodash";
-import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "../Store";
-
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { CompanyType } from '../../types/apps/company'; 
+// 비동기 액션을 위한 API 경로
 const API_URL = "/api/data/eCommerce/CompanyData";
-
+ 
 interface StateType {
-  products: any[];
-  productSearch: string;
-  sortBy: string;
-  cart: any[];
-  total: number;
-  filters: {
-    category: string;
-    color: string;
-    gender: string;
-    price: string;
-    rating: string;
-  };
-  error: string;
+  companies: CompanyType[];
+  searchQuery: string;
+  error: string | null;
 }
 
-const initialState = {
-  products: [],
-  productSearch: "",
-  sortBy: "newest",
-  cart: [],
-  total: 0,
-  filters: {
-    category: "All",
-    color: "All",
-    gender: "All",
-    price: "All",
-    rating: "",
-  },
-  error: "",
+const initialState: StateType = {
+  companies: [],
+  searchQuery: "",
+  error: null,
 };
+
+// 회사 정보를 등록하는 비동기 액션
+export const registerCompany = createAsyncThunk(
+  "company/register",
+  async (companyData: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/register`, companyData);
+      return response.data;
+    } catch (error : any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// 회사 정보를 삭제하는 비동기 액션
+export const deleteCompany = createAsyncThunk(
+  "company/delete",
+  async (companyId: string, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/${companyId}`);
+      return companyId;
+    } catch (error : any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// 회사 정보를 검색하는 액션(동기)
+// 비동기 API 호출이 아니라, 클라이언트 측에서의 검색을 가정함
+
+// 회사 정보를 얻는 비동기 액션
+export const fetchCompanies = createAsyncThunk(
+  "company/fetch",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}`);
+      return response.data;
+    } catch (error : any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 export const CompanySlice = createSlice({
   name: "company",
   initialState,
   reducers: {
-    // HAS ERROR
-
-    hasError(state: StateType, action) {
-      state.error = action.payload;
-    },
-
-    // GET PRODUCTS
-    getProducts: (state, action) => {
-      state.products = action.payload;
-    },
-
-    SearchProduct: (state, action) => {
-      state.productSearch = action.payload;
-    },
-
-    //  SORT  PRODUCTS
-    sortByProducts(state, action) {
-      state.sortBy = action.payload;
-    },
-
-    //  SORT  PRODUCTS
-    sortByGender(state, action) {
-      state.filters.gender = action.payload.gender;
-    },
-
-    //  SORT  By Color
-    sortByColor(state, action) {
-      state.filters.color = action.payload.color;
-    },
-
-    //  SORT  By Color
-    sortByPrice(state, action) {
-      state.filters.price = action.payload.price;
-    },
-
-    //  FILTER PRODUCTS
-    filterProducts(state, action) {
-      state.filters.category = action.payload.category;
-    },
-
-    //  FILTER Reset
-    filterReset(state) {
-      state.filters.category = "All";
-      state.filters.color = "All";
-      state.filters.gender = "All";
-      state.filters.price = "All";
-      state.sortBy = "newest";
-    },
-
-    // ADD TO CART
-    addToCart(state: StateType, action) {
-      const product = action.payload;
-      state.cart = [...state.cart, product];
-    },
-
-    // qty increment
-    increment(state: StateType, action) {
-      const productId = action.payload;
-      const updateCart = map(state.cart, (product) => {
-        if (product.id === productId) {
-          return {
-            ...product,
-            qty: product.qty + 1,
-          };
-        }
-
-        return product;
-      });
-
-      state.cart = updateCart;
-    },
-
-    // qty decrement
-    decrement(state: StateType, action) {
-      const productId = action.payload;
-      const updateCart = map(state.cart, (product) => {
-        if (product.id === productId) {
-          return {
-            ...product,
-            qty: product.qty - 1,
-          };
-        }
-
-        return product;
-      });
-
-      state.cart = updateCart;
-    },
-
-    // delete Cart
-    deleteCart(state: StateType, action) {
-      const updateCart = filter(
-        state.cart,
-        (item) => item.id !== action.payload
-      );
-      state.cart = updateCart;
+    // 검색 쿼리를 설정하는 동기 액션
+    setSearchQuery(state, action) {
+      state.searchQuery = action.payload;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(registerCompany.fulfilled, (state, action) => {
+        state.companies.push(action.payload);
+      })
+      .addCase(deleteCompany.fulfilled, (state, action) => {
+        state.companies = state.companies.filter(
+          (company) => company.id !== action.payload
+        );
+      })
+      .addCase(fetchCompanies.fulfilled, (state, action) => {
+        state.companies = action.payload;
+      })
+      .addMatcher(
+        (action) => action.type.endsWith("/rejected"),
+        (state, action) => {
+          state.error = action.payload;
+        }
+      );
+  },
 });
-export const {
-  hasError,
-  getProducts,
-  SearchProduct,
-  sortByProducts,
-  filterProducts,
-  sortByGender,
-  increment,
-  deleteCart,
-  decrement,
-  addToCart,
-  sortByPrice,
-  filterReset,
-  sortByColor,
-} = CompanySlice.actions;
 
-export const fetchProducts = () => async (dispatch: AppDispatch) => {
-  try {
-    const response = await axios.get(`${API_URL}`);
-    dispatch(getProducts(response.data));
-  } catch (error) {
-    dispatch(hasError(error));
-  }
-};
+export const { setSearchQuery } = CompanySlice.actions;
 
 export default CompanySlice.reducer;
