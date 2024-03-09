@@ -10,6 +10,8 @@ import {
   Typography,
   Select,
   InputLabel,
+  Box,
+  FormControlLabel,
 } from '@mui/material';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -27,6 +29,8 @@ import { IconCheck } from '@tabler/icons-react';
 import BlankCard from '../../../src/components/shared/BlankCard'; 
 import MenuItem from '@mui/material/MenuItem';
 import { Label } from '@mui/icons-material';
+import CustomSelect from '../../../src/components/forms/theme-elements/CustomSelect';
+import CustomCheckbox from '../../../src/components/forms/theme-elements/CustomCheckbox';
 
 moment.locale('ko'); // 한국어로 설정
 const localizer = momentLocalizer(moment);
@@ -159,23 +163,60 @@ export default function BigCalendar() {
   const handleEndChange = (newValue: any) => {
     setEnd(newValue);
   };
+  const [managerName, setManagerName] = useState<string>('김하늘');
   const [projectName, setProjectName] = useState<string>('trustee');
   return (
     <PageContainer>
       <Breadcrumb title="일정관리"   />
-      <>
-        <Typography  >프로젝트 명</Typography>
-        <Select 
+      <Box display={'flex'} sx={{margin:1}} alignItems="center">
+        <Typography sx={{mr:1}} >담당자 명</Typography>
+        <CustomSelect
           id="account-type-select"
-          value={projectName}
-          label="계정 유형"
-          onChange={(event) => {
+          sx={{mr:4}}
+          value={managerName} 
+          onChange={(event:any) => {
+            setManagerName(event.target.value as string)}}
+        >
+          <MenuItem value="이예니">이예니</MenuItem>
+          <MenuItem value="김하늘">김하늘</MenuItem>
+        </CustomSelect>
+
+        <Typography sx={{mr:1}} >프로젝트 명</Typography>
+        <CustomSelect
+          id="account-type-select"
+          sx={{mr:4}}
+          value={projectName} 
+          onChange={(event:any) => {
             setProjectName(event.target.value as string)}}
         >
           <MenuItem value="trustee">프로젝트1</MenuItem>
           <MenuItem value="consignor">프로젝트2</MenuItem>
-        </Select>
-      </>
+        </CustomSelect>
+        <FormControlLabel
+          sx={{mr:4}}
+          control={
+            <CustomCheckbox
+              defaultChecked
+              color="success"
+              inputProps={{ 'aria-label': 'checkbox with default color' }}
+            />
+          }
+          label="모든 수락사 현장점검 일정"
+        />
+        
+
+        <Typography sx={{mr:1}} >수탁사</Typography>
+        <CustomSelect
+          id="account-type-select" 
+          value={'www'} 
+          onChange={(event:any) => {
+            setProjectName(event.target.value as string)}}
+        >
+          <MenuItem value="www">수탁사1</MenuItem>
+          <MenuItem value="222">수탁사2</MenuItem>
+        </CustomSelect>
+      </Box>
+      
       <BlankCard>
       
         {/* ------------------------------------------- */}
@@ -203,8 +244,8 @@ export default function BigCalendar() {
             agenda: '일정',
             date: '날짜',
             time: '시간',
-            event: '이벤트', // 여기에 더 많은 번역을 추가할 수 있습니다.
-            noEventsInRange: '이 기간에 이벤트가 없습니다.',
+            event: '일정', // 여기에 더 많은 번역을 추가할 수 있습니다.
+            noEventsInRange: '이 기간에 일정가 없습니다.',
             // 다른 문자열들도 필요에 따라 추가 및 번역
           }}
         />
@@ -222,21 +263,21 @@ export default function BigCalendar() {
             {/* Add Edit title */}
             {/* ------------------------------------------- */}
             <Typography variant="h4" sx={{ mb: 2 }}>
-              {update ? '이벤트 수정' : '이벤트 추가'}
+              {update ? '일정 수정' : '일정 추가'}
             </Typography>
             <Typography mb={3} variant="subtitle2">
               {!update
-                ? '이벤트를 추가하려면 제목을 입력하고 색상을 선택한 후 추가 버튼을 누르세요'
-                : '이벤트를 수정/업데이트하려면 제목을 변경하고 색상을 선택한 후 업데이트 버튼을 누르세요'}
+                ? '일정를 추가하려면 제목을 입력하고 색상을 선택한 후 추가 버튼을 누르세요'
+                : '일정를 수정/업데이트하려면 제목을 변경하고 색상을 선택한 후 업데이트 버튼을 누르세요'}
               {slot?.title}
             </Typography>
 
             <TextField
               id="Event Title"
-              placeholder="이벤트 제목을 입력하세요"
+              placeholder="일정 제목을 입력하세요"
               variant="outlined"
               fullWidth
-              label="이벤트 제목"
+              label="일정 제목"
               value={title}
               sx={{ mb: 3 }}
               onChange={inputChangeHandler}
@@ -282,7 +323,7 @@ export default function BigCalendar() {
             {/* Calendar Event Color*/}
             {/* ------------------------------------------- */}
             <Typography variant="h6" fontWeight={600} my={2}>
-              이벤트 색상 선택
+              일정 색상 선택
             </Typography>
             {/* ------------------------------------------- */}
             {/* colors for event */}
@@ -325,7 +366,7 @@ export default function BigCalendar() {
               ''
             )}
             <Button type="submit" disabled={!title} variant="contained">
-              {update ? '이벤트 수정' : '이벤트 추가'}
+              {update ? '일정 수정' : '일정 추가'}
             </Button>
           </DialogActions>
           {/* ------------------------------------------- */}

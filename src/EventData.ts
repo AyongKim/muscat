@@ -19,13 +19,7 @@ const Events: EventType[] = [
     end: new Date(y, m, 5),
     color: 'default',
   },
-  {
-    title: 'Learn ReactJs',
-    start: new Date(y, m, d + 3, 10, 30),
-    end: new Date(y, m, d + 3, 11, 30),
-    allDay: false,
-    color: 'green',
-  },
+ 
   {
     title: '계정 생성',
     start: new Date(y, m, d + 7, 12, 0),

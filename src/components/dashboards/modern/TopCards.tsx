@@ -25,7 +25,7 @@ const topcards = [
   },
   { 
     title: "검수 중",
-    digits: "$96k",
+    digits: "96k",
     bgcolor: "success",
   },
   { 

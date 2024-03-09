@@ -149,14 +149,14 @@ export default function Modern() {
           {/* column */}
             <Grid item xs={6} lg={6}>
                
-                <Typography variant="body1">2%</Typography>
-                <LinearProgress variant="determinate" value={20} sx={{ height: '50px', borderRadius: '10px', marginTop: '10px' }} />
+                <Typography variant="body1">40%</Typography>
+                <LinearProgress variant="determinate" value={40} sx={{ height: '50px', borderRadius: '10px', marginTop: '10px' }} />
              
               <TopCards />
             </Grid>
             <Grid item xs={6} lg={6}>
                
-                <Typography variant="body1">2%</Typography>
+                <Typography variant="body1">20%</Typography>
                 <LinearProgress variant="determinate" value={20} sx={{ height: '50px', borderRadius: '10px', marginTop: '10px' }} />
              
               <TopCards />
@@ -164,15 +164,7 @@ export default function Modern() {
             <Grid item xs={3} lg={3}   > 
               <StatusCard/>
             </Grid>
-            <Grid item xs={3} lg={3}>
-              <StatusCard/>
-            </Grid> 
-            <Grid item xs={3} lg={3}>
-              <StatusCard/>
-            </Grid> 
-            <Grid item xs={3} lg={3}>
-              <StatusCard/>
-            </Grid> 
+            
         </Grid>
         
         {/* column */}

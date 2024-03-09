@@ -76,22 +76,43 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: '메모발신이력 ',
+    title: '등록업체 및 계정관리',
     icon: IconNotes,
-    href: '/apps/notes',
+    href: '/apps/account-manager',
   },
+  
+  {
+    id: uniqueId(),
+    title: '계정 등록',
+    icon: IconUserCircle,
+    href: '/theme-pages/account-settings',
+  },
+  {
+    id: uniqueId(),
+    title: '계정상세보기',
+    icon: IconUserCircle,
+    href: '/tables/account-detail',
+  },
+  
+  {
+    id: uniqueId(),
+    title: '회원가입 승인',
+    icon: IconUserCircle,
+    href: '/tables/account-accept',
+  },
+ 
  
   {
     id: uniqueId(),
     title: '공지사항',
     icon: IconNotes,
-    href: '/apps/ecommerce/list',
+    href: '/apps/noticelist',
   },
   {
     id: uniqueId(),
     title: '공지사항->글 작성',
     icon: IconEdit,
-    href: '/forms/form-quill',
+    href: '/apps/noticelist/notice-edit',
   },
   {
     id: uniqueId(),
@@ -126,7 +147,12 @@ const Menuitems: MenuitemsType[] = [
       },
     ],
   },
- 
+  {
+    id: uniqueId(),
+    title: '메모발신이력 ',
+    icon: IconNotes,
+    href: '/apps/notes',
+  },
     
   {
     id: uniqueId(),
@@ -150,12 +176,7 @@ const Menuitems: MenuitemsType[] = [
     icon: IconBorderAll,
     href: '/tables/basic',
   },
-  {
-    id: uniqueId(),
-    title: '계정 등록',
-    icon: IconUserCircle,
-    href: '/theme-pages/account-settings',
-  },
+  
  
    
   {

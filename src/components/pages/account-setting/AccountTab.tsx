@@ -114,169 +114,214 @@ const AccountTab: React.FC = () => {
   // ...other handlers here...
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h5" mb={2}>계정 생성</Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>계정 유형</TableCell>
-              <TableCell>
-                <FormControl fullWidth>
-                  <InputLabel id="account-type-select-label">계정 유형</InputLabel>
-                  <Select
-                    labelId="account-type-select-label"
-                    id="account-type-select"
-                    value={accountType}
-                    label="계정 유형"
-                    onChange={handleAccountTypeChange}
-                  >
-                    <MenuItem value="trustee">수탁사</MenuItem>
-                    <MenuItem value="consignor">위탁사</MenuItem>
-                  </Select>
-                </FormControl>
-              </TableCell>
-            </TableRow>
-          </TableHead>
+    <Box sx={{ width: 750 }}> 
+    <TableContainer component={Paper}>
+      <Table >
+        <TableHead >
+          <TableRow>
+            <TableCell sx={{width:'40%'}}><InputLabel id="account-type-select-label">계정 유형</InputLabel></TableCell>
+            <TableCell>
+              <FormControl fullWidth>
+              <InputLabel id="account-type-select-label">계정 유형</InputLabel>
+                <Select
+                  labelId="account-type-select-label"
+                  id="account-type-select"
+                  value={accountType}
+                  label="계정 유형"
+                  onChange={handleAccountTypeChange}
+                >
+                  <MenuItem value="trustee">수탁사</MenuItem>
+                  <MenuItem value="consignor">위탁사</MenuItem>
+                </Select>
+              </FormControl>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <Divider />
+
+        <TableBody  >
+          <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
           <Divider />
+          {/* ID */}
+          
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="id">
+                <AccountCircleIcon sx={{ marginRight: 1 }} />
+                아이디*
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField  
+              fullWidth
+                variant="outlined" 
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+                required
+              />
+             
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}> 
+              <Button onClick={handleIdCheck}>중복확인</Button>
+            </TableCell>
+           
+          </TableRow>
+         
+          {/* Password */}
+           
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="password">
+                <LockIcon sx={{ marginRight: 1 }} />
+                비밀번호*
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }} >
+              <TextField
+                fullWidth
+                type="password"
+                variant="outlined"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </TableCell>
+          </TableRow> 
+          <Divider/>
+          {/* Email */}
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="email">
+                <EmailIcon sx={{ marginRight: 1 }} />
+                이메일*
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField
+                fullWidth 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </TableCell>
+          </TableRow>
+          
+          <Typography variant="h4" padding={1} marginTop={3}>회사정보</Typography>
+          {/* Business Registration Number */}
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="businessNumber">
+                <BusinessIcon sx={{ marginRight: 1 }} />
+                사업자 등록번호*
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField 
+              fullWidth
+                variant="outlined"
+                value={businessNumber}
+                onChange={(e) => setBusinessNumber(e.target.value)}
+                required
+              /> 
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}> 
+              <Button onClick={handleBusinessNumberCheck}>조회</Button>
+            </TableCell>
+          </TableRow>
+          {/* Address */}
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="address">
+                <LocationOnIcon sx={{ marginRight: 1 }} />
+                주소*
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
+            </TableCell>
+          </TableRow>
+          <Typography variant="h4" padding={1} marginTop={3}>담당자 정보</Typography>
+          {/* Name */}
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="name">
+                <PersonIcon sx={{ marginRight: 1 }} />
+                이름*
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </TableCell>
+          </TableRow>
+          {/* Phone */}
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="phone">
+                <PhoneIcon sx={{ marginRight: 1 }} />
+                연락처*
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </TableCell>
+          </TableRow>
+          {/* Department */}
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="department">
+                <BusinessCenterIcon sx={{ marginRight: 1 }} />
+                부서명
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+              />
+            </TableCell>
+          </TableRow>
+          {/* Position */}
+          <TableRow>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="position">
+                <AssignmentIndIcon sx={{ marginRight: 1 }} />
+                직급
+              </InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+              />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
 
-          <TableBody>
-            <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
-             <Divider />
-            {/* ID */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}> 
-                <AccountCircleIcon sx={{ marginRight: 1 }} /> {/* Icon added here */}
-                 아이디*  
-              </TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField  
-                  variant="outlined" 
-                  value={id}
-                  sx={{ flex: 1 }}
-                  onChange={(e) => setId(e.target.value)}
-                  required
-                  
-                />
-                <Button onClick={handleIdCheck}>중복확인</Button>
-              </TableCell>
-            </TableRow>
 
-            {/* Password */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><LockIcon sx={{ marginRight: 1 }}  />비밀번호*</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField
-                  fullWidth
-                  type="password"
-                  variant="outlined"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  
-                />
-              </TableCell>
-            </TableRow>
-            {/* Email */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><EmailIcon sx={{ marginRight: 1 }}  />이메일*</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField
-                  fullWidth 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  
-                />
-              </TableCell>
-            </TableRow>
-            <Typography variant="h4" padding={1} marginTop={3}>회사정보</Typography>
-            {/* Business Registration Number */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><BusinessIcon sx={{ marginRight: 1 }}  />사업자 등록번호*</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField 
-                  variant="outlined"
-                  value={businessNumber}
-                  onChange={(e) => setBusinessNumber(e.target.value)}
-                  required
-                  
-                />
-                <Button onClick={handleBusinessNumberCheck}>조회</Button>
-              </TableCell>
-            </TableRow>
-            {/* Address */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><LocationOnIcon sx={{ marginRight: 1 }}  />주소*</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                  
-                />
-              </TableCell>
-            </TableRow>
-            <Typography variant="h4" padding={1} marginTop={3}>담당자 정보</Typography>
-            {/* Name */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><PersonIcon sx={{ marginRight: 1 }}  />이름*</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  
-                />
-              </TableCell>
-            </TableRow>
-            {/* Phone */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><PhoneIcon sx={{ marginRight: 1 }}  />연락처*</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  
-                />
-              </TableCell>
-            </TableRow>
-            {/* Department */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><BusinessCenterIcon sx={{ marginRight: 1 }}  />부서명</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  
-                />
-              </TableCell>
-            </TableRow>
-            {/* Position */}
-            <TableRow>
-              <TableCell sx={{  backgroundColor: '#f0f0f0',display: 'flex', alignItems: 'center'  }}><AssignmentIndIcon sx={{ marginRight: 1 }}  /> 직급</TableCell>
-              <TableCell sx={{ padding: 1 }} >
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={position}
-                  onChange={(e) => setPosition(e.target.value)}
-                  
-                />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
         <Button color="primary" onClick={() => setEditMode(!editMode)}>
           {editMode ? '저장' : '수정'}

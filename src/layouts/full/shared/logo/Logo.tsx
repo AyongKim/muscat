@@ -4,7 +4,7 @@ import Link from "next/link";
 import { styled } from "@mui/material";
 import { AppState } from "../../../../store/Store";
 import Image from "next/image";
-
+import LogoImg from "public/images/logos/logoIcon.svg";
 const Logo = () => {
   const customizer = useSelector((state: AppState) => state.customizer);
   const LinkStyled = styled(Link)(() => ({
@@ -17,23 +17,13 @@ const Logo = () => {
   if (customizer.activeDir === "ltr") {
     return (
       <LinkStyled href="/">
-        {customizer.activeMode === "dark" ? (
-          <Image
-            src="/images/logos/light-logo.svg"
+        <Image
+            src={LogoImg}
             alt="logo"
             height={customizer.TopbarHeight}
-            width={174}
+            width={174} 
             priority
           />
-        ) : (
-          <Image
-            src={"/images/logos/dark-logo.svg"}
-            alt="logo"
-            height={customizer.TopbarHeight}
-            width={174}
-            priority
-          />
-        )}
       </LinkStyled>
     );
   }

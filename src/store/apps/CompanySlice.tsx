@@ -1,9 +1,9 @@
-import axios from "../../../utils/axios";
+import axios from "../../utils/axios";
 import { filter, map } from "lodash";
 import { createSlice } from "@reduxjs/toolkit";
-import { AppDispatch } from "../../Store";
+import { AppDispatch } from "../Store";
 
-const API_URL = "/api/data/eCommerce/ProductsData";
+const API_URL = "/api/data/eCommerce/CompanyData";
 
 interface StateType {
   products: any[];
@@ -37,8 +37,8 @@ const initialState = {
   error: "",
 };
 
-export const EcommerceSlice = createSlice({
-  name: "notice",
+export const CompanySlice = createSlice({
+  name: "company",
   initialState,
   reducers: {
     // HAS ERROR
@@ -154,7 +154,7 @@ export const {
   sortByPrice,
   filterReset,
   sortByColor,
-} = EcommerceSlice.actions;
+} = CompanySlice.actions;
 
 export const fetchProducts = () => async (dispatch: AppDispatch) => {
   try {
@@ -165,4 +165,4 @@ export const fetchProducts = () => async (dispatch: AppDispatch) => {
   }
 };
 
-export default EcommerceSlice.reducer;
+export default CompanySlice.reducer;
