@@ -1,8 +1,8 @@
 import { GeneralIcon } from './icon';
 
 export interface CompanyType {
-  title: string;
-  num: number; 
+  company_name: string;
+  register_num: string; 
   id: number | string; 
 }
 

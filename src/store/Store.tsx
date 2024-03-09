@@ -11,6 +11,10 @@ import {
   TypedUseSelectorHook,
 } from 'react-redux';
 import authReducer from './authSlice';
+import userReducer from './apps/UserSlice';  
+  
+ 
+ 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -19,7 +23,7 @@ export const store = configureStore({
     notesReducer: NotesReducer, 
     ticketReducer: TicketReducer, 
     companyReducer: CompanyReducer, 
-    
+    user: userReducer,
   },
 });
 
@@ -30,6 +34,7 @@ const rootReducer = combineReducers({
   notesReducer: NotesReducer, 
   ticketReducer: TicketReducer, 
   companyReducer: CompanyReducer, 
+  user: userReducer,
 });
 
 export type AppState = ReturnType<typeof rootReducer>;
@@ -39,3 +44,4 @@ export const useDispatch = () => useAppDispatch<AppDispatch>();
 export const useSelector: TypedUseSelectorHook<AppState> = useAppSelector;
 
 export default store;
+

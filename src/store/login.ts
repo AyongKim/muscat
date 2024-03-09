@@ -1,31 +1,24 @@
+import { createAction, createReducer, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { apiUrl, execUrl } from '../utils/commonValues';
-import { actionFormat } from '../utils/commonFunctions';
 
-// Action Types 
-const SET_INITIAL = "login/SET_INITIAL";
-const CHECK_LOGIN = 'login/CHECK_LOGIN' as const;
-const POST_LOGIN = 'login/POST_LOGIN' as const;
-const LOGOUT = 'login/LOGOUT' as const;
-const CHECK_EMAIL = 'login/CHECK_EMAIL';
-const SAVE_FORM = 'login/SAVE_FORM';
-const INIT_PWRESET = 'login/INIT_PWRESET';
+// 비동기 액션 생성자
+export const postLogin = createAsyncThunk(
+  'login/POST_LOGIN',
+  async (params: object) => {
+    const response = await axios.post(`${apiUrl}user/Login`, params);
+    return response.data;
+  }
+);
 
-// Actions
-export const setInitial = () => actionFormat(SET_INITIAL);
-export const getCheckLogin = () =>
-  actionFormat(CHECK_LOGIN, null, 'get', `${apiUrl}Login/CheckLogin`);
-export const postLogin = (params: any) =>
-  actionFormat(POST_LOGIN, params, 'post', `${apiUrl}user/Login`);
-export const getLogout = () =>
-  actionFormat(LOGOUT, null, 'get', `${apiUrl}Login/Logout`);
-
-export const getCheckEmail = (params: any) =>
-  actionFormat(CHECK_EMAIL, params, 'get', `${execUrl}PasswdMail`);
-export const saveForm = (params: any) => actionFormat(SAVE_FORM, params);
-export const initPwreset = () => actionFormat(INIT_PWRESET);
-
-// Initial state
-interface stateType {
+// 동기 액션 생성자
+export const setInitial = createAction('login/SET_INITIAL');
+export const getCheckLogin = createAction('login/CHECK_LOGIN');
+export const getLogout = createAction('login/LOGOUT');
+export const getCheckEmail = createAction('login/CHECK_EMAIL');
+export const saveForm = createAction('login/SAVE_FORM');
+export const initPwreset = createAction('login/INIT_PWRESET');
+interface StateType {
   step?: number;
   sessionTimeout?: number;
   loginResult?: number;
@@ -36,7 +29,8 @@ interface stateType {
   formStore?: any;
   send?: any;
 }
-const initialState: stateType = {
+
+const initialState: StateType = {
   step: 1,
   sessionTimeout: 0,
   loginResult: 0,
@@ -53,63 +47,21 @@ const initialState: stateType = {
   },
 };
 
-// Reducers
-export default function login (state = initialState, action: any) {
-  switch (action.type) { 
-    case SET_INITIAL:
-      return initialState;
-    case CHECK_LOGIN:
-      if (action.payload) {
-        const { list } = action.payload.data;
-        state = {
-          ...state,
-          sessionTimeout: list.sessionTimeout,
-          userData: list.userData,
-        };
-      }
-      return state;
-    case POST_LOGIN:
-      if (action.payload) {
-        const { list } = action.payload.data;
-        state = {
-          ...state,
-          // sessionTimeout: list.sessionTimeout,
-          loginResult: list.loginResult,
-          loginMessage: list.loginMessage,
-          userData: list.userData,
-        };
-      } else {
-        state = {
-          ...state,
-          loginResult: 2,
-          loginMessage: 'Unable to connect to Server',
-          userData: null,
-        };
-      }
-      return state;
-    case CHECK_EMAIL:
-      if (action.payload) {
-        const { list } = action.payload.data;
-        state.send = list;
-        if (list.isExist === 1) {
-          state.step = 2;
-        }
-      }
-      return state;
-    case SAVE_FORM:
-      if (action.payload) {
-        state.formStore = action.payload;
-      }
-      return state;
-    case INIT_PWRESET:
-      state = {
-        ...state,
-        step: 1
-      }
-      return state;
-    case LOGOUT:
-      return initialState;
-    default:
-      return state;
-  }
-}
+const loginReducer = createReducer(initialState, (builder) => {
+  builder
+    .addCase(setInitial, (state) => initialState)
+    .addCase(getCheckLogin, (state, action) => {
+      // CHECK_LOGIN 처리 로직 구현
+    })
+    .addCase(postLogin.fulfilled, (state, action) => {
+      // POST_LOGIN 성공 처리 로직
+      // action.payload에 서버로부터 받은 데이터가 포함됩니다.
+    })
+    .addCase(postLogin.rejected, (state, action) => {
+      // POST_LOGIN 실패 처리 로직
+    })
+    // 나머지 액션들에 대한 처리 로직 추가...
+    ;
+});
+
+export default loginReducer;

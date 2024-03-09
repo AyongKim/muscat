@@ -11,27 +11,19 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  Toolbar,
-  IconButton,
-  Tooltip,
-  FormControlLabel,
-  Typography,
-  Avatar,
-  TextField,
-  InputAdornment,
+  Toolbar, 
+  Typography, 
   Paper,
-  Button,
-  MenuItem,
-  CardContent,
+  Button, 
   Divider,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { useSelector, useDispatch } from '../../../store/Store';
-import { fetchProducts } from '../../../store/apps/eCommerce/ECommerceSlice';
+import { fetchUsers  } from '../../../store/apps/UserSlice';
 import CustomCheckbox from '../../forms/theme-elements/CustomCheckbox';
 import CustomSwitch from '../../forms/theme-elements/CustomSwitch';
 import { IconDotsVertical, IconFilter, IconSearch, IconTrash } from '@tabler/icons-react';
-import { ProductType } from '../../../types/apps/eCommerce';
+import { UserType } from '../../../types/apps/account';
 import CustomSelect from '../../forms/theme-elements/CustomSelect';
 import BlankCard from '../../shared/BlankCard';
 
@@ -191,11 +183,11 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     >
      
       {numSelected > 0 ? (
-        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
+        <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
           {numSelected} 건 선택됨
         </Typography>
       ) : (
-        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
+        <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
           총  {rows.length} 건
         </Typography>
       )} 
@@ -215,27 +207,26 @@ const AccountList = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   const dispatch = useDispatch();
-
-  //Fetch Products
+ 
   React.useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(fetchUsers());
   }, [dispatch]);
 
-  const getProducts: ProductType[] = useSelector((state) => state.ecommerceReducer.products);
+  const accounts: UserType[] = useSelector((state) => state.user.users);
 
-  const [rows, setRows] = React.useState<any>(getProducts);
+  const [rows, setRows] = React.useState<any>(accounts);
   const [search, setSearch] = React.useState('');
 
   React.useEffect(() => {
-    setRows(getProducts);
-  }, [getProducts]);
+    setRows(accounts);
+  }, [accounts]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows: ProductType[] = getProducts.filter((row) => {
-      return row.title.toLowerCase().includes(event.target.value);
+    const filteredAccounts: UserType[] = accounts.filter((row) => {
+      return row.nickname.toLowerCase().includes(event.target.value);
     });
     setSearch(event.target.value);
-    setRows(filteredRows);
+    setRows(filteredAccounts);
   };
 
   // This is for the sorting
@@ -248,7 +239,7 @@ const AccountList = () => {
   // This is for select all the row
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n: any) => n.title);
+      const newSelecteds = rows.map((n: any) => n.nickname);
       setSelected(newSelecteds);
 
       return;
@@ -257,12 +248,12 @@ const AccountList = () => {
   };
 
   // This is for the single row sleect
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event: React.MouseEvent<unknown>, id: string | number) => {
+    const selectedIndex = selected.indexOf(id.toString());
     let newSelected: readonly string[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, id.toString());
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -312,7 +303,7 @@ const AccountList = () => {
             <TableContainer>
               <Table
                 sx={{ minWidth: 750 }}
-                aria-labelledby="tableTitle"
+                aria-labelledby="tablenickname"
                 size={dense ? 'small' : 'medium'}
               >
                 <EnhancedTableHead
@@ -327,17 +318,17 @@ const AccountList = () => {
                   {stableSort(rows, getComparator(order, orderBy))
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row: any, index) => {
-                      const isItemSelected = isSelected(row.title);
+                      const isItemSelected = isSelected(row.id); 
                       const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
                         <TableRow
                           hover
-                          onClick={(event) => handleClick(event, row.title)}
+                          onClick={(event) => handleClick(event, row.nickname)}
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}
-                          key={row.title}
+                          key={row.nickname}
                           selected={isItemSelected}
                         >
                           <TableCell padding="checkbox">
@@ -358,14 +349,14 @@ const AccountList = () => {
                                 }}
                               >
                                 <Typography variant="h6" fontWeight="600">
-                                  {row.title}
+                                  {row.nickname}
                                 </Typography> 
                               </Box>
                             </Box>
                           </TableCell>
                           <TableCell>
                               <Typography variant="h6" fontWeight="600">
-                                {row.category}
+                                {row.company_address}
                               </Typography> 
                           
                             
@@ -375,24 +366,23 @@ const AccountList = () => {
                             <Box display="flex" alignItems="center">
                                
                               <Typography
-                                color="textSecondary"
-                                variant="subtitle2"
+                                color="textSecondary" 
                                 sx={{
                                   ml: 1,
                                 }}
                               >
-                                {row.gender  }
+                                {row.manager_name  }
                               </Typography>
                             </Box>
                           </TableCell>
 
                           <TableCell>
-                          <Typography>{format(new Date(row.created), 'E, MMM d yyyy')}</Typography>
+                          <Typography>{format(new Date(row.manager_grade), 'E, MMM d yyyy')}</Typography>
                             
                           </TableCell>
                           <TableCell>
                           <Typography fontWeight={600} variant="h6">
-                              {row.price}
+                              {row.manager_grade}
                             </Typography>
                           </TableCell>
                         </TableRow>

@@ -58,10 +58,7 @@ export default function Login() {
   }, [authSent, timer]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
-    dispatch(loginSuccess({ email: "123" }));
-    router.push('/');
-    return;
+    e.preventDefault();  
     setLoading(true);
 
     if (loginAttempts >= 5) {
@@ -75,15 +72,13 @@ export default function Login() {
       console.log(email, password);
       // postLogin은 로그인 요청을 보내는 비동기 함수입니다. 실제 구현 필요.
        let response: { [key: string]: any };
-      
-       if (authSent) {
-        response = await dispatch(postLogin({ email: email, password: password, code: validCode })); 
-       }else{
-        response = await dispatch(postLogin({ email: email, password: password }));
-       }
-   
-       console.log(response)
-       response = response.data;``
+       response = {};
+      //  if (authSent) {
+      //   response = await dispatch(postLogin({ email: email, password: password, code: validCode })); 
+      //  }else{
+      //   response = await dispatch(postLogin({ email: email, password: password }));
+      //  }
+    
 
        if (response.loginResult === 1 && response.authRequired) {
          setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');

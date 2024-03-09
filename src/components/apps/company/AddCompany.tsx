@@ -69,18 +69,18 @@ const AddCompany = () => {
             disabled={!registerNum || !companyName} // 등록번호와 회사이름이 모두 입력되지 않으면 버튼 비활성화
             onClick={() => {
               // registerCompany 액션에 필요한 데이터 포맷으로 매개변수를 전달하고, 비동기 액션을 디스패치합니다.
-              dispatch(registerCompany({ num: registerNum, title: companyName  }))
-                .unwrap() // createAsyncThunk에서 반환된 promise 처리
-                .then(() => {
-                  // 액션 성공 시 실행할 로직
-                  setOpen(false); // 다이얼로그 닫기
-                  setRegisterNum(''); // 입력 필드 초기화
-                  setCompanyName(''); // 입력 필드 초기화
-                })
-                .catch((error:any) => {
-                  // 액션 실패 시 실행할 로직 (에러 처리)
-                  console.error("Failed to register the company:", error);
-                });
+              // dispatch(registerCompany({ register_num: registerNum, company_name: companyName  }))
+              //   .unwrap() // createAsyncThunk에서 반환된 promise 처리
+              //   .then(() => {
+              //     // 액션 성공 시 실행할 로직
+              //     setOpen(false); // 다이얼로그 닫기
+              //     setRegisterNum(''); // 입력 필드 초기화
+              //     setCompanyName(''); // 입력 필드 초기화
+              //   })
+              //   .catch((error:any) => {
+              //     // 액션 실패 시 실행할 로직 (에러 처리)
+              //     console.error("Failed to register the company:", error);
+              //   });
             }}
             variant="contained"
           >

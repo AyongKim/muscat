@@ -24,7 +24,7 @@ import CustomCheckbox from '../../forms/theme-elements/CustomCheckbox';
 import {   IconSearch,   } from '@tabler/icons-react';
 import { CompanyType } from '../../../types/apps/company'; 
 import BlankCard from '../../shared/BlankCard';
-import AddCompany from '../notes/Addcompany';
+import AddCompany from '../company/AddCompany';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -146,13 +146,11 @@ function CompanyTableHead(props: CompaynyTableProps) {
 
 interface CompanyTableToolbarProps {
   numSelected: number;
-  rows: any;
-  handleSearch: React.ChangeEvent<HTMLInputElement> | any;
-  search: string;
+  rows: any; 
 }
 
 const CompanyTableToolbar = (props: CompanyTableToolbarProps) => {
-  const { numSelected, handleSearch, search,rows } = props;
+  const { numSelected, rows } = props;
 
   return (
     <Toolbar
@@ -203,17 +201,38 @@ const CompanyList = () => {
   const getCompanies: CompanyType[] = useSelector((state) => state.companyReducer.companies);
 
   const [rows, setRows] = React.useState<any>(getCompanies);
-  const [search, setSearch] = React.useState('');
-
+ 
   React.useEffect(() => {
     setRows(getCompanies);
   }, [getCompanies]);
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+ 
+  const [companyNameSearch, setCompanyNameSearch] = React.useState('');
+  const [registrationNumberSearch, setRegistrationNumberSearch] = React.useState('');
+  const [accountNameSearch, setAccountNameSearch] = React.useState('');
+
+  // 기존 handleSearch 함수 수정
+  const handleCompanyNameSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const filteredRows: CompanyType[] = getCompanies.filter((row) => {
-      return row.title.toLowerCase().includes(event.target.value);
+      return row.company_name.toLowerCase().includes(event.target.value);
     });
-    setSearch(event.target.value);
+    setCompanyNameSearch(event.target.value);
+    setRows(filteredRows);
+  };
+
+  const handleRegistrationNumberSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const filteredRows: CompanyType[] = getCompanies.filter((row) => {
+      return row.company_name.toLowerCase().includes(event.target.value);
+    });
+    setRegistrationNumberSearch(event.target.value);
+    setRows(filteredRows);
+  };
+
+  const handleAccountNameSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const filteredRows: CompanyType[] = getCompanies.filter((row) => {
+      return row.company_name.toLowerCase().includes(event.target.value);
+    });
+    setAccountNameSearch(event.target.value);
     setRows(filteredRows);
   };
 
@@ -291,8 +310,8 @@ const CompanyList = () => {
             placeholder="업체명"
             size="small"
             sx={{mr:1}}
-            onChange={handleSearch}
-            value={search}
+            onChange={handleCompanyNameSearch}
+            value={companyNameSearch}
           />
           <TextField
             InputProps={{
@@ -305,8 +324,8 @@ const CompanyList = () => {
             placeholder="사업자번호"
             size="small"
             sx={{mr:1}}
-            onChange={handleSearch}
-            value={search}
+            onChange={handleRegistrationNumberSearch}
+            value={registrationNumberSearch}
           />
           <TextField
             InputProps={{
@@ -319,16 +338,14 @@ const CompanyList = () => {
             placeholder="계정명"
             size="small"
             sx={{mr:1}}
-            onChange={handleSearch}
-            value={search}
+            onChange={handleAccountNameSearch}
+            value={accountNameSearch}
           />
           <Button type="submit" color="secondary" variant="contained" sx={{width:150}}>조회</Button> 
       </Box>
         <BlankCard>
           <CompanyTableToolbar
-            numSelected={selected.length}
-            search={search}
-            handleSearch={(event: any) => handleSearch(event)}
+            numSelected={selected.length} 
             rows={rows}
           />
           <Paper variant="outlined" sx={{ mx: 2, my: 1, border: `1px solid ${borderColor}` }}>

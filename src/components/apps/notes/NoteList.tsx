@@ -40,7 +40,7 @@ const NoteList = () => {
       return notes.filter(
         (note) => 
           !note.deleted &&
-          note.title.toLowerCase().includes(nSearch.toLowerCase()) 
+          note.title!.toLowerCase().includes(nSearch.toLowerCase()) 
       );
 
     return notes.filter((note) => !note.deleted);
