@@ -37,12 +37,14 @@ import { registerUser } from '../../../store/apps/UserSlice';
 import { AppDispatch, useDispatch } from '../../../store/Store';
 import { UserType } from '../../../types/apps/account';
 // API 엔드포인트 URL
-const API_ENDPOINT = 'http://your-api-endpoint.com';
+const API_ENDPOINT = 'http://13.49.240.6:5001';
 // Assuming these are the functions that would actually perform API calls.
 // You would need to replace them with real API calls in your application.
 const checkDuplicateId = async (id: string): Promise<boolean> => {
   try {
-    const response = await axios.get(`${API_ENDPOINT}/check-duplicate-id/${id}`);
+    const response = await axios.post(`${API_ENDPOINT}/user/CheckId`,{
+      "id": id
+    });
     return response.data.isDuplicate;
   } catch (error) {
     console.error('Error checking duplicate ID:', error);
@@ -53,7 +55,9 @@ const checkDuplicateId = async (id: string): Promise<boolean> => {
 // 사업자 등록번호 확인 API 호출
 const checkBusinessNumber = async (number: string): Promise<string | null> => {
   try {
-    const response = await axios.get(`${API_ENDPOINT}/check-business-number/${number}`);
+    const response = await axios.post(`${API_ENDPOINT}/company/Check`,{
+      "register_num": number
+    });
     return response.data.companyName;
   } catch (error) {
     console.error('Error checking business number:', error);
@@ -117,7 +121,7 @@ const AccountTab: React.FC = () => {
     event.preventDefault();
      // 데이터 준비
     const userData: UserType = {
-      id: 0, // id는 여기서 임의로 설정
+      user_id: 0, // id는 여기서 임의로 설정
       user_type: accountType === 'trustee' ? 1 : 2, // 계정 유형에 따라 값 설정
       user_email: email,
       nickname: id, // 아이디를 닉네임으로 사용

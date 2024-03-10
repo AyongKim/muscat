@@ -29,7 +29,7 @@ const AccountModify: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
       return;
     }
     const userData: UserType = {
-      id: selectedUserInfo.id,
+      user_id: selectedUserInfo.id,
       user_type: selectedUserInfo.accountType === 'trustee' ? 1 : 2,
       user_email: selectedUserInfo.email,
       nickname: selectedUserInfo.id,

@@ -214,7 +214,7 @@ const CompanyList = () => {
   // This is for select all the row
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n: any) => n.register_num);
+      const newSelecteds = rows.map((n: any) => n.id);
       setSelected(newSelecteds);
 
       return;
@@ -295,7 +295,7 @@ const CompanyTableToolbar = (props: CompanyTableToolbarProps) => {
         </Typography>
       )} 
        
-      <DeleteCompanies selectedCompanyIds={selected} onClose={()=>{}}/>
+      <DeleteCompanies selectedCompanyIds={selected.join(',')} onClose={()=>{}}/>
       <AddCompany   />
    
     </Toolbar>
@@ -373,13 +373,13 @@ const CompanyTableToolbar = (props: CompanyTableToolbarProps) => {
                   {stableSort(rows, getComparator(order, orderBy))
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row: any, index) => {
-                      const isItemSelected = isSelected(row.register_num);
+                      const isItemSelected = isSelected(row.id);
                       const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
                         <TableRow
                           hover
-                          onClick={(event) => handleClick(event, row.register_num)}
+                          onClick={(event) => handleClick(event, row.id)}
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}

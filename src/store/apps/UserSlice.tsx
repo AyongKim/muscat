@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiUrl } from '../../utils/commonValues';
 import { UserType } from "../../types/apps/account";
 
-const API_URL = `http://${apiUrl}/user`;
+const API_URL = `http://${apiUrl}user`;
 
 interface StateType {
   users: UserType[];
@@ -22,7 +22,7 @@ export const registerUser = createAsyncThunk(
   "user/register",
   async (userData: UserType, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/register`, userData);
+      const response = await axios.post(`${API_URL}/SignUp`, userData);
       return response.data as UserType; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -35,7 +35,7 @@ export const deleteUsers = createAsyncThunk(
   'user/deleteMultiple',
   async (userIds: string[], { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/delete`, { ids: userIds });
+      const response = await axios.post(`${API_URL}/Delete`, { ids: userIds });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -48,7 +48,7 @@ export const updateUser = createAsyncThunk(
   "user/update",
   async (userData: UserType, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/update/${userData.id}`, userData); // 사용자의 ID를 기반으로 업데이트 요청
+      const response = await axios.put(`${API_URL}/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
       return response.data as UserType; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -62,7 +62,7 @@ export const fetchUsers = createAsyncThunk(
   "user/fetch",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}`);
+      const response = await axios.post(`${API_URL}/List`);
       return response.data as UserType[]; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -94,7 +94,7 @@ export const UserSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         // 업데이트된 사용자 정보로 기존 사용자 정보를 교체
         state.users = state.users.map(user =>
-          user.id === action.payload.id ? action.payload : user
+          user.user_id === action.payload.user_id ? action.payload : user
         );
       })
       .addMatcher(

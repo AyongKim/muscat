@@ -19,10 +19,10 @@ const initialState: StateType = {
 };
 
 export const registerCompany = createAsyncThunk(
-  "company/register",
+  "company/Register",
   async (companyData: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/register`, companyData);
+      const response = await axios.post(`${API_URL}/Register`, companyData);
       return response.data ; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -32,11 +32,14 @@ export const registerCompany = createAsyncThunk(
 
 export const deleteCompanies = createAsyncThunk(
   'companies/deleteMultiple',
-  async (companyIds: string[], { rejectWithValue }) => {
+  async (companyIds: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/delete`, { ids: companyIds });
-     
-      return response.data; // 성공 시, 삭제된 회사 ID들을 반환하는 것으로 가정
+      const response = await axios.delete(`${API_URL}/Delete`, {
+        data: { str_ids: companyIds }
+      });
+      
+      
+     return { ...response.data, deletedCompanyIds: companyIds };
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
     }
@@ -73,9 +76,16 @@ export const CompanySlice = createSlice({
         state.companies.push(action.payload);
       })
       .addCase(deleteCompanies.fulfilled, (state, action) => {
-        state.companies = state.companies.filter(
-          company => !action.payload.includes(company.id)
-        );
+        if (action.payload.result === "SUCCESS") {
+          // 삭제된 회사 ID들을 반환하는 것으로 가정 
+          const deletedCompanyIds = action.payload.deletedCompanyIds;
+          state.companies = state.companies.filter(
+            company => !deletedCompanyIds.includes(company.id)
+          );
+        } else {
+          // 삭제에 실패한 경우 처리
+          // 예를 들어, 에러 처리 또는 알림 표시 등을 수행할 수 있습니다.
+        }
       })
       .addCase(fetchCompanies.fulfilled, (state, action) => {
         state.companies = action.payload;

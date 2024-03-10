@@ -13,7 +13,7 @@ import { deleteCompanies } from '../../../store/apps/CompanySlice';
 import { AppDispatch } from '../../../store/Store';
 
 interface DeleteCompaniesProps {
-  selectedCompanyIds: string[];
+  selectedCompanyIds: string;
   onClose?: () => void;
 }
 

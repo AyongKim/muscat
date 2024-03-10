@@ -242,7 +242,7 @@ const AccountList = () => {
   // This is for select all the row
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n: any) => n.nickname);
+      const newSelecteds = rows.map((n: any) => n.user_id);
       setSelected(newSelecteds);
 
       return;
@@ -284,7 +284,7 @@ const AccountList = () => {
     setDense(event.target.checked);
   };
 
-  const isSelected = (name: string) => selected.indexOf(name) !== -1;
+  const isSelected = (name: number) => selected.indexOf(name.toString()) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
@@ -321,17 +321,17 @@ const AccountList = () => {
                   {stableSort(rows, getComparator(order, orderBy))
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row: any, index) => {
-                      const isItemSelected = isSelected(row.id); 
+                      const isItemSelected = isSelected(row.user_id); 
                       const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
                         <TableRow
                           hover
-                          onClick={(event) => handleClick(event, row.nickname)}
+                          onClick={(event) => handleClick(event, row.user_id)}
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}
-                          key={row.nickname}
+                          key={row.user_id}
                           selected={isItemSelected}
                         >
                           <TableCell padding="checkbox">
@@ -380,7 +380,7 @@ const AccountList = () => {
                           </TableCell>
 
                           <TableCell>
-                          <Typography>{format(new Date(row.manager_grade), 'E, MMM d yyyy')}</Typography>
+                          {/* <Typography>{format(new Date(row.manager_grade), 'E, MMM d yyyy')}</Typography> */}
                             
                           </TableCell>
                           <TableCell>
