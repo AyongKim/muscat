@@ -25,6 +25,7 @@ import {   IconSearch,   } from '@tabler/icons-react';
 import { CompanyType } from '../../../types/apps/company'; 
 import BlankCard from '../../shared/BlankCard';
 import AddCompany from '../company/AddCompany';
+import DeleteCompanies from '../company/DeleteCompanies';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -149,44 +150,10 @@ interface CompanyTableToolbarProps {
   rows: any; 
 }
 
-const CompanyTableToolbar = (props: CompanyTableToolbarProps) => {
-  const { numSelected, rows } = props;
-
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        }),
-      }}
-    >
-     
-      {numSelected > 0 ? (
-        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
-          {numSelected} 건 선택됨
-        </Typography>
-      ) : (
-        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
-          총  {rows.length} 건
-        </Typography>
-      )} 
-      <Button type="submit" disabled={numSelected <= 0} color="warning" variant="contained"  sx={{mr:1,width:150}}>업체 삭제</Button> 
-      
-      <AddCompany   />
-   
-    </Toolbar>
-  );
-};
-
 const CompanyList = () => {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
-  const [selected, setSelected] = React.useState<readonly string[]>([]);
+  const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -215,6 +182,7 @@ const CompanyList = () => {
   const handleCompanyNameSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const filteredRows: CompanyType[] = getCompanies.filter((row) => {
       return row.company_name.toLowerCase().includes(event.target.value);
+      // || row.register_num.includes(searchQuery);
     });
     setCompanyNameSearch(event.target.value);
     setRows(filteredRows);
@@ -222,7 +190,7 @@ const CompanyList = () => {
 
   const handleRegistrationNumberSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const filteredRows: CompanyType[] = getCompanies.filter((row) => {
-      return row.company_name.toLowerCase().includes(event.target.value);
+      return row.register_num.toLowerCase().includes(event.target.value);
     });
     setRegistrationNumberSearch(event.target.value);
     setRows(filteredRows);
@@ -246,7 +214,7 @@ const CompanyList = () => {
   // This is for select all the row
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n: any) => n.title);
+      const newSelecteds = rows.map((n: any) => n.register_num);
       setSelected(newSelecteds);
 
       return;
@@ -254,13 +222,15 @@ const CompanyList = () => {
     setSelected([]);
   };
 
+
+
   // This is for the single row sleect
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected: readonly string[] = [];
+  const handleClick = (event: React.MouseEvent<unknown>, num: string) => {
+    const selectedIndex = selected.indexOf(num);
+    let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, num);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -295,6 +265,42 @@ const CompanyList = () => {
 
   const theme = useTheme();
   const borderColor = theme.palette.divider;
+
+
+  
+const CompanyTableToolbar = (props: CompanyTableToolbarProps) => {
+  const { numSelected, rows } = props;
+
+  return (
+    <Toolbar
+      sx={{
+        pl: { sm: 2 },
+        pr: { xs: 1, sm: 1 },
+        bgcolor: (theme) =>
+            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+        ...(numSelected > 0 && {
+          bgcolor: (theme) =>
+            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+        }),
+      }}
+    >
+     
+      {numSelected > 0 ? (
+        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
+          {numSelected} 건 선택됨
+        </Typography>
+      ) : (
+        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
+          총  {rows.length} 건
+        </Typography>
+      )} 
+       
+      <DeleteCompanies selectedCompanyIds={selected} onClose={()=>{}}/>
+      <AddCompany   />
+   
+    </Toolbar>
+  );
+};
 
   return (
     <Box>
@@ -341,7 +347,7 @@ const CompanyList = () => {
             onChange={handleAccountNameSearch}
             value={accountNameSearch}
           />
-          <Button type="submit" color="secondary" variant="contained" sx={{width:150}}>조회</Button> 
+          <Button type="submit" color="success" variant="contained" sx={{width:150}}>조회</Button> 
       </Box>
         <BlankCard>
           <CompanyTableToolbar
@@ -367,17 +373,17 @@ const CompanyList = () => {
                   {stableSort(rows, getComparator(order, orderBy))
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row: any, index) => {
-                      const isItemSelected = isSelected(row.title);
+                      const isItemSelected = isSelected(row.register_num);
                       const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
                         <TableRow
                           hover
-                          onClick={(event) => handleClick(event, row.title)}
+                          onClick={(event) => handleClick(event, row.register_num)}
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}
-                          key={row.title}
+                          key={row.id}
                           selected={isItemSelected}
                         >
                           <TableCell padding="checkbox">
@@ -405,12 +411,12 @@ const CompanyList = () => {
                           </TableCell>
                           <TableCell>
                               <Typography variant="h6" fontWeight="600">
-                                {row.num}
+                                {row.register_num}
                               </Typography>  
                           </TableCell> 
                           <TableCell>
                               <Typography variant="h6" fontWeight="600">
-                                {row.title}
+                                {row.company_name}
                               </Typography>  
                           </TableCell> 
 

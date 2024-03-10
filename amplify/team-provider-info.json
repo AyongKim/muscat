@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-muscat-dev-45646-authRole",
+      "UnauthRoleArn": "arn:aws:iam::058264240456:role/amplify-muscat-dev-45646-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::058264240456:role/amplify-muscat-dev-45646-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-muscat-dev-45646-deployment",
+      "UnauthRoleName": "amplify-muscat-dev-45646-unauthRole",
+      "StackName": "amplify-muscat-dev-45646",
+      "StackId": "arn:aws:cloudformation:us-east-1:058264240456:stack/amplify-muscat-dev-45646/81d7f4b0-de14-11ee-a684-0a28979e5f6f",
+      "AmplifyAppId": "d3mxwivslb0cf7"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d3mxwivslb0cf7",
+          "type": "manual"
+        }
+      }
+    }
+  }
+}

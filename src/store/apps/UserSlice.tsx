@@ -1,4 +1,4 @@
-import axios from "../../utils/axios";
+import axios from "axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiUrl } from '../../utils/commonValues';
 import { UserType } from "../../types/apps/account";
@@ -43,6 +43,20 @@ export const deleteUsers = createAsyncThunk(
   }
 );
 
+// 유저 정보 업데이트
+export const updateUser = createAsyncThunk(
+  "user/update",
+  async (userData: UserType, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_URL}/update/${userData.id}`, userData); // 사용자의 ID를 기반으로 업데이트 요청
+      return response.data as UserType; 
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+
 // 유저 정보 가져오기
 export const fetchUsers = createAsyncThunk(
   "user/fetch",
@@ -76,6 +90,12 @@ export const UserSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.users = action.payload;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        // 업데이트된 사용자 정보로 기존 사용자 정보를 교체
+        state.users = state.users.map(user =>
+          user.id === action.payload.id ? action.payload : user
+        );
       })
       .addMatcher(
         action => action.type.endsWith("/rejected"),

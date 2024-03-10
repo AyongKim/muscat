@@ -201,7 +201,7 @@ export default function BigCalendar() {
               inputProps={{ 'aria-label': 'checkbox with default color' }}
             />
           }
-          label="모든 수락사 현장점검 일정"
+          label="모든 수탁사 현장점검 일정"
         />
         
 

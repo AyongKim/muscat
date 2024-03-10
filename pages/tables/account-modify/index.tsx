@@ -26,7 +26,7 @@ import { Stack } from '@mui/system';
 import { EnhancedTableData, EnTableType } from '../../../src/components/tables/tableData';
 import { Badge } from 'antd';
 import AccountDetail from '../../../src/components/apps/ecommerce/AccountDetail';
-import Link from 'next/link';
+import AccountModify from '../../../src/components/apps/ecommerce/AccountModify';
 
 const BCrumb = [
   {
@@ -34,11 +34,15 @@ const BCrumb = [
     title: '계정관리',
   },
   {
+    to: '/tables/account-detail',
     title: '계정상세보기',
+  },
+  {
+    title: '수정',
   },
 ];
 
-export default function AccountDetailTable() {
+export default function AccountModifyTable() {
 
    
   const [showRegistrationInfo, setShowRegistrationInfo] = React.useState(true);
@@ -52,16 +56,10 @@ export default function AccountDetailTable() {
        
         {showRegistrationInfo && (
           <Box width={800}>
-            <AccountDetail selectedUserInfo={selectedUserInfo} />
+            <AccountModify selectedUserInfo={selectedUserInfo} />
           </Box>
         )} 
-       
-        </Box>
-        <Box width={800} sx={{ display: 'flex', justifyContent: 'flex-end', marginY:2 }}>
-        <Button component={Link}
-            href="/tables/account-modify" variant="contained" onClick={()=>{}} sx={{ mr: 1 }}>
-          수정
-        </Button>
+        
       </Box>
     </PageContainer>
   );

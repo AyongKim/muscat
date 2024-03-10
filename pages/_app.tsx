@@ -15,12 +15,11 @@ import { AppState } from "../src/store/Store";
 import NextNProgress from "nextjs-progressbar";
 import BlankLayout from "../src/layouts/blank/BlankLayout";
 import FullLayout from "../src/layouts/full/FullLayout";
-import { useRouter } from 'next/router';
-import "../src/_mockApis";
+import { useRouter } from 'next/router'; 
 import "../src/utils/i18n";
 
 // CSS FILES
-// import "react-quill/dist/quill.snow.css";//??
+import "react-quill/dist/quill.snow.css";//??
 import "./apps/noticelist/notice-edit/Quill.css";
 import "./apps/calendar/Calendar.css"; 
 import "slick-carousel/slick/slick.css";

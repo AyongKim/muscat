@@ -4,7 +4,7 @@ import Breadcrumb from '../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { Grid, Tabs, Tab, Box, CardContent, Divider } from '@mui/material';
 
 // components
-import AccountTab from '../../../src/components/pages/account-setting/AccountTab'; 
+import AccountTab from '../../../src/components/apps/ecommerce/AccountCreate'; 
 import BlankCard from '../../../src/components/shared/BlankCard'; 
 const BCrumb = [
   {

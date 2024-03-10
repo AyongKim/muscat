@@ -32,19 +32,37 @@ import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import axios from 'axios'; 
+import { registerUser } from '../../../store/apps/UserSlice'; 
+import { AppDispatch, useDispatch } from '../../../store/Store';
+import { UserType } from '../../../types/apps/account';
+// API 엔드포인트 URL
+const API_ENDPOINT = 'http://your-api-endpoint.com';
 // Assuming these are the functions that would actually perform API calls.
 // You would need to replace them with real API calls in your application.
 const checkDuplicateId = async (id: string): Promise<boolean> => {
-  // Replace with actual API call
-  return false; // Return true if ID is duplicate
+  try {
+    const response = await axios.get(`${API_ENDPOINT}/check-duplicate-id/${id}`);
+    return response.data.isDuplicate;
+  } catch (error) {
+    console.error('Error checking duplicate ID:', error);
+    return true; // API 호출 실패 시 중복으로 간주
+  }
 };
 
+// 사업자 등록번호 확인 API 호출
 const checkBusinessNumber = async (number: string): Promise<string | null> => {
-  // Replace with actual API call
-  return null; // Return company name if exists, otherwise null
+  try {
+    const response = await axios.get(`${API_ENDPOINT}/check-business-number/${number}`);
+    return response.data.companyName;
+  } catch (error) {
+    console.error('Error checking business number:', error);
+    return null; // API 호출 실패 시 null 반환
+  }
 };
 
 const AccountTab: React.FC = () => {
+  const dispatch: AppDispatch = useDispatch();
   // Form state
   const [accountType, setAccountType] = useState<string>('trustee');
   const [id, setId] = useState<string>('');
@@ -56,9 +74,7 @@ const AccountTab: React.FC = () => {
   const [phone, setPhone] = useState<string>('');
   const [department, setDepartment] = useState<string>('');
   const [position, setPosition] = useState<string>('');
-
-  // Edit mode state
-  const [editMode, setEditMode] = useState<boolean>(true);
+ 
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -97,13 +113,44 @@ const AccountTab: React.FC = () => {
     setDialogOpen(true);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async  (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Add form validation and submission logic here
-    // For now, just show the dialog
-    setDialogTitle('계정 생성');
-    setDialogContent('수탁사 계정이 생성되었습니다.');
-    setDialogOpen(true);
+     // 데이터 준비
+    const userData: UserType = {
+      id: 0, // id는 여기서 임의로 설정
+      user_type: accountType === 'trustee' ? 1 : 2, // 계정 유형에 따라 값 설정
+      user_email: email,
+      nickname: id, // 아이디를 닉네임으로 사용
+      user_password: password,
+      register_num: businessNumber,
+      company_address: address,
+      manager_name: name,
+      manager_phone: phone,
+      manager_depart: department,
+      manager_grade: position,
+      other: '', // 필요에 따라 설정
+      admin_name: '', // 필요에 따라 설정
+      admin_phone: '', // 필요에 따라 설정
+    };
+
+
+    try {
+      // 사용자 등록 액션 디스패치
+      await dispatch(registerUser(userData));
+
+
+      // 다이얼로그 메시지 설정
+      setDialogTitle('계정 생성');
+      setDialogContent('수탁사 계정이 생성되었습니다.');
+      setDialogOpen(true);
+    } catch (error) {
+      console.error('Failed to register user:', error);
+
+      // 다이얼로그 메시지 설정
+      setDialogTitle('계정 생성 실패');
+      setDialogContent('사용자 등록에 실패했습니다. 다시 시도해주세요.');
+      setDialogOpen(true);
+    }
   };
 
   // Dialog close handler
@@ -323,8 +370,8 @@ const AccountTab: React.FC = () => {
 
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-        <Button color="primary" onClick={() => setEditMode(!editMode)}>
-          {editMode ? '저장' : '수정'}
+        <Button color="primary" variant='contained' onClick={() => {}}>
+          생성
         </Button>
       </Box>
 

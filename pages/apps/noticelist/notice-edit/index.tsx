@@ -18,13 +18,25 @@ import {
   Button,
   Card,
 } from '@mui/material'; 
-import { Stack } from '@mui/system';
-// import ReactQuill from 'react-quill';
+import { Stack } from '@mui/system'; 
 import PageContainer from '../../../../src/components/container/PageContainer';
 import Breadcrumb from '../../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
 import BlankCard from '../../../../src/components/shared/BlankCard';
 import DashboardCard from '../../../../src/components/shared/DashboardCard';
 import { Space } from 'antd';
+// import "./Quill.css";
+import dynamic from "next/dynamic";
+// import "react-quill/dist/quill.snow.css";
+const ReactQuill: any = dynamic(
+  async () => {
+    const { default: RQ } = await import("react-quill");
+    // eslint-disable-next-line react/display-name
+    return ({ ...props }) => <RQ {...props} />;
+  },
+  {
+    ssr: false,
+  }
+);
 
 const BCrumb = [
   {
@@ -151,13 +163,13 @@ export default function QuillEditor() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* <ReactQuill
+                    <ReactQuill
                       value={text}
-                      onChange={(value) => {
+                      onChange={(value: any) => {
                         setText(value);
                       }}
                       placeholder="Type here..."
-                    /> */}
+                    />
                   </TableBody>
                 </Table>
               </TableContainer>

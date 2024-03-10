@@ -26,6 +26,7 @@ import { IconDotsVertical, IconFilter, IconSearch, IconTrash } from '@tabler/ico
 import { UserType } from '../../../types/apps/account';
 import CustomSelect from '../../forms/theme-elements/CustomSelect';
 import BlankCard from '../../shared/BlankCard';
+import Link from 'next/link';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -192,7 +193,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         </Typography>
       )} 
       <Button type="submit" disabled={numSelected <= 0} color="warning" variant="contained"  sx={{mr:1,width:150}}>계정 삭제</Button> 
-      <Button type="submit" color="success" variant="contained" sx={{width:150}}>계정 등록</Button> 
+      <Button component={Link}
+            href="/tables/account-settings" color="primary" variant="contained" sx={{width:150}}
+      >계정 등록</Button> 
    
     </Toolbar>
   );

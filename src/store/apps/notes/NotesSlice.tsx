@@ -1,4 +1,4 @@
-import axios from '../../../utils/axios';
+import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch } from '../../Store';
 import type { PayloadAction } from '@reduxjs/toolkit';

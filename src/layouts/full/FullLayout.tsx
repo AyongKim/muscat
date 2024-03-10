@@ -3,8 +3,7 @@ import { useSelector } from "../../store/Store";
 import { AppState } from "../../store/Store";
 import Header from "./vertical/header/Header";
 import Sidebar from "./vertical/sidebar/Sidebar";
-import Customizer from "./shared/customizer/Customizer";
-import Navigation from "../full/horizontal/navbar/Navigation";
+import Customizer from "./shared/customizer/Customizer"; 
 import HorizontalHeader from "../full/horizontal/header/Header";
 
 const MainWrapper = styled("div")(() => ({
@@ -55,8 +54,7 @@ const FullLayout: React.FC<Props> = ({ children }) => {
         {/* Header */}
         {/* ------------------------------------------- */}
         {customizer.isHorizontal ? <HorizontalHeader /> : <Header />}
-        {/* PageContent */}
-        {customizer.isHorizontal ? <Navigation /> : ""}
+      
         <Container
           sx={{
             maxWidth: customizer.isLayout === "boxed" ? "lg" : "100%!important",

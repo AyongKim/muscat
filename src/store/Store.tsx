@@ -37,7 +37,8 @@ const rootReducer = combineReducers({
   user: userReducer,
 });
 
-export type AppState = ReturnType<typeof rootReducer>;
+// export type AppState = ReturnType<typeof rootReducer>;
+export type AppState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export const { dispatch } = store;
 export const useDispatch = () => useAppDispatch<AppDispatch>();
