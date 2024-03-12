@@ -33,7 +33,7 @@ export const registerUser = createAsyncThunk(
 // 유저 삭제
 export const deleteUsers = createAsyncThunk(
   'user/deleteMultiple',
-  async (userIds: string[], { rejectWithValue }) => {
+  async (userIds: string, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}/Delete`, { ids: userIds });
       return response.data;

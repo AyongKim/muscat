@@ -25,8 +25,8 @@ import BlankCard from '../../../src/components/shared/BlankCard';
 import { Stack } from '@mui/system';
 import { EnhancedTableData, EnTableType } from '../../../src/components/tables/tableData';
 import { Badge } from 'antd';
-import AccountDetail from '../../../src/components/apps/ecommerce/AccountDetail';
-import AccountModify from '../../../src/components/apps/ecommerce/AccountModify';
+import AccountDetail from '../../../src/components/apps/account/AccountDetail';
+import AccountModify from '../../../src/components/apps/account/AccountModify';
 
 const BCrumb = [
   {

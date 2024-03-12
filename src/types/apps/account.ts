@@ -13,6 +13,7 @@ export interface UserType {
   other: string;
   admin_name: string;
   admin_phone: string;
+  approval: number;
 }
 
 // 필터 타입이나 카드 프롭스와 같은 추가 인터페이스는 사용자 계정 데이터와 직접적으로 관련이 없어 보입니다.

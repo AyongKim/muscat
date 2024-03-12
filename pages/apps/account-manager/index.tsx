@@ -1,9 +1,9 @@
 import Breadcrumb from '../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '../../../src/components/container/PageContainer';
-import NoticeList from '../../../src/components/apps/ecommerce/NoticeList';
+import NoticeList from '../../../src/components/apps/notice/NoticeList';
 import BlankCard from '../../../src/components/shared/BlankCard';
-import CompanyList from '../../../src/components/apps/ecommerce/CompanyList';
-import AccountList from '../../../src/components/apps/ecommerce/AccountList';
+import CompanyList from '../../../src/components/apps/company/CompanyList';
+import AccountList from '../../../src/components/apps/account/AccountList';
 
 const BCrumb = [
   {

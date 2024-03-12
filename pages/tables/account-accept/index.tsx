@@ -26,7 +26,7 @@ import BlankCard from '../../../src/components/shared/BlankCard';
 import { Stack } from '@mui/system';
 import { EnhancedTableData, EnTableType } from '../../../src/components/tables/tableData';
  
-import AccountDetail from '../../../src/components/apps/ecommerce/AccountDetail';
+import AccountDetail from '../../../src/components/apps/account/AccountDetail';
 
 const BCrumb = [
   {

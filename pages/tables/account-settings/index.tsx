@@ -4,11 +4,11 @@ import Breadcrumb from '../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { Grid, Tabs, Tab, Box, CardContent, Divider } from '@mui/material';
 
 // components
-import AccountTab from '../../../src/components/apps/ecommerce/AccountCreate'; 
+import AccountTab from '../../../src/components/apps/account/AccountCreate'; 
 import BlankCard from '../../../src/components/shared/BlankCard'; 
 const BCrumb = [
   {
-    to: '/',
+    to: '/apps/account-manager',
     title: '계정관리',
   },
   {

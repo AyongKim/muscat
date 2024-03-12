@@ -80,12 +80,26 @@ const Menuitems: MenuitemsType[] = [
     icon: IconNotes,
     href: '/apps/account-manager',
   },
-   
   {
     id: uniqueId(),
     title: '계정상세보기',
     icon: IconUserCircle,
     href: '/tables/account-detail',
+  }, 
+  
+   
+  {
+    id: uniqueId(),
+    title: '마이페이지',
+    icon: IconUserCircle,
+    href: '/tables/account-my',
+  }, 
+
+  {
+    id: uniqueId(),
+    title: '프로젝트관리',
+    icon: IconUserCircle,
+    href: '/apps/project',
   }, 
   
   {

@@ -1,6 +1,6 @@
 import Breadcrumb from '../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '../../../src/components/container/PageContainer';
-import ProductTableList from '../../../src/components/apps/ecommerce/NoticeList';
+import ProductTableList from '../../../src/components/apps/notice/NoticeList';
 import BlankCard from '../../../src/components/shared/BlankCard';
 
 const BCrumb = [
