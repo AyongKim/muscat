@@ -12,7 +12,7 @@ const Header = () => {
   // drawer
   const customizer = useSelector((state: AppState) => state.customizer);
   const dispatch = useDispatch();
-
+  const user: string | undefined = useSelector((state) => state.auth.user?.email);
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
     background: theme.palette.background.paper,
@@ -44,7 +44,7 @@ const Header = () => {
        
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          <Typography>... 으로 로그인됨</Typography>
+          <Typography>관리자 ({user})  으로 로그인되었습니다.</Typography>
           <Profile />
         </Stack>
       </ToolbarStyled>

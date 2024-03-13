@@ -23,7 +23,7 @@ export const registerCompany = createAsyncThunk(
   async (companyData: any, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}/Register`, companyData);
-      return response.data ; 
+      return { ...response.data, companyData: { ...companyData,id:response.data.id }  }; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
     }
@@ -39,7 +39,7 @@ export const deleteCompanies = createAsyncThunk(
       });
       
       
-     return { ...response.data, deletedCompanyIds: companyIds };
+     return { ...response.data, deletedCompanyIds: companyIds};
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
     }
@@ -73,7 +73,9 @@ export const CompanySlice = createSlice({
   extraReducers: (builder) => {
     builder 
       .addCase(registerCompany.fulfilled, (state, action) => {
-        state.companies.push(action.payload);
+        const companyData = action.payload.companyData; 
+        console.log("companyData:",companyData);
+        state.companies.push(companyData);
       })
       .addCase(deleteCompanies.fulfilled, (state, action) => {
         if (action.payload.result === "SUCCESS") {

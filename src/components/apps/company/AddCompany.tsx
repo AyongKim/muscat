@@ -12,7 +12,7 @@ import {
 
 // 예제로 사용할 addCompany 액션입니다.
 // 실제로 이 액션을 사용하기 위해서는 해당 액션을 정의하고 Redux 스토어에 추가해야 합니다.
-import { registerCompany } from '../../../store/apps/CompanySlice';
+import { registerCompany,fetchCompanies } from '../../../store/apps/CompanySlice';
 import { AppDispatch } from '../../../store/Store';
 
 const AddCompany = () => { 
@@ -74,6 +74,7 @@ const AddCompany = () => {
               dispatch(registerCompany(  { register_num: registerNum, company_name: companyName  }))
                 .unwrap() // createAsyncThunk에서 반환된 promise 처리
                 .then(() => {
+                  dispatch(fetchCompanies());
                   // 액션 성공 시 실행할 로직
                   setOpen(false); // 다이얼로그 닫기
                   setRegisterNum(''); // 입력 필드 초기화

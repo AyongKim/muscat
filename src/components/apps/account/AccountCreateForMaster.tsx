@@ -19,27 +19,20 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions,
-  ListItemIcon,
+  DialogActions, 
   Fab,
 } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LockIcon from '@mui/icons-material/Lock';
-import EmailIcon from '@mui/icons-material/Email';
-import BusinessIcon from '@mui/icons-material/Business';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import EmailIcon from '@mui/icons-material/Email'; 
 import PersonIcon from '@mui/icons-material/Person';
-import PhoneIcon from '@mui/icons-material/Phone';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import PhoneIcon from '@mui/icons-material/Phone'; 
 import axios from 'axios'; 
 import { registerUser } from '../../../store/apps/UserSlice'; 
-import { AppDispatch, useDispatch } from '../../../store/Store';
-import { UserType } from '../../../types/apps/account';
-import { IconCheck } from '@tabler/icons-react';
-import { Row } from 'antd';
-import { Router, useRouter } from 'next/router';
+import { AppDispatch, useDispatch } from '../../../store/Store'; 
+import { IconCheck } from '@tabler/icons-react'; 
+import {  useRouter } from 'next/router';
 // API 엔드포인트 URL
 const API_ENDPOINT = 'http://localhost:5001';
 // Assuming these are the functions that would actually perform API calls.
@@ -69,7 +62,7 @@ const checkBusinessNumber = async (number: string): Promise<string> => {
   }
 };
 
-const AccountTab: React.FC = () => {
+const AccountCreateForMaster: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   // Form state
   const [accountType, setAccountType] = useState<string>('수탁사');
@@ -91,8 +84,7 @@ const AccountTab: React.FC = () => {
   const [dialogContent, setDialogContent] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('');
   
-  const [idChecked, setIdChecked] = useState<boolean>(false);
-  const [compChecked, setCompChecked] = useState<boolean>(false);
+  const [idChecked, setIdChecked] = useState<boolean>(false); 
 
   const router = useRouter();
   // Handlers
@@ -114,21 +106,7 @@ const AccountTab: React.FC = () => {
       setDialog2Open(true);
     }
   };
-
-  const handleBusinessNumberCheck = async () => {
-    const companyN = await checkBusinessNumber(businessNumber);
-    setCompanyName(companyN);
-    if (companyN) {
-      setDialogTitle('업체 확인');
-      setDialogContent(`업체 명: ${companyN}`);
-      setDialog2Open(true);
-    } else {
-      setDialogTitle('업체 확인');
-      setDialogContent('등록된 업체가 없습니다. 업체를 등록해 주세요');
-      setDialog1Open(true);
-    }
-    
-  };
+ 
 
   const handleSubmit = async  ( ) => { 
     if( !idChecked){
@@ -136,16 +114,7 @@ const AccountTab: React.FC = () => {
       setDialogContent('아이디를 입력해주세요.');
       setDialog1Open(true);
       return;
-    }
-    if(!compChecked  ){
-      setDialogTitle('사업자 등록번호');
-      setDialogContent('사업자 등록번호를 입력해주세요.');
-      setDialog1Open(true);
-      return;
-    }
-    
-   
- 
+    } 
     // 사용자 등록 액션 디스패치
     await dispatch(registerUser({ 
       user_type: accountType === '수탁사' ? 1 : 2, // 계정 유형에 따라 값 설정
@@ -185,8 +154,6 @@ const AccountTab: React.FC = () => {
     setIdChecked(true); 
     if (dialogContent.includes('사용 가능한 아이디입니다.')) {
       setIdChecked(true); 
-    }else if(dialogContent.includes('업체 명')) {
-      setCompChecked(true);
     } 
     setDialog2Open(false);
   };
@@ -267,8 +234,7 @@ const AccountTab: React.FC = () => {
               
             </TableCell>
            
-          </TableRow>
-         
+          </TableRow> 
           {/* Password */}
            
           <TableRow>
@@ -307,67 +273,7 @@ const AccountTab: React.FC = () => {
               />
             </TableCell>
           </TableRow>
-          
-          <Typography variant="h4" padding={1} marginTop={3}>회사정보</Typography>
-          {/* Business Registration Number */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="businessNumber">
-                <BusinessIcon sx={{ marginRight: 1 }} />
-                사업자 등록번호*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-            {compChecked ? (
-              <Typography  sx={{ml:2}} >{businessNumber}</Typography>
-            ):(
-              <TextField 
-                fullWidth
-                variant="outlined"
-                value={businessNumber}
-                onChange={(e) => setBusinessNumber(e.target.value)}
-                required
-              /> 
-            )}
-              
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}> 
-            {compChecked ? (
-              <Row  align={'middle'}>
-               <Fab
-                  color="success" 
-                  size="small" 
-                >
-                  <IconCheck width={16} /> 
-                </Fab>
-                <Typography sx={{mr:2}}>업체 명: {companyName}</Typography>
-              </Row>
-             
-            ):(
-              <Button onClick={handleBusinessNumberCheck}>조회</Button>
-            )}
-              
-            </TableCell>
-          </TableRow>
-          {/* Address */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="address">
-                <LocationOnIcon sx={{ marginRight: 1 }} />
-                주소*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                required
-              />
-            </TableCell>
-          </TableRow>
-          <Typography variant="h4" padding={1} marginTop={3}>담당자 정보</Typography>
+           
           {/* Name */}
           <TableRow>
             <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
@@ -403,41 +309,7 @@ const AccountTab: React.FC = () => {
                 required
               />
             </TableCell>
-          </TableRow>
-          {/* Department */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="department">
-                <BusinessCenterIcon sx={{ marginRight: 1 }} />
-                부서명
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              />
-            </TableCell>
-          </TableRow>
-          {/* Position */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="position">
-                <AssignmentIndIcon sx={{ marginRight: 1 }} />
-                직급
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-              />
-            </TableCell>
-          </TableRow>
+          </TableRow>  
         </TableBody>
       </Table>
     </TableContainer>
@@ -480,4 +352,4 @@ const AccountTab: React.FC = () => {
   );
 };
 
-export default AccountTab;
+export default AccountCreateForMaster;

@@ -16,14 +16,14 @@ import NextNProgress from "nextjs-progressbar";
 import BlankLayout from "../src/layouts/blank/BlankLayout";
 import FullLayout from "../src/layouts/full/FullLayout";
 import { useRouter } from 'next/router'; 
-import "../src/utils/i18n";
-
+import "../src/utils/i18n"; 
 // CSS FILES
 import "react-quill/dist/quill.snow.css";//??
 import "./apps/noticelist/notice-edit/Quill.css";
 import "./apps/calendar/Calendar.css"; 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Login from './login';
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -48,49 +48,52 @@ const MyApp = (props: MyAppProps) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const isAuthenticated = useSelector((state: AppState) => state.auth.isAuthenticated);
+  
   useEffect(() => {
     // 로딩 시간을 설정하여 앱이 초기화 될 때까지 기다립니다.
     setTimeout(() => setLoading(true), 1000);
     // 로그인 상태가 아니라면 로그인 페이지로 리다이렉션
-    // if (!isAuthenticated && router.pathname !== '/login') {
-    //   router.push('/login');
-    // }
+    if (!isAuthenticated && router.pathname !== '/login') {
+      router.push('/login');
+    } else if (isAuthenticated && router.pathname === '/login') { // 로그인 후 메인 페이지로 바로 이동
+      setLoading(false)
+      setTimeout(() => setLoading(true), 1000);
+      router.push('/');
+    }
   }, [isAuthenticated, router]);
 
   return ( 
-      <CacheProvider value={emotionCache}>
-        <Head>
-          <meta name="viewport" content="initial-scale=1, width=device-width" />
-          <title>Modernize NextJs Admin template</title>
-        </Head>
-        <NextNProgress color="#5D87FF" />
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {loading ? (
-            isAuthenticated ? (
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            ) :(  
-              <Layout>
+    <CacheProvider value={emotionCache}>
+      <Head>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+        <title>수탁사 개인정보 관리 현황 점검 시스템</title>
+      </Head>
+      <NextNProgress color="#5D87FF" />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {loading ? (
+          isAuthenticated ? (
+            <Layout>
               <Component {...pageProps} />
             </Layout>
-            ) 
-          ) : (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                height: "100vh",
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          )} 
-      </ThemeProvider>
-    </CacheProvider>
+          ) :(   
+            <Login></Login> 
+          ) 
+        ) : (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "100vh",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )} 
+    </ThemeProvider>
+  </CacheProvider>
   );
 };
 

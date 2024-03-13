@@ -16,6 +16,8 @@ import {
   Paper,
   Button, 
   Divider,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { useSelector, useDispatch } from '../../../store/Store';
@@ -27,6 +29,7 @@ import { UserType } from '../../../types/apps/account';
 import CustomSelect from '../../forms/theme-elements/CustomSelect';
 import BlankCard from '../../shared/BlankCard';
 import Link from 'next/link';
+import DeleteUser from './DeleteUser';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -71,7 +74,7 @@ interface HeadCell {
   numeric: boolean;
 }
 
-const headCells: readonly HeadCell[] = [
+const headCells:  HeadCell[] = [
   {
     id: 'no',
     numeric: false,
@@ -118,8 +121,7 @@ interface EnhancedTableProps {
   order: Order;
   orderBy: string;
   rowCount: number;
-}
-
+} 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property: any) => (event: React.MouseEvent<unknown>) => {
@@ -164,53 +166,13 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     </TableHead>
   );
 }
+ 
 
-interface EnhancedTableToolbarProps {
-  numSelected: number;
-  rows: any;
-  handleSearch: React.ChangeEvent<HTMLInputElement> | any;
-  search: string;
-}
 
-const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-  const { numSelected, handleSearch, search,rows } = props;
-
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        }),
-      }}
-    >
-     
-      {numSelected > 0 ? (
-        <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
-          {numSelected} 건 선택됨
-        </Typography>
-      ) : (
-        <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
-          총  {rows.length} 건
-        </Typography>
-      )} 
-      <Button type="submit" disabled={numSelected <= 0} color="warning" variant="contained"  sx={{mr:1,width:150}}>계정 삭제</Button> 
-      <Button component={Link}
-            href="/tables/account-settings" color="primary" variant="contained" sx={{width:150}}
-      >계정 등록</Button> 
-   
-    </Toolbar>
-  );
-};
-
-const AccountList = () => {
+const AccountList = () => {  
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
-  const [selected, setSelected] = React.useState<readonly string[]>([]);
+  const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -220,7 +182,7 @@ const AccountList = () => {
   React.useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
-
+ 
   const accounts: UserType[] = useSelector((state) => state.user.users);
 
   const [rows, setRows] = React.useState<any>(accounts);
@@ -232,7 +194,7 @@ const AccountList = () => {
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const filteredAccounts: UserType[] = accounts.filter((row) => {
-      return row.nickname.toLowerCase().includes(event.target.value);
+      return row.user_id!.toString().toLowerCase().includes(event.target.value);
     });
     setSearch(event.target.value);
     setRows(filteredAccounts);
@@ -259,7 +221,7 @@ const AccountList = () => {
   // This is for the single row sleect
   const handleClick = (event: React.MouseEvent<unknown>, id: string | number) => {
     const selectedIndex = selected.indexOf(id.toString());
-    let newSelected: readonly string[] = [];
+    let newSelected:  string[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, id.toString());
@@ -301,13 +263,52 @@ const AccountList = () => {
   return (
     <Box>
       <Divider sx={{ mt: 3 }}/>
-        <BlankCard>
-          <EnhancedTableToolbar
-            numSelected={selected.length}
-            search={search}
-            handleSearch={(event: any) => handleSearch(event)}
-            rows={rows}
-          />
+        <BlankCard> 
+          <Toolbar
+            sx={{
+              pl: { sm: 2 },
+              pr: { xs: 1, sm: 1 },
+              bgcolor: (theme) =>
+                  alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+              ...(selected.length > 0 && {
+                bgcolor: (theme) =>
+                  alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+              }),
+            }}
+          >
+          
+            {selected.length > 0 ? (
+              <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
+                {selected.length} 건 선택됨
+              </Typography>
+            ) : (
+              <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
+                총  {rows.length} 건
+              </Typography>
+            )} 
+            <TextField
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconSearch size="1.1rem" />
+                    </InputAdornment>
+                  ),
+                  style: { backgroundColor: 'white' } 
+                }}
+                placeholder="계정명"
+                size="small"
+                sx={{mr:3}}
+                onChange={handleSearch}
+                value={search}
+              />
+
+            <DeleteUser selectedUserIds={selected.join(',')} onClose={()=>{setSelected([])}}/>
+            
+            <Button component={Link}
+                  href="/account/account-create" color="primary" variant="contained" sx={{width:150}}
+            >계정 등록</Button> 
+        
+          </Toolbar>
           <Paper variant="outlined" sx={{ mx: 2, my: 1, border: `1px solid ${borderColor}` }}>
             <TableContainer>
               <Table
@@ -371,28 +372,30 @@ const AccountList = () => {
                                 }}
                               >
                                 <Typography variant="h6" fontWeight="600">
-                                  {row.user_type}
+                                  {row.user_type==0?'관리자':'수탁사'}
                                 </Typography> 
                               </Box>
                             </Box>
                           </TableCell>
                           <TableCell>
-                              <Typography variant="h6" fontWeight="600">
+                            <Box display="flex" alignItems="center"> 
+                              <Typography
+                                component={Link}
+                                sx={{  ml: 1, cursor: 'pointer', borderBottom:'1px solid black' }} variant="h6" fontWeight="600"
+                                href={`/account/account-detail?id=${row.user_id}`}
+                              >
                                 {row.user_email}
                               </Typography> 
-                          
+                              </Box>
                             
                           </TableCell>
 
                           <TableCell>
                             <Box display="flex" alignItems="center"> 
                               <Typography
-                                color="textSecondary" 
-                                sx={{
-                                  ml: 1,
-                                }}
+                                color="textSecondary"   
                               >
-                                {row.nickname}
+                                {row.id}
                               </Typography>
                             </Box>
                           </TableCell>
@@ -403,7 +406,7 @@ const AccountList = () => {
                           </TableCell>
                           <TableCell>
                           <Typography fontWeight={600} variant="h6">
-                              1999-99999
+                              {row.access_time}  
                             </Typography>
                           </TableCell>
                         </TableRow>

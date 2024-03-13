@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TableContainer,
   Table,
@@ -14,13 +14,23 @@ import {
   Button,
   Card, 
   MenuItem,
+  IconButton,
+  Chip,
 } from '@mui/material';
 import PageContainer from '../../../../src/components/container/PageContainer';
 import Breadcrumb from '../../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
 import DashboardCard from '../../../../src/components/shared/DashboardCard'; 
 import dynamic from "next/dynamic";
 import CustomSelect from '../../../../src/components/forms/theme-elements/CustomSelect';
-import Link from 'next/link'; 
+import Link from 'next/link';   
+import { AppDispatch, useDispatch, useSelector } from '../../../../src/store/Store'; 
+import { Delete as DeleteIcon } from '@mui/icons-material'; // 삭제 아이콘 추가
+import { Row } from 'antd';
+import { fetchProjects } from '../../../../src/store/apps/ProjectSlice';
+import { ProjectType } from '../../../../src/types/apps/project'; 
+import axios from 'axios'; 
+import { apiUrl } from '../../../../src/utils/commonValues';
+// ReactQuill 동적 import
 const ReactQuill: any = dynamic(
   async () => {
     const { default: RQ } = await import("react-quill"); 
@@ -31,6 +41,7 @@ const ReactQuill: any = dynamic(
   }
 );
 
+// Breadcrumb 경로
 const BCrumb = [
   {
     to: '/apps/noricelist',
@@ -40,45 +51,117 @@ const BCrumb = [
     title: '글작성',
   },
 ];
-
+interface SelectedFile {
+  file: File;
+  id: string;
+}
 export default function QuillEditor() {
+  const dispatch: AppDispatch = useDispatch(); 
+  const [id, setId] = useState('');
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [category, setCategory] = useState('');
+  const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null); 
+  const projects: ProjectType[] = useSelector((state) => state.projectReducer.projects);
 
-  const [text, setText] = useState('');
-  const [isEditing, setIsEditing] = useState(false); // State to manage editing mode
-  const theme = useTheme();
-  const borderColor = theme.palette.divider;
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [create_by, setCreatedBy] = useState('');
+  const [create_time, setCreateTime] = useState('');
+  const [attachment, setAttachment] = useState('');
+  const [views, setViews] = useState(0);
 
-  const handleFileChange = (event: any) => {
-    // 첫 번째 선택된 파일을 가져옵니다.
-    const file = event.target.files[0]; 
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id') || ''; 
+        const API_URL = `http://${apiUrl}notice`;
+        const response = await axios.post(`${API_URL}/Detail`, { id: id });
+        console.log(response);
+        // 파라미터에서 받아온 공지사항 정보 설정
+        setId(id);
+        setTitle(response.data.title);
+        setCategory(response.data.project_name);
+        setContent(response.data.content);  
+
+        setCreatedBy(response.data.create_by);  
+        setCreateTime(response.data.create_time);  
+        setAttachment(response.data.attachment);  
+        setViews(response.data.views);   
+      } catch (error) {
+        console.error('Error fetching notice info:', error);
+        // Handle error if necessary
+      }
+    };
+    dispatch(fetchProjects());
+    fetchDetail();
+  }, []); // 페이지 로드시 한번만 실행 
+  // 파라미터에서 공지사항 정보 추출 
+
+  // 파일 변경 핸들러
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files && event.target.files[0];
     if (file) {
-      setSelectedFile(file);
-      // 파일 처리 로직 추가 (예: 파일을 서버에 업로드)
-    } else {
-      // 파일이 선택되지 않았을 경우의 처리
-      console.log("No file selected.");
+      setSelectedFile({
+        file: file,
+        id: Math.random().toString(36).substr(2, 9), // 각 파일에 고유한 ID 할당
+      });
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true); // Set editing mode to true when edit button is clicked
+  const handleDelete = () => {
+    setSelectedFile(null);
   };
 
+  // 수정 모드로 변경
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  // 저장 핸들러
   const handleSave = () => {
-    setIsEditing(false); // Set editing mode to false when save button is clicked
-    // Here you can add logic to save the changes, like sending a request to the server
+    if (!selectedFile) {
+      console.error("No file selected.");
+      return;
+    }
+  
+    const formData = new FormData();
+    
+    formData.append('notice_id', id);
+    formData.append('file', selectedFile.file);
+    formData.append('project_id', category);
+    formData.append('title', title);
+    formData.append('content', content);
+    formData.append('change', 'string');
+  
+    fetch('http://localhost:5001/notice/Update', {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(() => { 
+        setContent('');
+        setTitle('');
+        setSelectedFile(null); 
+      })
+      .catch(error => {
+        console.error("Failed to register the notice:", error);
+      });
   };
 
   return (
     <PageContainer>
-      {/* breadcrumb */}
       <Breadcrumb title="글 작성" items={BCrumb} />
       <DashboardCard
         title="글 작성"
         action={
           <Box>
-            {isEditing ? ( // Render different actions based on editing mode
+            {isEditing ? (
               <Button variant="contained" onClick={handleSave} sx={{ mr: 1 }}>
                 저장
               </Button>
@@ -106,103 +189,108 @@ export default function QuillEditor() {
                       <Typography color={'dark'} variant="h6">제목</Typography>
                     </TableCell>
                     <TableCell width={'100%'} sx={{ borderColor: 'black' }} colSpan={7}>
-                      {isEditing ? ( // Render input field if editing mode is true
+                      {isEditing ? (
                         <Input
-                          value="첫번째 공지사항입니다."
-                          onChange={(e) => {}} // Add onChange handler to update the state
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
                           fullWidth
                         />
                       ) : (
-                        <Typography variant="h6">첫번째 공지사항입니다.</Typography>
+                        <Typography variant="h6">{title}</Typography>
                       )}
                     </TableCell>
-
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ backgroundColor: "primary.light", borderColor: 'black' }}>
                       <Typography variant="h6">분류</Typography>
                     </TableCell>
                     <TableCell sx={{ borderColor: 'black' }}>
-                    {isEditing ? ( // Render input field if editing mode is true
+                      {isEditing ? (
                         <CustomSelect
-                        labelId="month-dd"
-                        id="month-dd"
-                        size="small" 
-                        value={1}
-                        sx={{width:200, mr:1}}
-                      >
-                        <MenuItem value={1}>제목</MenuItem>
-                        <MenuItem value={2}>제목+내용</MenuItem>
-                        <MenuItem value={3}>작성자</MenuItem>
-                      </CustomSelect>
+                          labelId="month-dd"
+                          id="month-dd"
+                          size="small" 
+                          value={category}
+                          sx={{width:200, mr:1}}
+                          onChange={(e:any) => setCategory(e.target.value)}
+                        >
+                          {projects.map((project: any) => (
+                            <MenuItem key={project.id} value={project.id}>
+                              {project.name}
+                            </MenuItem>
+                          ))}
+                        </CustomSelect>
                       ) : (
                         <Typography variant="h6">전체</Typography>
                       )}
-                     
                     </TableCell>
                     {!isEditing && <TableCell sx={{ backgroundColor: "primary.light", borderColor: 'black' }}>
                       <Typography variant="h6">작성자</Typography>
-                    </TableCell>}
+                    </TableCell>}  
                     {!isEditing && <TableCell sx={{ borderColor: 'black' }}>
-                      <Typography variant="h6">ooo</Typography>
+                      <Typography variant="h6">{create_by}</Typography>
                     </TableCell>}
                     {!isEditing &&   <TableCell sx={{ backgroundColor: "primary.light", borderColor: 'black' }}>
                       <Typography variant="h6">작성일</Typography>
                     </TableCell>}
                     {!isEditing &&   <TableCell sx={{ borderColor: 'black' }}>
-                      <Typography variant="h6">yyyy-mm-dd hh:mm:ss</Typography>
+                      <Typography variant="h6">{create_time}</Typography>
                     </TableCell>}
                     {!isEditing &&  <TableCell sx={{ backgroundColor: "primary.light", borderColor: 'black' }}>
                       <Typography variant="h6">조회</Typography>
                     </TableCell>}
                     {!isEditing  && <TableCell sx={{ borderColor: 'black' }}>
-                      <Typography variant="h6">52</Typography>
+                      <Typography variant="h6">{views}</Typography>
                     </TableCell>}
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ backgroundColor: "primary.light", borderColor: 'black' }}>
                       <Typography color={'dark'} variant="h6">첨부파일</Typography>
                     </TableCell>
-                    <TableCell width={'100%'} sx={{ borderColor: 'black' }} colSpan={7}  >
-                      <Box display={'flex'} alignItems="center">
-                        <InputLabel
-                          htmlFor="file-upload"
-                          component="label"
-                          sx={{
-                            borderRadius: '4px',
-                            display: 'inline-block',
-                            mr: 3
-                          }}
-                        >
-                          파일 선택
-                        </InputLabel>
-                        { isEditing && <Input
-                          id="file-upload"
-                          type="file"
-                          onChange={handleFileChange}
-                          inputProps={{
-                            'aria-label': '첨부파일',
-                          }}
-                          style={{ display: 'none' }}
-                        />}
-                        {selectedFile && <Typography> </Typography>}
-                      </Box>
+                    <TableCell> 
+                      {isEditing ? 
+                      <Row align={'middle'}>
+                      <InputLabel htmlFor="file-upload" style={{textAlign:'center', width:80, borderBottom: '1px solid black' }} component="label">
+                        파일 선택
+                      </InputLabel>
+                      <Input
+                        id="file-upload"
+                        type="file"
+                        onChange={handleFileChange}
+                        inputProps={{
+                          'aria-label': '첨부파일',
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                      {selectedFile && (
+                        <Chip
+                          style={{ marginLeft: 2 }}
+                          label={selectedFile.file.name}
+                          onDelete={handleDelete}
+                        />
+                      )}
+                      
+                      
+                      </Row>: 
+                      <a href={`http://localhost:5001/notice/Attachment?id=${id}`}>{attachment}</a> 
+                      }
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                <ReactQuill
-                  readOnly={!isEditing} // Make the Quill editor read-only if not in editing mode
-                  value={text}
-                  onChange={(value: any) => {
-                    setText(value);
-                  }} 
-                  placeholder="Type here..."
-                />
+                  <TableRow>
+                    <TableCell>
+                      <ReactQuill
+                        readOnly={!isEditing}
+                        value={content}
+                        onChange={(value: any) => setContent(value)}
+                        placeholder="Type here..."
+                      />
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
-
           </Card>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginY: 2 }}>
             <Button component={Link} href="/apps/noticelist" variant="contained" onClick={() => { }} sx={{ mr: 1 }}>
@@ -212,7 +300,5 @@ export default function QuillEditor() {
         </>
       </DashboardCard>
     </PageContainer>
-
-
   );
 };

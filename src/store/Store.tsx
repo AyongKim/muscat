@@ -2,6 +2,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import CustomizerReducer from './customizer/CustomizerSlice';
 import EcommerceReducer from './apps/eCommerce/ECommerceSlice'; 
 import CompanyReducer from './apps/CompanySlice'; 
+import NoticeReducer from './apps/NoticeSlice'; 
+import ProjectReducer from './apps/ProjectSlice'; 
 import NotesReducer from './apps/notes/NotesSlice'; 
 import TicketReducer from './apps/tickets/TicketSlice';  
 import { combineReducers } from 'redux';
@@ -23,6 +25,8 @@ export const store = configureStore({
     notesReducer: NotesReducer, 
     ticketReducer: TicketReducer, 
     companyReducer: CompanyReducer, 
+    noticeReducer:NoticeReducer,
+    projectReducer:ProjectReducer,
     user: userReducer,
   },
 });
@@ -34,6 +38,8 @@ const rootReducer = combineReducers({
   notesReducer: NotesReducer, 
   ticketReducer: TicketReducer, 
   companyReducer: CompanyReducer, 
+  noticeReducer:NoticeReducer,
+  projectReducer:ProjectReducer,
   user: userReducer,
 });
 

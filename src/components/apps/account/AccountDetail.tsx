@@ -1,15 +1,16 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableRow, Typography, InputLabel, Divider } from '@mui/material';
+import { UserType } from '../../../types/apps/account';
 
 interface AccountDetailProps {
-  selectedUserInfo: any;
+  selectedUserInfo: UserType;
 }
 
 const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
   return (
-    <Table sx={{flex:1}}>
+    <Table sx={{flex:1}}> 
       <TableBody>
-        <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
+        <Typography variant="h4" padding={1} >기본정보</Typography>
         <Divider />
         <TableRow sx={{ padding: 1, border: '1px solid black' }}>
           <TableCell sx={{ backgroundColor: '#f0f0f0', width:'30%',border: '1px solid black' }}>
@@ -17,7 +18,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell  sx={{ border: '1px solid black' }}>
             <InputLabel htmlFor="id" sx={{ flex: 1 }}>
-              {selectedUserInfo.id}
+              {selectedUserInfo.user_id}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -28,7 +29,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="password" sx={{ flex: 1 }}>
-              {selectedUserInfo.password}
+              {selectedUserInfo.admin_name}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -39,7 +40,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="email" sx={{ flex: 1 }}>
-              {selectedUserInfo.email}
+              {selectedUserInfo.user_email}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -51,7 +52,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="name" sx={{ flex: 1 }}>
-              {selectedUserInfo.name}
+              {selectedUserInfo.admin_name}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -61,7 +62,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="businessNumber" sx={{ flex: 1 }}>
-              {selectedUserInfo.businessNumber}
+              {selectedUserInfo.register_num}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -72,7 +73,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="address" sx={{ flex: 1 }}>
-              {selectedUserInfo.address}
+              {selectedUserInfo.company_address}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -83,7 +84,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="name" sx={{ flex: 1 }}>
-              {selectedUserInfo.name}
+              {selectedUserInfo.manager_name}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -94,7 +95,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="phone" sx={{ flex: 1 }}>
-              {selectedUserInfo.phone}
+              {selectedUserInfo.manager_phone}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -105,7 +106,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="department" sx={{ flex: 1 }}>
-              {selectedUserInfo.department}
+              {selectedUserInfo.manager_depart}
             </InputLabel>
           </TableCell>
         </TableRow>
@@ -116,7 +117,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
           </TableCell>
           <TableCell sx={{ padding: 1, border: '1px solid black' }}>
             <InputLabel htmlFor="position" sx={{ flex: 1 }}>
-              {selectedUserInfo.position}
+              {selectedUserInfo.manager_grade}
             </InputLabel>
           </TableCell>
         </TableRow>

@@ -21,7 +21,7 @@ import { AppState } from '../../../../store/Store';
 const Header = () => {
   const lgDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
-
+  const user: string = useSelector((state) => state.auth.user?.email);
   // drawer
   const customizer = useSelector((state: AppState) => state.customizer);
   const dispatch = useDispatch();
@@ -67,7 +67,7 @@ const Header = () => {
          
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          <Typography>... 으로 로그인됨</Typography>
+          <Typography>{user} 으로 로그인됨</Typography>
           <Profile />
         </Stack>
       </ToolbarStyled>

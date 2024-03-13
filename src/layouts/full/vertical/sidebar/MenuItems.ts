@@ -82,31 +82,24 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: '계정상세보기',
-    icon: IconUserCircle,
-    href: '/tables/account-detail',
+    title: '등록업체 및 계정관리-마스터',
+    icon: IconNotes,
+    href: '/master/account-manager',
   }, 
-  
-   
   {
     id: uniqueId(),
     title: '마이페이지',
     icon: IconUserCircle,
-    href: '/tables/account-my',
+    href: '/account/account-my',
   }, 
 
-  {
-    id: uniqueId(),
-    title: '프로젝트관리',
-    icon: IconUserCircle,
-    href: '/apps/project',
-  }, 
+  
   
   {
     id: uniqueId(),
     title: '회원가입 승인',
-    icon: IconUserCircle,
-    href: '/tables/account-accept',
+    icon: IconNotes,
+    href: '/account/account-accept',
   },
  
  
@@ -116,7 +109,12 @@ const Menuitems: MenuitemsType[] = [
     icon: IconNotes,
     href: '/apps/noticelist',
   },
-  
+  {
+    id: uniqueId(),
+    title: '프로젝트관리',
+    icon: IconUserCircle,
+    href: '/apps/project',
+  }, 
   {
     id: uniqueId(),
     title: '일정관리',

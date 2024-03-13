@@ -20,23 +20,23 @@ const initialState: StateType = {
 // 유저 등록
 export const registerUser = createAsyncThunk(
   "user/register",
-  async (userData: UserType, { rejectWithValue }) => {
+  async (userData: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/SignUp`, userData);
-      return response.data as UserType; 
+      const response = await axios.post(`${API_URL}/Signup`, userData);
+      return { ...response.data, userData: { ...userData,id:response.data.id }  }; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
     }
   }
-);
+); 
 
 // 유저 삭제
 export const deleteUsers = createAsyncThunk(
   'user/deleteMultiple',
   async (userIds: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/Delete`, { ids: userIds });
-      return response.data;
+      const response = await axios.delete(`${API_URL}/Delete`, {data: { str_ids: userIds  }} );
+      return { ...response.data, userIds: userIds };
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
     }
@@ -48,7 +48,7 @@ export const updateUser = createAsyncThunk(
   "user/update",
   async (userData: UserType, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
+      const response = await axios.post(`${API_URL}/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
       return response.data as UserType; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -81,12 +81,22 @@ export const UserSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.fulfilled, (state, action) => {
-        state.users.push(action.payload);
+        const userData = action.payload.userData; 
+        console.log("userData:",userData);
+        state.users.push(userData); 
       })
       .addCase(deleteUsers.fulfilled, (state, action) => {
-        state.users = state.users.filter(
-          user => !action.payload.includes(user.user_email) // 삭제 로직은 user_email 또는 다른 식별자를 기준으로 수정해야 할 수 있음
-        );
+        if (action.payload.result === "SUCCESS") {
+          // 삭제된 회사 ID들을 반환하는 것으로 가정 
+          const deletedUserIds = action.payload.userIds;
+          state.users = state.users.filter(
+            user => !deletedUserIds.includes(user.user_id)
+          );
+        } else {
+          // 삭제에 실패한 경우 처리
+          // 예를 들어, 에러 처리 또는 알림 표시 등을 수행할 수 있습니다.
+        }
+ 
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.users = action.payload;

@@ -13,20 +13,25 @@ import {
   TableSortLabel,
   Toolbar,
   Typography,
-  Button,
-  InputLabel,
-  Divider,
-  Badge,
+  Button, 
+  Badge, 
 } from '@mui/material';
+import IconButton from '@mui/material/IconButton'; 
+import { Cancel } from '@mui/icons-material';
 import { visuallyHidden } from '@mui/utils';
 import CustomCheckbox from '../../../src/components/forms/theme-elements/CustomCheckbox';
 import Breadcrumb from '../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '../../../src/components/container/PageContainer';
 import BlankCard from '../../../src/components/shared/BlankCard';
-import { Stack } from '@mui/system';
-import { EnhancedTableData, EnTableType } from '../../../src/components/tables/tableData';
- 
+import { Stack } from '@mui/system'; 
 import AccountDetail from '../../../src/components/apps/account/AccountDetail';
+import { useDispatch, useSelector } from '../../../src/store/Store';
+import { fetchUsers, updateUser } from '../../../src/store/apps/UserSlice';
+import { UserType } from '../../../src/types/apps/account';
+import DeleteUser from '../../../src/components/apps/account/DeleteUser';
+import DashboardCard from '../../../src/components/shared/DashboardCard';
+import { Row } from 'antd';
+import { userInfo } from 'os';
 
 const BCrumb = [
   {
@@ -47,8 +52,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   }
 
   return 0;
-}
-const rows: EnTableType[] = EnhancedTableData;
+} 
 
 type Order = 'asc' | 'desc';
 
@@ -167,38 +171,15 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-interface EnhancedTableToolbarProps {
-  numSelected: number;
-}
-
-function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const { numSelected } = props;
-
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        }),
-      }}
-    >
-      {numSelected > 0 ? (
-        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-          Filter
-        </Typography>
-      )} 
-    </Toolbar>
-  );
-}
+  
 
 export default function EnhanceTable() {
+  const dispatch = useDispatch(); 
+  React.useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
+ 
+  const accounts: UserType[] = useSelector((state) => state.user.users);
 
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
@@ -215,39 +196,54 @@ export default function EnhanceTable() {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
-      setSelected(newSelecteds);
-
+      const newSelecteds = accounts.map((n) => n.user_id!.toString());
+      setSelected(newSelecteds); 
       return;
     }
     setSelected([]);
   };
 
   const [showRegistrationInfo, setShowRegistrationInfo] = React.useState(false);
-  const [selectedUserInfo, setSelectedUserInfo] = React.useState(Object);
+  const [selectedUserInfo, setSelectedUserInfo] = React.useState<UserType>({
+    user_id: null,
+    user_type: 0,
+    user_email: "", 
+    user_password: "",
+    register_num: "",
+    company_address: "",
+    manager_name: "",
+    manager_phone: "",
+    manager_depart: "",
+    manager_grade: "",
+    other: "",
+    admin_name: "",
+    admin_phone: "",
+    approval: 0,
+  });
 
-  
+  const handleClick = (event: React.MouseEvent<unknown>, id: string | number) => {
+    const selectedIndex = selected.indexOf(id.toString());
+    let newSelected:  string[] = [];
 
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-    // setSelectedUserInfo(row);
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id.toString());
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  const handleShow = (event: React.MouseEvent<unknown>, user: UserType) => { 
     setShowRegistrationInfo(true);
-    // const selectedIndex = selected.indexOf(name);
-    // let newSelected: readonly string[] = [];
-
-    // if (selectedIndex === -1) {
-    //   newSelected = newSelected.concat(selected, name);
-    // } else if (selectedIndex === 0) {
-    //   newSelected = newSelected.concat(selected.slice(1));
-    // } else if (selectedIndex === selected.length - 1) {
-    //   newSelected = newSelected.concat(selected.slice(0, -1));
-    // } else if (selectedIndex > 0) {
-    //   newSelected = newSelected.concat(
-    //     selected.slice(0, selectedIndex),
-    //     selected.slice(selectedIndex + 1),
-    //   );
-    // }
-
-    // setSelected(newSelected);
+    setSelectedUserInfo(user); 
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -259,14 +255,10 @@ export default function EnhanceTable() {
     setPage(0);
   };
 
-  const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDense(event.target.checked);
-  };
-
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - accounts.length) : 0;
 
   return (
     <PageContainer>
@@ -274,84 +266,108 @@ export default function EnhanceTable() {
       <Breadcrumb title="회원가입 승인" items={BCrumb} />
        <Box sx={{ display:'flex', gap:3 }}>
         <BlankCard >
-          <Box mb={2} sx={{ mb: 2 }}>
-            <EnhancedTableToolbar numSelected={selected.length} />
+        <Toolbar
+            sx={{
+              pl: { sm: 2 },
+              pr: { xs: 1, sm: 1 },
+              bgcolor: (theme) =>
+                  alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+              ...(selected.length > 0 && {
+                bgcolor: (theme) =>
+                  alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+              }),
+            }}
+          > 
+            {selected.length > 0 ? (
+              <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
+                {selected.length} 건 선택됨
+              </Typography>
+            ) : (
+              <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
+                총  {accounts.length} 건
+              </Typography>
+            )} 
+            <DeleteUser selectedUserIds={selected.join(',')} onClose={()=>{setSelected([])}}/>
+          </Toolbar>
+          <Box mb={2} sx={{ mb: 2 }}> 
+          
             <TableContainer>
               <Table
                 sx={{ minWidth: 750 }}
                 aria-labelledby="tableTitle"
                 size={  'medium'}
-              >
-                <EnhancedTableHead
+              > 
+               <EnhancedTableHead
                   numSelected={selected.length}
                   order={order}
                   orderBy={orderBy}
                   onSelectAllClick={handleSelectAllClick}
                   onRequestSort={handleRequestSort}
-                  rowCount={rows.length}
+                  rowCount={accounts.length}
                 />
+                
                 <TableBody>
-                  {stableSort(rows, getComparator(order, orderBy))
+                  {stableSort(accounts, getComparator(order, orderBy))
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row: any, index) => {
-                      const isItemSelected = isSelected(row.name);
+                      const isItemSelected = isSelected(row.user_id);
                       const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
                         <TableRow
                           hover
-                          onClick={(event) => handleClick(event, row.name)}
+                          onClick={(event) => handleShow(event, row)}
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}
-                          key={row.id}
+                          key={row.user_id}
                           
                           selected={isItemSelected}
                         >
                           <TableCell padding="checkbox">
                             <CustomCheckbox
                               checked={isItemSelected}
+                              onClick={(event) => handleClick(event, row.user_id)}
                               inputProps={{
                                 'aria-labelledby': labelId,
                               }}
                             />
                           </TableCell>
-                          <TableCell>
-                            <Stack spacing={2} direction="row">
-                              
-                              <Box>
-                                <Typography variant="h6" fontWeight="600">
-                                  {row.id}
-                                </Typography> 
-                              </Box>
-                            </Stack>
+                          <TableCell> 
+                            <Box>
+                              <Typography variant="h6" fontWeight="600">
+                                {row.user_id}
+                              </Typography> 
+                            </Box> 
+                          </TableCell>
+                          <TableCell> 
+                            <Box>
+                              <Typography variant="h6" fontWeight="600">
+                                {row.admin_name}
+                              </Typography> 
+                            </Box> 
                           </TableCell>
                           <TableCell>
                             <Typography color="textSecondary" variant="subtitle2" fontWeight="400">
-                              {row.pname}
+                              {row.access_time}
                             </Typography>
-                          </TableCell>
-                          <TableCell>
-                            {/* <Typography>{format(new Date(row.created), 'E, MMM d yyyy')}</Typography> */}
-                          </TableCell>
+                          </TableCell> 
                           <TableCell>
                             <Stack spacing={1} direction="row" alignItems="center">
                               <Badge
-                                color={
-                                  row.status === 'Active'
-                                    ? 'success'
-                                    : row.status === 'Pending'
-                                      ? 'warning'
-                                      : row.status === 'Completed'
-                                        ? 'primary'
-                                        : row.status === 'Cancel'
+                                color={ 
+                                     row.approval === 0
+                                      ? 'warning' 
+                                        : row.approval === 2
                                           ? 'error'
                                           : 'secondary'
                                 }
                                 variant="dot"
                               ></Badge>
                               <Typography color="textSecondary" variant="body1">
-                                {row.status}
+                                {row.approval === 0
+                                      ? '준비중' 
+                                        : '미사용'}
                               </Typography>
                             </Stack>
                           </TableCell>
@@ -371,29 +387,57 @@ export default function EnhanceTable() {
                 </TableBody>
               </Table>
             </TableContainer>
+
+           
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={rows.length}
+              count={accounts.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
-          </Box>
-          <Box m={2} sx={{ display: 'flex', justifyContent: 'flex-end', marginY:2 }}>
-          <Button type="submit" disabled={selected.length <= 0} color="warning" variant="contained"  sx={{mr:1}}>삭제</Button> 
-       
-          </Box>
-          
-        </BlankCard>
-        
+          </Box>  
+        </BlankCard> 
         {showRegistrationInfo && (
-          <BlankCard >
+          <DashboardCard
+            title="회원가입 승인"
+            action={
+              <Box>
+                <IconButton onClick={() => setShowRegistrationInfo(false)} sx={{ mr: 1 }}>
+                  <Cancel />
+                </IconButton> 
+              </Box>
+            }
+          >
             <Box m={1} >
               <AccountDetail selectedUserInfo={selectedUserInfo} />
+              <Box display="flex"   alignItems="center" justifyContent={'flex-end'} sx={{ mt: 1 }}>
+                <Button variant="contained" color='error' onClick={()=>{
+                   dispatch(updateUser({...selectedUserInfo, approval:1}))
+                   .then(() => { 
+                   })
+                   .catch((error) => {
+                     // 에러 처리
+                   });
+                }} sx={{ mr: 1 }}>
+                  승인 거부
+                </Button>
+                <Button variant="contained" onClick={()=>{
+                  dispatch(updateUser({...selectedUserInfo, approval:2}))
+                  .then(() => { 
+                  })
+                  .catch((error) => {
+                    // 에러 처리
+                  });
+                }} sx={{ mr: 1 }}>
+                승인
+                </Button>
             </Box>
-          </BlankCard>
+            </Box>
+            
+          </DashboardCard>
         )} 
         </Box>
       

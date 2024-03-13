@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react'; 
 import { useRouter } from 'next/router';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
-// import {  sendAuthEmail } from '../utils/commonFunctions'; // sendAuthEmail은 인증 이메일을 보내는 함수입니다.
-import { postLogin, saveForm } from '../src/store/login'
 import { nowEpoch } from '../src/utils/commonFunctions'
 import { loginSuccess } from '../src/store/authSlice';
+import { AppDispatch, useDispatch } from '../src/store/Store';
+import axios from 'axios';
+import { apiUrl } from '../src/utils/commonValues';
 
 interface LoginResponse {
   loginResult: number;
@@ -15,7 +15,7 @@ interface LoginResponse {
   };
   authRequired?: boolean;
 }
-
+const API_URL = `http://${apiUrl}user`;
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState(''); 
@@ -26,8 +26,7 @@ export default function Login() {
   const [authSent, setAuthSent] = useState(false);
   const [timer, setTimer] = useState<number>(300);
   const router = useRouter();
-  const dispatch = useDispatch()
- 
+  const dispatch: AppDispatch = useDispatch();  
 
   const resetLogin = () => {
     setLoginAttempts(0);
@@ -44,7 +43,6 @@ export default function Login() {
       const countdown = setInterval(() => {
         setTimer((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
       }, 1000);
-
       // 타이머 종료 시 인증번호 만료 처리
       if (timer === 0) {
         clearInterval(countdown);
@@ -59,6 +57,9 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();  
+    dispatch(loginSuccess({id: 3, email:'123456' }));
+    router.replace('/');
+    return;
     setLoading(true);
 
     if (loginAttempts >= 5) {
@@ -73,11 +74,11 @@ export default function Login() {
       // postLogin은 로그인 요청을 보내는 비동기 함수입니다. 실제 구현 필요.
        let response: { [key: string]: any };
        response = {};
-      //  if (authSent) {
-      //   response = await dispatch(postLogin({ email: email, password: password, code: validCode })); 
-      //  }else{
-      //   response = await dispatch(postLogin({ email: email, password: password }));
-      //  }
+       if (authSent) {
+        response = await await axios.post(`${API_URL}/Login`, { email: email, password: password, code: validCode });  
+       }else{
+        response = await  axios.post(`${API_URL}/Login`, { email: email, password: password });   
+       }
     
 
        if (response.loginResult === 1 && response.authRequired) {
@@ -88,7 +89,7 @@ export default function Login() {
             localStorage.setItem('loginUser', response.userData!.userEmail);
             sessionStorage.setItem('accessTime', nowEpoch().toString());
             console.log(response.userData!.userEmail)
-            dispatch(loginSuccess({ email: response.userData.userEmail }));
+            dispatch(loginSuccess({  id: response.userData.id  ,email: response.userData.userEmail }));
             router.push('/');
        } else {
          setLoginAttempts(prev => prev + 1);
@@ -104,7 +105,7 @@ export default function Login() {
  
   return (
     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh">
-      <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1, width:300 }}>
+      <Box component="form" onSubmit={handleLogin} noValidate={false} sx={{ mt: 1, width:300 }}>
         
         <Typography  component="h1" variant="h5">로그인</Typography>
         
