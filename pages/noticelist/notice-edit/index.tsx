@@ -17,19 +17,19 @@ import {
   IconButton,
   Chip,
 } from '@mui/material';
-import PageContainer from '../../../../src/components/container/PageContainer';
-import Breadcrumb from '../../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
-import DashboardCard from '../../../../src/components/shared/DashboardCard'; 
+import PageContainer from '@src/components/container/PageContainer';
+import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
+import DashboardCard from '@src/components/shared/DashboardCard'; 
 import dynamic from "next/dynamic";
-import CustomSelect from '../../../../src/components/forms/theme-elements/CustomSelect';
+import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import Link from 'next/link';   
-import { AppDispatch, useDispatch, useSelector } from '../../../../src/store/Store'; 
+import { AppDispatch, useDispatch, useSelector } from '@src/store/Store'; 
 import { Delete as DeleteIcon } from '@mui/icons-material'; // 삭제 아이콘 추가
 import { Row } from 'antd';
-import { fetchProjects } from '../../../../src/store/apps/ProjectSlice';
-import { ProjectType } from '../../../../src/types/apps/project'; 
+import { fetchProjects } from '@src/store/apps/ProjectSlice';
+import { ProjectType } from '@src/types/apps/project'; 
 import axios from 'axios'; 
-import { apiUrl } from '../../../../src/utils/commonValues';
+import { apiUrl } from '@src/utils/commonValues';
 // ReactQuill 동적 import
 const ReactQuill: any = dynamic(
   async () => {
