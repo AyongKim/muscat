@@ -1,6 +1,5 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
-import PageContainer from '@src/components/container/PageContainer';
-import NoticeList from '../apps/noticelist/NoticeList';
+import PageContainer from '@src/components/container/PageContainer'; 
 import BlankCard from '@src/components/shared/BlankCard';
 import CompanyList from '@src/components/apps/company/CompanyList';
 import AccountList from './components/AccountList';
