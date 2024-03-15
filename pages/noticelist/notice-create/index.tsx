@@ -17,17 +17,17 @@ import {
   IconButton,
   Chip,
 } from '@mui/material';
-import PageContainer from '../../../../src/components/container/PageContainer';
-import Breadcrumb from '../../../../src/layouts/full/shared/breadcrumb/Breadcrumb';
-import DashboardCard from '../../../../src/components/shared/DashboardCard';
+import PageContainer from '@src/components/container/PageContainer';
+import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
+import DashboardCard from '@src/components/shared/DashboardCard';
 import dynamic from "next/dynamic";
-import CustomSelect from '../../../../src/components/forms/theme-elements/CustomSelect';
+import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import Link from 'next/link';
-import { AppDispatch, useDispatch, useSelector } from '../../../../src/store/Store';
-import { fetchNotices, registerNotice } from '../../../../src/store/apps/NoticeSlice';
-import { fetchProjects } from '../../../../src/store/apps/ProjectSlice';
+import { AppDispatch, useDispatch, useSelector } from '@src/store/Store';
+import { fetchNotices, registerNotice } from '@src/store/apps/NoticeSlice';
+import { fetchProjects } from '@src/store/apps/ProjectSlice';
 import { Delete as DeleteIcon } from '@mui/icons-material'; // 삭제 아이콘 추가
-import { ProjectType } from '../../../../src/types/apps/project';
+import { ProjectType } from '@src/types/apps/project';
 import { Row } from 'antd';
 import { Router, useRouter } from 'next/router';
 
@@ -48,7 +48,7 @@ const ReactQuill: any = dynamic(
 
 const BCrumb = [
   {
-    to: '/apps/noricelist',
+    to: '/noricelist',
     title: '공지사항',
   },
   {
@@ -234,7 +234,7 @@ export default function QuillEditor() {
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell>
+                    <TableCell colSpan={2}>
                       <ReactQuill
                         value={content}
                         onChange={(value: any) => setContent(value)}
@@ -247,7 +247,7 @@ export default function QuillEditor() {
             </TableContainer>
           </Card>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginY: 2 }}>
-            <Button component={Link} href="/apps/noticelist" variant="contained" onClick={() => { }} sx={{ mr: 1 }}>
+            <Button component={Link} href="/noticelist" variant="contained" onClick={() => { }} sx={{ mr: 1 }}>
               목록
             </Button>
           </Box>

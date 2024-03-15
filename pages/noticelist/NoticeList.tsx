@@ -366,7 +366,7 @@ const NoticeList = () => {
 
         <Button
               component={Link}
-              href="/apps/noticelist/notice-create"
+              href="/noticelist/notice-create"
               variant="contained"
               color="success" 
               sx={{width:100}}

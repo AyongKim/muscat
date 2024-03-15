@@ -328,7 +328,7 @@ export default function AccountDetailTable() {
           <DialogContentText>정보가 수정되었습니다.</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { handleClosePopup(); router.push('/apps/account-manager'); }}>OK</Button>
+          <Button onClick={() => { handleClosePopup(); /*router.push('/account/account-manager');*/ }}>OK</Button>
         </DialogActions>
       </Dialog> 
        <Dialog open={showErrorPopup} onClose={handleClosePopup}> 

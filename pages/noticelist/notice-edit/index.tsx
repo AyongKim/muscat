@@ -44,7 +44,7 @@ const ReactQuill: any = dynamic(
 // Breadcrumb 경로
 const BCrumb = [
   {
-    to: '/apps/noricelist',
+    to: '/noricelist',
     title: '공지사항',
   },
   {
@@ -293,7 +293,7 @@ export default function QuillEditor() {
             </TableContainer>
           </Card>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginY: 2 }}>
-            <Button component={Link} href="/apps/noticelist" variant="contained" onClick={() => { }} sx={{ mr: 1 }}>
+            <Button component={Link} href="/noticelist" variant="contained" onClick={() => { }} sx={{ mr: 1 }}>
               목록
             </Button>
           </Box>
