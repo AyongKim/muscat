@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch } from '../../Store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-const API_URL = '/api/data/notes/NotesData';
+const API_URL = 'https://localhost:5001';
 
 interface StateType {
   notes: any[];

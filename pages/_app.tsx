@@ -19,8 +19,8 @@ import { useRouter } from 'next/router';
 import "../src/utils/i18n"; 
 // CSS FILES
 import "react-quill/dist/quill.snow.css";//??
-import "./apps/noticelist/notice-edit/Quill.css";
-import "./apps/calendar/Calendar.css"; 
+import "./noticelist/notice-edit/Quill.css";
+import "./calendar/Calendar.css"; 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Login from './login';
@@ -46,20 +46,21 @@ const MyApp = (props: MyAppProps) => {
   const customizer = useSelector((state: AppState) => state.customizer);
   const Layout = layouts[Component.layout] || FullLayout;
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const isAuthenticated = useSelector((state: AppState) => state.auth.isAuthenticated);
   
   useEffect(() => {
     // 로딩 시간을 설정하여 앱이 초기화 될 때까지 기다립니다.
-    setTimeout(() => setLoading(true), 1000);
+    //setTimeout(() => setLoading(true), 1000);
     // 로그인 상태가 아니라면 로그인 페이지로 리다이렉션
+    /*
     if (!isAuthenticated && router.pathname !== '/login') {
       router.push('/login');
     } else if (isAuthenticated && router.pathname === '/login') { // 로그인 후 메인 페이지로 바로 이동
       setLoading(false)
       setTimeout(() => setLoading(true), 1000);
       router.push('/');
-    }
+    }*/
   }, [isAuthenticated, router]);
 
   return ( 
@@ -72,7 +73,7 @@ const MyApp = (props: MyAppProps) => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         {loading ? (
-          isAuthenticated ? (
+          !isAuthenticated ? (
             <Layout>
               <Component {...pageProps} />
             </Layout>

@@ -4,8 +4,8 @@ import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { Grid, Tabs, Tab, Box, CardContent, Divider } from '@mui/material';
 
 // components
+import AccountTab from 'pages/account/components/AccountCreate'; 
 import BlankCard from '@src/components/shared/BlankCard'; 
-import AccountCreateForMaster from '@pages/account/components/AccountCreateForMaster';
 const BCrumb = [
   {
     to: '/account/account-manager',
@@ -36,7 +36,7 @@ export default function AccountSetting() {
         <Grid item xs={12}>
           <BlankCard> 
             <CardContent> 
-                <AccountCreateForMaster /> 
+                <AccountTab /> 
             </CardContent>
           </BlankCard>
         </Grid>

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Box,Dialog, DialogContent, DialogActions, Button, Divider, InputLabel, Table, TableBody, TableCell, TableRow, Typography, TextField, Input, MenuItem } from '@mui/material';
+import { Box,Dialog, DialogContent, DialogActions, Button, Divider, InputLabel, Table, TableBody, TableCell, TableRow, Typography, TextField } from '@mui/material';
 import { useRouter } from 'next/router'; // Import useRouter from Next.js 
 import { dispatch, useSelector } from '@src/store/Store';
 import { UserType } from '@src/types/apps/account';
 import { apiUrl } from '@src/utils/commonValues';
 import axios from 'axios';
 import { updateUser } from '@src/store/apps/UserSlice';
-import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
  
  
 
@@ -35,8 +34,6 @@ export default function AccountDetailTable() {
     approval: 0,
   }); // State to hold user info
   const router = useRouter(); // useRouter hook to handle navigation
-  const [approve, setApprove] = useState<number>(0);
-  const [type, setType] = useState<number>(0);
   useEffect(() => {
     const fetchDetail = async () => {
       try {
@@ -91,31 +88,10 @@ export default function AccountDetailTable() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box width={600}>
-      {editMode && (
-                  <Box display={'flex'} justifyContent={'flex-start'} alignItems={'center'} sx={{ padding: 1,  }}>
-                     
-                      <InputLabel htmlFor="phone" sx={{ fontWeight: 'bold' }}>
-                        계정유형
-                      </InputLabel>
-                     
-                    <CustomSelect
-                        id="account-type-select"
-                        sx={{mx:1 , px:0}}
-                        
-                        value={type} 
-                        onChange={(event:any) => {
-                          setType(event.target.value as number)}}
-                      >
-                        <MenuItem value={0}>관리자</MenuItem>
-                        <MenuItem value={1}>위탁사</MenuItem>
-                        <MenuItem value={2}>수탁사</MenuItem>
-                      </CustomSelect> 
-                </Box>
-                )}
         <Table>
           <TableBody>
             <Typography variant="h4" padding={1} marginTop={3}>
-              관리자계정수정
+              기본정보
             </Typography>
             <Divider />
             <TableRow sx={{ padding: 1, border: '1px solid black' }}>
@@ -130,7 +106,7 @@ export default function AccountDetailTable() {
               </TableCell>
             </TableRow>
             {/* Password row - only editable in edit mode */}
-            {editMode ? (
+            {editMode && (
               <>
                 <TableRow sx={{  border: '1px solid black' }}>
                   <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
@@ -156,19 +132,7 @@ export default function AccountDetailTable() {
                   </TableCell>
                 </TableRow>
               </>
-            ):(
-              <TableRow sx={{ padding: 1, border: '1px solid black' }}>
-              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-                <InputLabel htmlFor="email" sx={{ fontWeight: 'bold' }}>
-                  비밀번호
-                </InputLabel>
-              </TableCell>
-              <TableCell sx={{ padding: 0, border: '1px solid black' }}> 
-                  <Input readOnly disableUnderline value={selectedUserInfo.user_email} type="password" sx={{ px:2}}></Input> 
-              </TableCell>
-            </TableRow>
-            )
-           }
+            )}
             {/* Email row */}
             <TableRow sx={{ padding: 1, border: '1px solid black' }}>
               <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
@@ -216,28 +180,6 @@ export default function AccountDetailTable() {
                 )}
               </TableCell>
             </TableRow>
-            {editMode && (
-                  <TableRow sx={{ padding: 1, border: '1px solid black' }}>
-                    <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-                      <InputLabel htmlFor="phone" sx={{ fontWeight: 'bold' }}>
-                        사용여부
-                      </InputLabel>
-                    </TableCell>
-                    <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-                    <CustomSelect
-                        id="account-type-select"
-                        sx={{mx:1 , px:0}}
-                        
-                        value={approve} 
-                        onChange={(event:any) => {
-                          setApprove(event.target.value as number)}}
-                      >
-                        <MenuItem value={0}>사용</MenuItem>
-                        <MenuItem value={1}>미사용</MenuItem>
-                      </CustomSelect>
-                    </TableCell>
-                </TableRow>
-                )}
           </TableBody>
         </Table>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginY: 2 }}>
@@ -260,7 +202,7 @@ export default function AccountDetailTable() {
           <Typography>정보가 수정되었습니다.</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { handleClosePopup(); router.push('/master/account-manager'); }}>OK</Button>
+          <Button onClick={() => { handleClosePopup(); router.push('/account/account-my'); }}>OK</Button>
         </DialogActions>
       </Dialog>
 

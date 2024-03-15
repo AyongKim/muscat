@@ -77,12 +77,6 @@ const Breadcrumb = ({ subtitle, items, title, children }: BreadCrumbType) => (
         ) : (
           <>
             <Box sx={{ top: "0px", position: "absolute" }}>
-              <Image
-                src={breadcrumbImg}
-                alt={"breadcrumbImg"}
-                style={{ width: "165px", height: "165px" }}
-                priority
-              />
             </Box>
           </>
         )}

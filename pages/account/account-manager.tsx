@@ -1,7 +1,9 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer';
+import NoticeList from '../apps/noticelist/NoticeList';
+import BlankCard from '@src/components/shared/BlankCard';
 import CompanyList from '@src/components/apps/company/CompanyList';
-import AccountListForMaster from '@pages/account/components/AccountListForMaster';
+import AccountList from './components/AccountList';
 
 const BCrumb = [
   {
@@ -25,7 +27,7 @@ export default function EcomProductList() {
         {/* ------------------------------------------- */}
         <CompanyList />
 
-        <AccountListForMaster/>
+        <AccountList/>
        
     </PageContainer>
   );

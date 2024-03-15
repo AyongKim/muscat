@@ -1,4 +1,4 @@
-import Menuitems from './MenuItems';
+import Menuitems from '@pages/MenuItems';
 import { useRouter } from 'next/router';
 import { Box, List, useMediaQuery } from '@mui/material';
 import { useDispatch, useSelector } from '../../../../store/Store';
