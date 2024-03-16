@@ -172,6 +172,7 @@ export default function PrivacyItemManagement() {
              {isAddingNewItem && (
               <TableRow>
                 <TableCell></TableCell>
+                <TableCell>새 항목</TableCell>
                 <TableCell>
                   <TextField
                     fullWidth
