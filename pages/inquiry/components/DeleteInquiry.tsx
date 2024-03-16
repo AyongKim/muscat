@@ -62,13 +62,13 @@ const DeleteInquiry: React.FC<DeleteCompaniesProps> = ({ selectedInquiryIds, onC
   return (
     <>
       <Button variant="contained" color="error"  sx={{width:150, mr:1}} onClick={handleClickOpen} disabled={selectedInquiryIds.length === 0}>
-        업체 삭제
+        문의 삭제
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>업체 삭제</DialogTitle>
+        <DialogTitle>문의 삭제</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            선택한 업체들을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            선택한 문의들을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

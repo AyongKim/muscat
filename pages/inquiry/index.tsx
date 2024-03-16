@@ -50,7 +50,7 @@ export default function EcomProductList() {
         {/* ------------------------------------------- */}
         {/* Left part */}
         {/* ------------------------------------------- */}
-       
+       <InquiryList/>
     </PageContainer>
   );
 };
@@ -109,20 +109,27 @@ const headCells: readonly HeadCell[] = [
     label: 'No',
   },
   {
-    id: 'name',
+    id: 'title',
     numeric: false,
     disablePadding: false,
-    label: '사업자 번호',
+    label: '제목',
   },
   {
-    id: 'pname',
+    id: 'author',
     numeric: false,
     disablePadding: false,
-    label: '업체 명',
+    label: '글쓴이',
   }, 
+  {
+    id: 'date',
+    numeric: false,
+    disablePadding: false,
+    label: '작성날짜',
+  },
 ];
 
-interface CompaynyTableProps {
+
+interface InquiryTableProps {
   numSelected: number;
   onRequestSort: (event: React.MouseEvent<unknown>, property: any) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -131,7 +138,7 @@ interface CompaynyTableProps {
   rowCount: number;
 }
 
-function InquiryTableHead(props: CompaynyTableProps) {
+function InquiryTableHead(props: InquiryTableProps) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property: any) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
@@ -266,12 +273,12 @@ const InquiryList = () => {
 
 
   // This is for the single row sleect
-  const handleClick = (event: React.MouseEvent<unknown>, num: string) => {
-    const selectedIndex = selected.indexOf(num);
+  const handleClick = (event: React.MouseEvent<unknown>, num: number) => {
+    const selectedIndex = selected.indexOf(num.toString());
     let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, num);
+      newSelected = newSelected.concat(selected, num.toString());
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -299,7 +306,7 @@ const InquiryList = () => {
     setDense(event.target.checked);
   };
 
-  const isSelected = (name: string) => selected.indexOf(name) !== -1;
+  const isSelected = (name: number) => selected.indexOf(name.toString()) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
@@ -346,7 +353,7 @@ const InquiryList = () => {
                     ),
                     style: { backgroundColor: 'white' } 
                   }}
-                  placeholder="업체명"
+                  placeholder="제목"
                   size="small"
                   sx={{mr:1,width:300 }}
                   onChange={handleInquiryNameSearch}
@@ -361,7 +368,7 @@ const InquiryList = () => {
                     ),
                     style: { backgroundColor: 'white' } 
                   }}
-                  placeholder="사업자번호"
+                  placeholder="글쓴이"
                   size="small" 
                   sx={{ mr: 1, width: 300,   }} // 배경색을 흰색으로 설정
                   onChange={handleRegistrationNumberSearch}
@@ -429,12 +436,17 @@ const InquiryList = () => {
                           </TableCell>
                           <TableCell>
                               <Typography variant="h6" fontWeight="600">
-                                {row.register_num}
+                                {row.title}
                               </Typography>  
                           </TableCell> 
                           <TableCell>
                               <Typography variant="h6" fontWeight="600">
-                                {row.inquiry_name}
+                                {row.author}
+                              </Typography>  
+                          </TableCell> 
+                          <TableCell>
+                              <Typography variant="h6" fontWeight="600">
+                                {row.created_date}
                               </Typography>  
                           </TableCell> 
 

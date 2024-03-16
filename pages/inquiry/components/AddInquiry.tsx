@@ -17,8 +17,7 @@ const AddInquiry = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [password, setPassword] = useState('');
-  const [author, setAuthor] = useState('');
-  const [createdDate, setCreatedDate] = useState('');
+  const [author, setAuthor] = useState(''); 
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const handleClickOpen = () => {
     setOpen(true);
@@ -38,7 +37,7 @@ const AddInquiry = () => {
       content,
       password,
       author,
-      created_date: createdDate,
+      created_date: new Date().toDateString(),
     };
 
     const API_URL = `http://${apiUrl}inquiry`;
@@ -54,7 +53,6 @@ const AddInquiry = () => {
         setContent('');
         setPassword('');
         setAuthor('');
-        setCreatedDate('');
       } else {
         // Handle non-200 responses
         console.error('Failed to submit the inquiry:', response.data);
@@ -118,38 +116,14 @@ const AddInquiry = () => {
             <Button onClick={handleSetPasswordClick} color="secondary" variant="outlined" sx={{ my: 2 }}>
               비밀번호 설정
             </Button>
-          )}
-          <TextField
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            margin="normal"
-            id="inquiry-author"
-            label="저자"
-            type="text"
-            fullWidth
-            size="small"
-            variant="outlined"
-          />
-          <TextField
-            value={createdDate}
-            onChange={(e) => setCreatedDate(e.target.value)}
-            margin="normal"
-            id="inquiry-created-date"
-            label="생성 날짜"
-            type="date"
-            fullWidth
-            size="small"
-            variant="outlined"
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
+          )} 
+           
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>취소</Button>
+          <Button color='error' onClick={handleClose}>취소</Button>
           <Button
             onClick={handleSubmit}
-            disabled={!title || !content || !password || !author || !createdDate}
+            disabled={!title || !content }
             variant="contained"
           >
             저장
