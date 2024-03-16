@@ -12,12 +12,12 @@ import {
 import axios from 'axios';
 import { apiUrl } from '@src/utils/commonValues';
 
-interface DeleteCompaniesProps {
+interface DeleteInquiryProps {
   selectedInquiryIds: string;
   onClose?: () => void;
 }
 
-const DeleteInquiry: React.FC<DeleteCompaniesProps> = ({ selectedInquiryIds, onClose }) => {  
+const DeleteInquiry: React.FC<DeleteInquiryProps> = ({ selectedInquiryIds, onClose }) => {  
   const [open, setOpen] = useState<boolean>(false); 
   const handleClickOpen = (): void => {
     setOpen(true);
@@ -38,9 +38,11 @@ const DeleteInquiry: React.FC<DeleteCompaniesProps> = ({ selectedInquiryIds, onC
         if (deleteResponse.status === 200) {
           // Handle successful delete response (status code 200)
           const { result } = deleteResponse.data;
-          if (result === "success") {
+          if (result === "SUCCESS") {
+            handleClose();
             // Fetch updated list after successful deletion
             const listResponse = await axios.post(`${API_URL}/List`);
+
             // Handle the list response as needed
             console.log("List of companies:", listResponse.data);
           } else {

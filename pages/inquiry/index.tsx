@@ -1,6 +1,6 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer';
-
+import LockIcon from '@mui/icons-material/Lock';
 import * as React from 'react';
 import { alpha, useTheme } from '@mui/material/styles'; 
 import {
@@ -17,9 +17,10 @@ import {
   Typography, 
   TextField,
   InputAdornment,
-  Paper,
-  Button, 
-} from '@mui/material';
+  Paper, 
+  Dialog, DialogTitle, DialogContent, DialogActions, Button
+} from '@mui/material'; 
+
 import { visuallyHidden } from '@mui/utils'; 
 import {   IconSearch,   } from '@tabler/icons-react';  
 import { useDispatch, useSelector } from '@src/store/Store';
@@ -182,46 +183,65 @@ function InquiryTableHead(props: InquiryTableProps) {
     </TableHead>
   );
 }
-
-interface InquiryTableToolbarProps {
-  numSelected: number;
-  rows: any; 
-}
-
+ 
 const InquiryList = () => {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
   const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-
+  const [rowsPerPage, setRowsPerPage] = React.useState(12); 
   const [rows, setRows] = React.useState<any>([]);
- 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const API_URL = `http://${apiUrl}inquiry`;
-      try {
-        const response = await axios.post(`${API_URL}/List`);
-        if (response.status === 200) {
-          // Handle successful response (status code 200)
-          const { data } = response;
-          // Assuming the data structure matches the Model for success
-          // You can access individual fields like data.id, data.title, etc.
-          setRows(data);
-        } else if (response.status === 400) {
-          // Handle failed response (status code 400)
-          const { result, reason, error_message } = response.data;
-          // You can use the error information to display an appropriate message
-          console.error(`API request failed: ${reason} - ${error_message}`);
-        }
-      } catch (error:any) {
-        // Handle any other errors (e.g., network issues, invalid URL, etc.)
-        console.error('Error fetching data from API:', error.message);
-      }
-    };
+  const [passwordDialogOpen, setPasswordDialogOpen] = React.useState(false);
+  const [selectedInquiry, setSelectedInquiry] = React.useState<InquiryType>({id:1, 
+    title: '',
+    content:  '',
+    password:  '',
+    author:  '',
+    created_date:  ''});
+  const [detailsDialogOpen, setDetailsDialogOpen] = React.useState(false);
+  const [passwordInput, setPasswordInput] = React.useState('');
+  const handleInquirySelection = (row : any) => {
+    if (row.password) {
+      setSelectedInquiry(row);
+      setPasswordDialogOpen(true);
+    } else {
+      // Handle unsecured inquiry selection
+    }
+  };
+  const verifyPassword = async (password:any) => { 
+    // const isPasswordCorrect = await checkPassword(selectedInquiry.id, password);
   
+    if (selectedInquiry.password == password) {
+      setDetailsDialogOpen(true); // Show the details dialog
+      setPasswordDialogOpen(false); // Close the password dialog
+    } else {
+      // Handle incorrect password case
+      alert("Incorrect password");
+    }
+  };
+  const fetchData = async () => {
+    const API_URL = `http://${apiUrl}inquiry`;
+    try {
+      const response = await axios.post(`${API_URL}/List`);
+      if (response.status === 200) {
+        // Handle successful response (status code 200)
+        const { data } = response;
+        // Assuming the data structure matches the Model for success
+        // You can access individual fields like data.id, data.title, etc.
+        setRows(data);
+      } else if (response.status === 400) {
+        // Handle failed response (status code 400)
+        const { result, reason, error_message } = response.data;
+        // You can use the error information to display an appropriate message
+        console.error(`API request failed: ${reason} - ${error_message}`);
+      }
+    } catch (error:any) {
+      // Handle any other errors (e.g., network issues, invalid URL, etc.)
+      console.error('Error fetching data from API:', error.message);
+    }
+  };
+  React.useEffect(() => { 
     fetchData();
   }, []);
   
@@ -375,8 +395,8 @@ const InquiryList = () => {
                   value={registrationNumberSearch}
                 />
 
-            <DeleteInquiry selectedInquiryIds={selected.join(',')} onClose={()=>{setSelected([])}}/>
-            <AddInquiry   />
+            <DeleteInquiry selectedInquiryIds={selected.join(',')} onClose={()=>{fetchData(); setSelected([])}}/>
+            <AddInquiry   onClose={()=>{fetchData();}} />
         
           </Toolbar>
           <Paper variant="outlined" sx={{ mx: 2, my: 1, border: `1px solid ${borderColor}` }}>
@@ -435,9 +455,14 @@ const InquiryList = () => {
                             </Box>
                           </TableCell>
                           <TableCell>
-                              <Typography variant="h6" fontWeight="600">
-                                {row.title}
+                            <Box display={'flex'} justifyContent={'flex-start'} alignItems={'center'}>
+                              <Typography 
+                                onClick={() => handleInquirySelection(row)}
+                                variant="h6" fontWeight="600" sx={{cursor: 'pointer', borderBottom:'1px solid black' }}>
+                                {row.title}  
                               </Typography>  
+                              {row.password && <LockIcon sx={{ml: 1,}} fontSize="small" />}
+                            </Box>
                           </TableCell> 
                           <TableCell>
                               <Typography variant="h6" fontWeight="600">
@@ -475,6 +500,36 @@ const InquiryList = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
+            <Dialog open={passwordDialogOpen} onClose={() => setPasswordDialogOpen(false)}>
+              <DialogTitle>비밀번호를 입력하세요</DialogTitle>
+              <DialogContent>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="password"
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  variant="outlined"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setPasswordDialogOpen(false)}>Cancel</Button>
+                <Button onClick={() => verifyPassword(passwordInput)}>Submit</Button>
+              </DialogActions>
+            </Dialog>
+            <Dialog open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="md" fullWidth>
+              <DialogTitle>{selectedInquiry.title}</DialogTitle>
+              <DialogContent>
+                {/* Display inquiry content here */}
+                <Typography variant="body1">{selectedInquiry.content}</Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setDetailsDialogOpen(false)}>Close</Button>
+              </DialogActions>
+            </Dialog>
           </Paper> 
         </BlankCard> 
       

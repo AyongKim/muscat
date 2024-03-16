@@ -448,7 +448,7 @@ const NoticeList = () => {
                                 variant="subtitle2"
                                 sx={{  cursor: 'pointer', borderBottom:'1px solid black' }}
                                 component={Link}
-                                href={`/apps/noticelist/notice-edit?id=${row.id}`}
+                                href={`/noticelist/notice-edit?id=${row.id}`}
                               >
                                 {row.title  }
                               </Typography>

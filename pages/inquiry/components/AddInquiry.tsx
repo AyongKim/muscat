@@ -11,13 +11,17 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { apiUrl } from '@src/utils/commonValues';
+import { useSelector } from '@src/store/Store';
+interface AddInquiryProps {
+  onClose?: () => void;
+}
 
-const AddInquiry = () => {
+const AddInquiry : React.FC<AddInquiryProps> = ({  onClose }) => {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [password, setPassword] = useState('');
-  const [author, setAuthor] = useState(''); 
+  const [author, setauthor] = useState('');
+  const [password, setPassword] = useState(''); 
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const handleClickOpen = () => {
     setOpen(true);
@@ -26,12 +30,14 @@ const AddInquiry = () => {
   const handleClose = () => {
     setOpen(false);
     setShowPasswordInput(false);
+   
   };
   const handleSetPasswordClick = () => {
     setShowPasswordInput(true); // 비밀번호 입력 필드 표시
   };
-
+  // const author: string | undefined = useSelector((state) => state.auth.user?.email);
   const handleSubmit = async () => {
+    
     const inquiryData = {
       title,
       content,
@@ -42,17 +48,17 @@ const AddInquiry = () => {
 
     const API_URL = `http://${apiUrl}inquiry`;
     try {
-      const response = await axios.post(`${API_URL}/register`, inquiryData);
+      const response = await axios.post(`${API_URL}/Register`, inquiryData);
 
       if (response.status === 200) {
         // Handle successful response
-        console.log('Inquiry submitted successfully:', response.data);
+        console.log('Inquiry submitted successfully:', response.data); 
         // Reset form and close dialog
         setOpen(false);
         setTitle('');
         setContent('');
-        setPassword('');
-        setAuthor('');
+        setPassword(''); 
+        if (onClose) onClose();
       } else {
         // Handle non-200 responses
         console.error('Failed to submit the inquiry:', response.data);
