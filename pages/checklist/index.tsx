@@ -1,209 +1,182 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Toolbar, Typography } from '@mui/material';
+import { IconCheck, IconX } from '@tabler/icons-react';
+import { alpha, useTheme } from '@mui/material/styles';
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
-import PageContainer from '@src/components/container/PageContainer';
-import React, { useState } from 'react';
-import { Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel } from '@mui/material';
+import { apiUrl } from '@src/utils/commonValues';
 
-const BCrumb = [
-  {
-    to: '/',
-    title: '메인',
-  },
-  {
-    title: '점검항목 관리',
-  },
-];
+const API_URL = `http://${apiUrl}checklist`; // 서버 API 주소로 수정 필요
 
-export default function EcomProductList() {
-
-  return (
-    <PageContainer>
-      {/* breadcrumb */}
-      <Breadcrumb title="점검항목 관리" items={BCrumb} />
-      
-        {/* ------------------------------------------- */}
-        {/* Left part */}
-        {/* ------------------------------------------- */}
-       <CustomTable></CustomTable>
-    </PageContainer>
-  );
-};
-
-
-
-interface Cell {
-  content: string;
-  merged: number;
-}
-
-interface Row {
+interface ChecklistItem {
   id: number;
-  sequence: number;
-  data: Cell[];
+  checklist_item: string;
+  description: string;
 }
 
-interface SelectedCell {
-  rowIndex: number;
-  colIndex: number;
-}
+export default function ChecklistManagement() {
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [newItem, setNewItem] = useState<{ checklist_item: string; description: string }>({ checklist_item: '', description: '' });
+  const [isAddingNewItem, setIsAddingNewItem] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-const initialRows: Row[] = [
-  { id: 1, sequence: 1, data: [{ content: 'Row 1 Col 1', merged: 1 }, { content: 'Row 1 Col 2', merged: 1 }, { content: 'Row 1 Col 3', merged: 1 }] },
-  { id: 2, sequence: 2, data: [{ content: 'Row 2 Col 1', merged: 1 }, { content: 'Row 2 Col 2', merged: 1 }, { content: 'Row 2 Col 3', merged: 1 }] },
-  { id: 3, sequence: 3, data: [{ content: 'Row 3 Col 1', merged: 1 }, { content: 'Row 3 Col 2', merged: 1 }, { content: 'Row 3 Col 3', merged: 1 }] },
-];
+  const handleAddItemToggle = () => {
+    setIsAddingNewItem(!isAddingNewItem);
+    setNewItem({ checklist_item: '', description: '' }); // 새 항목 입력 필드 초기화
+  };
 
-const CustomTable: React.FC = () => {
-  const [rows, setRows] = useState<Row[]>(initialRows);
-  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
-  const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
-
-  const handleCellUpdate = (rowIndex: number, colIndex: number, content: string) => {
-    const updatedRows = rows.map((row, rIndex) => {
-      if (rIndex === rowIndex) {
-        const updatedData = row.data.map((cell, cIndex) => {
-          if (cIndex === colIndex) {
-            return { ...cell, content };
-          }
-          return cell;
-        });
-        return { ...row, data: updatedData };
+  const fetchChecklistItems = async () => {
+    try {
+      const response = await axios.post(`${API_URL}/List`);
+      if (response.status === 200) {
+        setChecklistItems(response.data);
+        setIsAddingNewItem(false);
+        setNewItem({ checklist_item: '', description: '' });
+      } else {
+        console.error('Failed to fetch checklist items');
       }
-      return row;
-    });
-    setRows(updatedRows);
-    setEditingCell(null);
-  };
-
-  const handleAddRow = () => {
-    const newRow: Row = {
-      id: rows.length > 0 ? rows[rows.length - 1].id + 1 : 1,
-      sequence: rows.length > 0 ? rows[rows.length - 1].sequence + 1 : 1,
-      data: new Array(3).fill(null).map((_, index) => ({ content: `Row ${rows.length + 1} Col ${index + 1}`, merged: 1 })),
-    };
-
-    if (selectedCell) {
-      const updatedRows = [...rows];
-      const insertAtIndex = selectedCell.rowIndex + 1;
-      updatedRows.splice(insertAtIndex, 0, newRow);
-      updatedRows.forEach((row, index) => (row.sequence = index + 1));
-      setRows(updatedRows);
-    } else {
-      setRows([...rows, newRow]);
+    } catch (error) {
+      console.error('Error fetching checklist items:', error);
     }
   };
 
-  const handleDeleteRow = () => {
-    if (selectedCell) {
-      const updatedRows = rows.filter((_, index) => index !== selectedCell.rowIndex);
-      updatedRows.forEach((row, index) => (row.sequence = index + 1));
-      setRows(updatedRows);
-      setSelectedCell(null);
+  useEffect(() => {
+    fetchChecklistItems();
+  }, []);
+
+  const handleAddItem = async () => {
+    if (!newItem.checklist_item || !newItem.description) {
+      alert('항목과 설명을 모두 입력해주세요.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}/Register`, newItem);
+      if (response.status === 200) {
+        fetchChecklistItems();
+      } else {
+        console.error('Failed to add checklist item');
+      }
+    } catch (error) {
+      console.error('Error adding checklist item:', error);
     }
   };
 
-  const handleMerge = () => {
-    if (!selectedCell) return;
-
-    let mergeCount = 1; // 병합할 셀의 수를 추적합니다.
-    let processing = true;
-    rows.forEach((row, rowIndex) => {
-      row.data.forEach((cell, colIndex) => {
-        if (colIndex === selectedCell!.colIndex && rowIndex > selectedCell!.rowIndex) {
-          if (cell.merged <= 1 && processing) {
-            mergeCount++;
-            if (cell.merged === 1)
-              processing = false;
-          }
-        }
-      });
-    });
-
-    processing = true;
-    const updatedRows = rows.map((row, rowIndex) => {
-      const newData = row.data.map((cell, colIndex) => {
-        if (colIndex === selectedCell!.colIndex) {
-          if (rowIndex === selectedCell!.rowIndex) {
-            return { ...cell, merged: mergeCount };
-          } else if (rowIndex > selectedCell!.rowIndex && cell.merged <= 1 && processing) {
-            if (cell.merged === 1) 
-              processing = false;
-            return { ...cell, merged: 0 };
-          }
-        }
-        return cell;
-      });
-      return { ...row, data: newData };
-    });
-
-    setRows(updatedRows);
+  const handleDeleteSelectedItems = async () => {
+    try {
+      const response = await axios.delete(`${API_URL}/Delete`, { data: { id: selected.join(',') } });
+      if (response.status === 200) {
+        fetchChecklistItems();
+        setSelected([]);
+      } else {
+        console.error('Failed to delete checklist items');
+      }
+    } catch (error) {
+      console.error('Error deleting checklist items:', error);
+    }
+    setDeleteDialogOpen(false);
   };
 
-  const handleSplit = () => {
-    if (!selectedCell) return;
+  const openDeleteDialog = () => {
+    if (selected.length > 0) {
+      setDeleteDialogOpen(true);
+    }
+  };
 
-    const updatedRows = rows.map(row => {
-      const newData = row.data.map((cell, colIndex) => {
-        if (colIndex === selectedCell!.colIndex) {
-          return { ...cell, merged: 1 };
-        }
-        return cell;
-      });
-      return { ...row, data: newData };
-    });
+  const cancelNewRow = () => {
+    setIsAddingNewItem(false);
+    setNewItem({ checklist_item: '', description: '' });
+  };
 
-    setRows(updatedRows);
+  const handleSaveNewItem = () => {
+    handleAddItem();
+  };
+
+  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      const newSelecteds = checklistItems.map((n) => n.id);
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  };
+
+  const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected: any = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex >= 0) {
+      newSelected = newSelected.filter((selectedId: any) => selectedId !== id);
+    }
+
+    setSelected(newSelected);
   };
 
   return (
-    <>
-      <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
-        <Button variant="contained" onClick={handleMerge} disabled={!selectedCell}>Merge</Button>
-        <Button variant="contained" onClick={handleSplit} disabled={!selectedCell}>Split</Button>
-        <Button variant="contained" onClick={handleAddRow}>Add Row</Button>
-        <Button variant="contained" onClick={handleDeleteRow} disabled={!selectedCell}>Delete Row</Button>
-      </Box>
+    <Box sx={{ width: '100%' }}>
+      <Breadcrumb title="점검 항목 관리" items={[{ to: '/', title: '메인' }, { title: '점검 항목 관리' }]} />
+      <Toolbar sx={{ pl: { sm: 2 }, pr: { xs: 1, sm: 1 }, bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity), ...(selected.length > 0 && { bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity), }), }}>
+        {selected.length > 0 ? (
+          <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
+            {selected.length} 건 선택됨
+          </Typography>
+        ) : (
+          <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle2" component="div">
+            총 {checklistItems.length} 건
+          </Typography>
+        )} 
+        <Button variant="outlined" color="error" disabled={ selected.length==0 } onClick={openDeleteDialog}>삭제</Button>
+        <Button variant="contained"  onClick={handleAddItemToggle}  sx={{ ml: 1 }}>추가</Button>
+      </Toolbar>
       <TableContainer component={Paper}>
         <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell padding="checkbox"><Checkbox indeterminate={selected.length > 0 && selected.length < checklistItems.length} checked={checklistItems.length > 0 && selected.length === checklistItems.length} onChange={handleSelectAllClick} /></TableCell>
+              <TableCell>번호</TableCell>
+              <TableCell>항목</TableCell>
+              <TableCell>설명</TableCell>
+            </TableRow>
+          </TableHead>
           <TableBody>
-            {rows.map((row, rowIndex) => (
-              <TableRow key={row.id}>
-                {row.data.map((cell, colIndex) => {
-                  const isEditing = editingCell && editingCell.rowIndex === rowIndex && editingCell.colIndex === colIndex;
-                  return cell.merged !== 0 ? (
-                    <TableCell
-                      key={colIndex}
-                      style={{ textAlign: 'center', cursor: 'pointer', backgroundColor: !isEditing && selectedCell && selectedCell.rowIndex === rowIndex && selectedCell.colIndex === colIndex ? '#bde0fe' : '' }}
-                      onClick={() => setSelectedCell({ rowIndex, colIndex })}
-                      onDoubleClick={() => setEditingCell({ rowIndex, colIndex })}
-                      rowSpan={cell.merged > 0 ? cell.merged : 1}
-                      sx={{ p: 0 }}
-                    >
-                      {isEditing ? (
-                        <TextField
-                          autoFocus
-                          defaultValue={cell.content}
-                          onBlur={(e) => handleCellUpdate(rowIndex, colIndex, e.target.value)}
-                          onKeyDown={(e: any) => { if (e.key === 'Enter') e.target.blur(); }}
-                          fullWidth
-                          sx={{ m: 1 }}
-                        />
-                      ) : (
-                        <InputLabel sx={{ m: 1 }}>
-                          {cell.content}
-                        </InputLabel>
-                      )}
-                    </TableCell>
-                  ) : null;
-                })}
+            {isAddingNewItem && (
+              <TableRow>
+                <TableCell></TableCell>
+                <TableCell>새 항목</TableCell>
+                <TableCell>
+                  <TextField fullWidth variant="outlined" value={newItem.checklist_item} onChange={(e) => setNewItem({ ...newItem, checklist_item: e.target.value })} />
+                </TableCell>
+                <TableCell>
+                  <TextField fullWidth variant="outlined" value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} />
+                </TableCell>
+                <TableCell align="right">
+                  <IconButton onClick={handleSaveNewItem}><IconCheck /></IconButton>
+                  <IconButton onClick={cancelNewRow}><IconX /></IconButton>
+                </TableCell>
+              </TableRow>
+            )}
+            {checklistItems.map((row, index) => (
+              <TableRow key={row.id} hover onClick={(event) => handleClick(event, row.id)} role="checkbox" aria-checked={selected.indexOf(row.id) !== -1} tabIndex={-1} selected={selected.indexOf(row.id) !== -1}>
+                <TableCell padding="checkbox"><Checkbox checked={selected.indexOf(row.id) !== -1} /></TableCell>
+                <TableCell component="th" scope="row">{index + 1}</TableCell>
+                <TableCell>{row.checklist_item}</TableCell>
+                <TableCell>{row.description}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-    </>
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>삭제 확인</DialogTitle>
+        <DialogContent>선택한 항목을 삭제하시겠습니까?</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>취소</Button>
+          <Button onClick={handleDeleteSelectedItems} color="error">삭제</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
-};
- 
-
-
-
+}
