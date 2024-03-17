@@ -32,6 +32,7 @@ export default function AccountDetailTable() {
     admin_name: "",
     admin_phone: "",
     approval: 0,
+    id: ""
   }); // State to hold user info
   const router = useRouter(); // useRouter hook to handle navigation
   useEffect(() => {
@@ -102,7 +103,7 @@ export default function AccountDetailTable() {
               </TableCell>
               {/* Display user ID */}
               <TableCell sx={{ border: '1px solid black' }}>
-                <Typography>{selectedUserInfo.user_id}</Typography>
+                <Typography>{selectedUserInfo.id}</Typography>
               </TableCell>
             </TableRow>
             {/* Password row - only editable in edit mode */}

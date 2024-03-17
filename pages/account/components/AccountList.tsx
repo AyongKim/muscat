@@ -30,6 +30,8 @@ import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import BlankCard from '@src/components/shared/BlankCard';
 import Link from 'next/link';
 import DeleteUser from './DeleteUser';
+import axios from 'axios';
+import { API_URL } from '@pages/constant';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -170,6 +172,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 
 const AccountList = () => {  
+  const isMaster = true;
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
   const [selected, setSelected] = React.useState<string[]>([]);
@@ -177,24 +180,25 @@ const AccountList = () => {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  const dispatch = useDispatch();
  
+  const fetchUsers = async() => {
+    const response = await axios.post(`${API_URL}/user/List`);
+    setAccounts(response.data)
+    setRows(response.data)
+  }
+
   React.useEffect(() => {
-    dispatch(fetchUsers());
-  }, [dispatch]);
- 
-  const accounts: UserType[] = useSelector((state) => state.user.users);
+    fetchUsers();
+  }, []);
+
+  const [accounts, setAccounts] = React.useState([]);
 
   const [rows, setRows] = React.useState<any>(accounts);
   const [search, setSearch] = React.useState('');
 
-  React.useEffect(() => {
-    setRows(accounts);
-  }, [accounts]);
-
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredAccounts: UserType[] = accounts.filter((row) => {
-      return row.user_id!.toString().toLowerCase().includes(event.target.value);
+    const filteredAccounts: UserType[] = accounts.filter((row:any) => {
+      return row.user_email!.toString().toLowerCase().includes(event.target.value);
     });
     setSearch(event.target.value);
     setRows(filteredAccounts);
@@ -259,6 +263,8 @@ const AccountList = () => {
 
   const theme = useTheme();
   const borderColor = theme.palette.divider;
+
+  const typeName= ['어드민', '수탁사', '위탁사']
 
   return (
     <Box>
@@ -334,7 +340,7 @@ const AccountList = () => {
                       return (
                         <TableRow
                           hover
-                          onClick={(event) => handleClick(event, row.user_id)}
+                          
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}
@@ -344,6 +350,7 @@ const AccountList = () => {
                           <TableCell padding="checkbox">
                             <CustomCheckbox
                               color="primary"
+                              onClick={(event) => handleClick(event, row.user_id)}
                               checked={isItemSelected}
                               inputProps={{
                                 'aria-labelledby': labelId,
@@ -372,7 +379,7 @@ const AccountList = () => {
                                 }}
                               >
                                 <Typography variant="h6" fontWeight="600">
-                                  {row.user_type==0?'관리자':'수탁사'}
+                                  {typeName[row.user_type]}
                                 </Typography> 
                               </Box>
                             </Box>

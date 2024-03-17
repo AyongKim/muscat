@@ -1,7 +1,7 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer'; 
 import BlankCard from '@src/components/shared/BlankCard';
-import CompanyList from '@src/components/apps/company/CompanyList';
+import CompanyList from './components/CompanyList';
 import AccountList from './components/AccountList';
 
 const BCrumb = [

@@ -26,14 +26,17 @@ import {
   MenuItem,
   CardContent,
 } from '@mui/material';
+import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { visuallyHidden } from '@mui/utils';
 import { useSelector, useDispatch, AppDispatch } from '@src/store/Store';
-import { deleteNotices, fetchNotices   } from '@src/store/apps/NoticeSlice';
+import { deleteNotices } from '@src/store/apps/NoticeSlice';
 import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
 import { IconDotsVertical, IconFilter, IconSearch, IconTrash } from '@tabler/icons-react';
 import { NoticeType } from '@src/types/apps/notice';
 import BlankCard from '@src/components/shared/BlankCard';
 import Link from 'next/link';
+import axios from 'axios';
+import { API_URL } from '@pages/constant';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -208,28 +211,27 @@ const NoticeList = () => {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [searchType, setSearchType] = React.useState(1);
+  const [keyword, setKeyword] = React.useState('');
  
+  const fetchNotices = async() => {
+    const response = await axios.post(`${API_URL}/notice/List`, {
+      search_type: searchType,
+      keyword: keyword
+    });
+    setNotice(response.data)
+  }
 
   //Fetch Products
   React.useEffect(() => {
-    dispatch(fetchNotices());
-  }, [dispatch]);
+    fetchNotices()
+  }, []);
 
-  const getNotices: NoticeType[] = useSelector((state) => state.noticeReducer.notices);
-
-  const [notice, setNotice] = React.useState<any>(getNotices);
+  const [notice, setNotice] = React.useState([]);
   const [search, setSearch] = React.useState('');
 
-  React.useEffect(() => {
-    setNotice(getNotices);
-  }, [getNotices]);
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows: NoticeType[] = getNotices.filter((row) => {
-      return row.title.toLowerCase().includes(event.target.value);
-    });
-    setSearch(event.target.value);
-    setNotice(filteredRows);
+  const handleSearch = () => {
+    fetchNotices()
   };
 
   // This is for the sorting
@@ -294,20 +296,39 @@ const NoticeList = () => {
 
   return (
     <Box>
-      {/* <CardContent> 
-         <CustomSelect
+      <CustomSelect
           labelId="month-dd"
           id="month-dd"
           size="small" 
-          value={1}
-          sx={{width:200, mr:1}}
+          value={searchType}
+          onChange = {(e) => setSearchType(e.target.value)} 
+          sx={{width:200, mr:1,mb:2}}
         >
           <MenuItem value={1}>제목</MenuItem>
           <MenuItem value={2}>제목+내용</MenuItem>
           <MenuItem value={3}>작성자</MenuItem>
         </CustomSelect>
-        
-      </CardContent> */}
+        <TextField
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IconSearch size="1.1rem" />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="검색"
+            size="small"
+            value={keyword}
+            onChange = {(e) => setKeyword(e.target.value)} 
+          />
+          <Button
+              onClick={handleSearch}
+              variant="contained"
+              color="primary" 
+              sx={{width:60, ml:1}}
+            >
+              검색
+        </Button> 
      
         <BlankCard>
         <Toolbar
@@ -333,21 +354,6 @@ const NoticeList = () => {
           </Typography>
         )}  
         
-        <TextField
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <IconSearch size="1.1rem" />
-                </InputAdornment>
-              ),
-              style: { backgroundColor: 'white' } 
-            }}
-            placeholder="제목 검색"
-            size="small"
-            sx={{mr:1, width:200}}
-            onChange={handleSearch}
-            value={search}
-          />
         <Button variant="contained" color="error"  sx={{width:100, mr:1}} onClick={handleClickOpen} disabled={selected.length === 0}>
           삭제
         </Button>
@@ -400,7 +406,6 @@ const NoticeList = () => {
                       return (
                         <TableRow
                           hover
-                          onClick={(event) => handleClick(event, row.id)}
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}
@@ -409,6 +414,7 @@ const NoticeList = () => {
                         >
                           <TableCell padding="checkbox">
                             <CustomCheckbox
+                              onClick={(event) => handleClick(event, row.id)}
                               color="primary"
                               checked={isItemSelected}
                               inputProps={{

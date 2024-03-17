@@ -18,12 +18,12 @@ import {
   Button, 
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
-import { useSelector, useDispatch } from '../../../store/Store';
-import { fetchCompanies   } from '../../../store/apps/CompanySlice';
-import CustomCheckbox from '../../forms/theme-elements/CustomCheckbox'; 
+import { useSelector, useDispatch } from '@src/store/Store';
+import { fetchCompanies   } from '@src/store/apps/CompanySlice';
+import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox'; 
 import {   IconSearch,   } from '@tabler/icons-react';
-import { CompanyType } from '../../../types/apps/company'; 
-import BlankCard from '../../shared/BlankCard';
+import { CompanyType } from '@src/types/apps/company'; 
+import BlankCard from '@src/components/shared/BlankCard';
 import AddCompany from './AddCompany';
 import DeleteCompanies from './DeleteCompanies';
 

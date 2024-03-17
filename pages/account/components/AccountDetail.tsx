@@ -14,12 +14,12 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
         <TableBody>
           
           <TableRow sx={{ padding: 1, border: '1px solid black' }}>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', width:'30%',border: '1px solid black' }}>
-              <InputLabel htmlFor="id" sx={{ fontWeight: 'bold' }}>아이디</InputLabel>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', width:300,border: '1px solid black' }}>
+              <InputLabel htmlFor="id" sx={{ fontWeight: 'bold', width: '100%' }}>아이디</InputLabel>
             </TableCell>
             <TableCell  sx={{ border: '1px solid black' }}>
-              <InputLabel htmlFor="id" sx={{ flex: 1 }}>
-                {selectedUserInfo.user_id}
+              <InputLabel htmlFor="id">
+                {selectedUserInfo.id}
               </InputLabel>
             </TableCell>
           </TableRow>
@@ -57,7 +57,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
             </TableCell>
             <TableCell sx={{ padding: 1, border: '1px solid black' }}>
               <InputLabel htmlFor="name" sx={{ flex: 1 }}>
-                {selectedUserInfo.admin_name}
+                {selectedUserInfo.company_name}
               </InputLabel>
             </TableCell>
           </TableRow>

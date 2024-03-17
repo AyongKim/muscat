@@ -12,8 +12,8 @@ import {
 
 // 예제로 사용할 addCompany 액션입니다.
 // 실제로 이 액션을 사용하기 위해서는 해당 액션을 정의하고 Redux 스토어에 추가해야 합니다.
-import { registerCompany,fetchCompanies } from '../../../store/apps/CompanySlice';
-import { AppDispatch } from '../../../store/Store';
+import { registerCompany,fetchCompanies } from '@src/store/apps/CompanySlice';
+import { AppDispatch } from '@src/store/Store';
 
 const AddCompany = () => { 
   const dispatch: AppDispatch = useDispatch(); // 여기에서 타입을 명시합니다.

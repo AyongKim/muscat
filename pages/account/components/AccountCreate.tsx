@@ -33,20 +33,17 @@ import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import axios from 'axios'; 
-import { registerUser } from '../../../src/store/apps/UserSlice'; 
-import { AppDispatch, useDispatch } from '../../../src/store/Store';
-import { UserType } from '../../../src/types/apps/account';
 import { IconCheck } from '@tabler/icons-react';
 import { Row } from 'antd';
 import { Router, useRouter } from 'next/router';
-// API 엔드포인트 URL
-const API_ENDPOINT = 'http://localhost:5001';
+import axios from 'axios';
+import { API_URL } from '@pages/constant';
+
 // Assuming these are the functions that would actually perform API calls.
 // You would need to replace them with real API calls in your application.
 const checkDuplicateId = async (id: string): Promise<boolean> => {
   try {
-    const response = await axios.post(`${API_ENDPOINT}/user/CheckId`,{
+    const response = await axios.post(`${API_URL}/user/CheckId`,{
       "id": id
     });
     return response.data.isDuplicate;
@@ -59,7 +56,7 @@ const checkDuplicateId = async (id: string): Promise<boolean> => {
 // 사업자 등록번호 확인 API 호출
 const checkBusinessNumber = async (number: string): Promise<string> => {
   try {
-    const response = await axios.post(`${API_ENDPOINT}/company/Check`,{
+    const response = await axios.post(`${API_URL}/company/Check`,{
       "register_num": number
     });
     return response.data.data;
@@ -70,9 +67,10 @@ const checkBusinessNumber = async (number: string): Promise<string> => {
 };
 
 const AccountTab: React.FC = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const isMaster = true;
+  
   // Form state
-  const [accountType, setAccountType] = useState<string>('수탁사');
+  const [accountType, setAccountType] = useState<number>(isMaster ? 0 : 1);
   const [id, setId] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -94,10 +92,12 @@ const AccountTab: React.FC = () => {
   const [idChecked, setIdChecked] = useState<boolean>(false);
   const [compChecked, setCompChecked] = useState<boolean>(false);
 
+  
+
   const router = useRouter();
   // Handlers
   const handleAccountTypeChange = (event:any) => {
-    setAccountType(event.target.value as string);
+    setAccountType(event.target.value);
   };
 
   // ...other handlers here...
@@ -129,44 +129,41 @@ const AccountTab: React.FC = () => {
     }
     
   };
-
-  const handleSubmit = async  ( ) => { 
+    
+  const registerUser = () => {
     if( !idChecked){
       setDialogTitle('아이디');
       setDialogContent('아이디를 입력해주세요.');
       setDialog1Open(true);
       return;
     }
-    if(!compChecked  ){
+    if(accountType != 0 && !compChecked  ){
       setDialogTitle('사업자 등록번호');
       setDialogContent('사업자 등록번호를 입력해주세요.');
       setDialog1Open(true);
       return;
     }
-    
-   
- 
-    // 사용자 등록 액션 디스패치
-    await dispatch(registerUser({ 
-      user_type: accountType === '수탁사' ? 1 : 2, // 계정 유형에 따라 값 설정
+
+    axios.post(`${API_URL}/user/Signup`, {
+      user_type: accountType, // 계정 유형에 따라 값 설정
       user_email: email, 
       user_password: password,
       register_num: businessNumber,
       company_address: address,
-      manager_name: name,
-      manager_phone: phone,
+      manager_name: accountType > 0 ? name : '',
+      manager_phone: accountType > 0 ? phone : '',
       manager_depart: department,
       manager_grade: position,
       other: '', // 필요에 따라 설정
-      admin_name: id, // 필요에 따라 설정
-      admin_phone: '', // 필요에 따라 설정
-      approval:0,
-    }))
-    .unwrap() // createAsyncThunk에서 반환된 promise 처리
+      admin_name: accountType == 0 ? name : '', // 필요에 따라 설정
+      admin_phone: accountType == 0 ? phone : '', // 필요에 따라 설정
+      approval:2,
+      id: id,
+    })
     .then(() => {
         // 다이얼로그 메시지 설정
       setDialogTitle('계정 생성');
-      setDialogContent('수탁사 계정이 생성되었습니다.');
+      setDialogContent('계정이 생성되었습니다.');
       setDialog1Open(true);
     })
     .catch((error:any) => {
@@ -176,10 +173,8 @@ const AccountTab: React.FC = () => {
       setDialogContent('사용자 등록에 실패했습니다. 다시 시도해주세요.');
       setDialog1Open(true);
     }); 
-
+  }
  
-  };
-
   // Dialog close handler
   const handleDialog2Close = () => {
     setIdChecked(true); 
@@ -192,8 +187,8 @@ const AccountTab: React.FC = () => {
   };
   const handleDialog1Close = () => { 
     setDialog1Open(false);
-    if (dialogContent.includes('수탁사 계정이 생성되었습니다.')) {
-      router.back();
+    if (dialogContent.includes('계정이 생성되었습니다.')) {
+      router.push('/account/account-manager');
     }
   };
 
@@ -216,8 +211,12 @@ const AccountTab: React.FC = () => {
                   label="계정 유형"
                   onChange={handleAccountTypeChange}
                 >
-                  <MenuItem value="수탁사">수탁사</MenuItem>
-                  <MenuItem value="위탁사">위탁사</MenuItem>
+                  {isMaster &&
+                  <MenuItem value={0}>어드민</MenuItem>
+                  }
+                  
+                  <MenuItem value={1}>수탁사</MenuItem>
+                  <MenuItem value={2}>위탁사</MenuItem>
                 </Select>
               </FormControl>
             </TableCell>
@@ -225,226 +224,351 @@ const AccountTab: React.FC = () => {
         </TableHead>
         <Divider />
 
-        <TableBody  >
-          <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
-          <Divider />
-          {/* ID */}
-          
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="id">
-                <AccountCircleIcon sx={{ marginRight: 1 }} />
-                아이디*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-            {idChecked ? ( // Render input field if editing mode is true
-                <Typography  sx={{ml:2}} >{id}</Typography>
-              ) : (
-                <TextField  
+        {accountType == 0 ? (
+          <TableBody  >
+            <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
+            <Divider />
+            {/* ID */}
+            
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="id">
+                  <AccountCircleIcon sx={{ marginRight: 1 }} />
+                  아이디*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+              {idChecked ? ( // Render input field if editing mode is true
+                  <Typography  sx={{ml:2}} >{id}</Typography>
+                ) : (
+                  <TextField  
+                    fullWidth
+                    variant="outlined" 
+                    value={id}
+                  
+                    onChange={(e) => setId(e.target.value)}
+                    required
+                  /> 
+                )}
+                
+              
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}> 
+              {idChecked ? (
+                <Fab
+                    color="success" 
+                    size="small" 
+                  >
+                    <IconCheck width={16} /> 
+                  </Fab>
+              ):(
+                <Button onClick={handleIdCheck}>중복확인</Button>
+              )}
+                
+              </TableCell>
+            
+            </TableRow> 
+            {/* Password */}
+            
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="password">
+                  <LockIcon sx={{ marginRight: 1 }} />
+                  비밀번호*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }} >
+                <TextField
                   fullWidth
-                  variant="outlined" 
-                  value={id}
-                 
-                  onChange={(e) => setId(e.target.value)}
+                  type="password"
+                  variant="outlined"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow> 
+            <Divider/>
+            {/* Email */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="email">
+                  <EmailIcon sx={{ marginRight: 1 }} />
+                  이메일*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+            
+            {/* Name */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="name">
+                  <PersonIcon sx={{ marginRight: 1 }} />
+                  이름*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+            {/* Phone */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="phone">
+                  <PhoneIcon sx={{ marginRight: 1 }} />
+                  연락처*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow>  
+          </TableBody>
+        ): (
+          <TableBody  >
+            <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
+            <Divider />
+            {/* ID */}
+            
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="id">
+                  <AccountCircleIcon sx={{ marginRight: 1 }} />
+                  아이디*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+              {idChecked ? ( // Render input field if editing mode is true
+                  <Typography  sx={{ml:2}} >{id}</Typography>
+                ) : (
+                  <TextField  
+                    fullWidth
+                    variant="outlined" 
+                    value={id}
+                  
+                    onChange={(e) => setId(e.target.value)}
+                    required
+                  /> 
+                )}
+                
+              
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}> 
+              {idChecked ? (
+                <Fab
+                    color="success" 
+                    size="small" 
+                  >
+                    <IconCheck width={16} /> 
+                  </Fab>
+              ):(
+                <Button onClick={handleIdCheck}>중복확인</Button>
+              )}
+                
+              </TableCell>
+            
+            </TableRow>
+          
+            {/* Password */}
+            
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="password">
+                  <LockIcon sx={{ marginRight: 1 }} />
+                  비밀번호*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }} >
+                <TextField
+                  fullWidth
+                  type="password"
+                  variant="outlined"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow> 
+            <Divider/>
+            {/* Email */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="email">
+                  <EmailIcon sx={{ marginRight: 1 }} />
+                  이메일*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+            
+            <Typography variant="h4" padding={1} marginTop={3}>회사정보</Typography>
+            {/* Business Registration Number */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="businessNumber">
+                  <BusinessIcon sx={{ marginRight: 1 }} />
+                  사업자 등록번호*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+              {compChecked ? (
+                <Typography  sx={{ml:2}} >{businessNumber}</Typography>
+              ):(
+                <TextField 
+                  fullWidth
+                  variant="outlined"
+                  value={businessNumber}
+                  onChange={(e) => setBusinessNumber(e.target.value)}
                   required
                 /> 
               )}
+                
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}> 
+              {compChecked ? (
+                <Row  align={'middle'}>
+                <Fab
+                    color="success" 
+                    size="small" 
+                  >
+                    <IconCheck width={16} /> 
+                  </Fab>
+                  <Typography sx={{mr:2}}>업체 명: {companyName}</Typography>
+                </Row>
               
-             
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}> 
-            {idChecked ? (
-              <Fab
-                  color="success" 
-                  size="small" 
-                >
-                  <IconCheck width={16} /> 
-                </Fab>
-            ):(
-              <Button onClick={handleIdCheck}>중복확인</Button>
-            )}
-              
-            </TableCell>
-           
-          </TableRow>
-         
-          {/* Password */}
-           
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="password">
-                <LockIcon sx={{ marginRight: 1 }} />
-                비밀번호*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }} >
-              <TextField
-                fullWidth
-                type="password"
-                variant="outlined"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </TableCell>
-          </TableRow> 
-          <Divider/>
-          {/* Email */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="email">
-                <EmailIcon sx={{ marginRight: 1 }} />
-                이메일*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </TableCell>
-          </TableRow>
-          
-          <Typography variant="h4" padding={1} marginTop={3}>회사정보</Typography>
-          {/* Business Registration Number */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="businessNumber">
-                <BusinessIcon sx={{ marginRight: 1 }} />
-                사업자 등록번호*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-            {compChecked ? (
-              <Typography  sx={{ml:2}} >{businessNumber}</Typography>
-            ):(
-              <TextField 
-                fullWidth
-                variant="outlined"
-                value={businessNumber}
-                onChange={(e) => setBusinessNumber(e.target.value)}
-                required
-              /> 
-            )}
-              
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}> 
-            {compChecked ? (
-              <Row  align={'middle'}>
-               <Fab
-                  color="success" 
-                  size="small" 
-                >
-                  <IconCheck width={16} /> 
-                </Fab>
-                <Typography sx={{mr:2}}>업체 명: {companyName}</Typography>
-              </Row>
-             
-            ):(
-              <Button onClick={handleBusinessNumberCheck}>조회</Button>
-            )}
-              
-            </TableCell>
-          </TableRow>
-          {/* Address */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="address">
-                <LocationOnIcon sx={{ marginRight: 1 }} />
-                주소*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                required
-              />
-            </TableCell>
-          </TableRow>
-          <Typography variant="h4" padding={1} marginTop={3}>담당자 정보</Typography>
-          {/* Name */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="name">
-                <PersonIcon sx={{ marginRight: 1 }} />
-                이름*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </TableCell>
-          </TableRow>
-          {/* Phone */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="phone">
-                <PhoneIcon sx={{ marginRight: 1 }} />
-                연락처*
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </TableCell>
-          </TableRow>
-          {/* Department */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="department">
-                <BusinessCenterIcon sx={{ marginRight: 1 }} />
-                부서명
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              />
-            </TableCell>
-          </TableRow>
-          {/* Position */}
-          <TableRow>
-            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
-              <InputLabel htmlFor="position">
-                <AssignmentIndIcon sx={{ marginRight: 1 }} />
-                직급
-              </InputLabel>
-            </TableCell>
-            <TableCell sx={{ padding: 1 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-              />
-            </TableCell>
-          </TableRow>
-        </TableBody>
+              ):(
+                <Button onClick={handleBusinessNumberCheck}>조회</Button>
+              )}
+                
+              </TableCell>
+            </TableRow>
+            {/* Address */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="address">
+                  <LocationOnIcon sx={{ marginRight: 1 }} />
+                  주소*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+            <Typography variant="h4" padding={1} marginTop={3}>담당자 정보</Typography>
+            {/* Name */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="name">
+                  <PersonIcon sx={{ marginRight: 1 }} />
+                  이름*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+            {/* Phone */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="phone">
+                  <PhoneIcon sx={{ marginRight: 1 }} />
+                  연락처*
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </TableCell>
+            </TableRow>
+            {/* Department */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="department">
+                  <BusinessCenterIcon sx={{ marginRight: 1 }} />
+                  부서명
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                />
+              </TableCell>
+            </TableRow>
+            {/* Position */}
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="position">
+                  <AssignmentIndIcon sx={{ marginRight: 1 }} />
+                  직급
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                />
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        )
+
+        }
+        
       </Table>
     </TableContainer>
 
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-        <Button color="primary" variant='contained' onClick={handleSubmit}>
+        <Button color="primary" variant='contained' onClick={registerUser}>
           생성
         </Button>
       </Box>

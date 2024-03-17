@@ -4,6 +4,7 @@ export interface UserType {
   user_email: string; 
   user_password: string;
   register_num: string;
+  company_name: string;
   company_address: string;
   manager_name: string;
   manager_phone: string;
@@ -13,5 +14,6 @@ export interface UserType {
   admin_name: string;
   admin_phone: string;
   approval: number;
+  id: string;
 }
  

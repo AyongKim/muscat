@@ -141,12 +141,6 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: '등록업체 및 계정관리-마스터',
-    icon: IconNotes,
-    href: '/master/account-manager',
-  },
-  {
-    id: uniqueId(),
     title: '프로젝트관리',
     icon: IconUserCircle,
     href: '/project',

@@ -26,12 +26,11 @@ import BlankCard from '@src/components/shared/BlankCard';
 import { Stack } from '@mui/system'; 
 import AccountDetail from './components/AccountDetail';
 import { useDispatch, useSelector } from '@src/store/Store';
-import { fetchUsers, updateUser } from '@src/store/apps/UserSlice';
 import { UserType } from '@src/types/apps/account';
 import DeleteUser from './components/DeleteUser';
 import DashboardCard from '@src/components/shared/DashboardCard';
-import { Row } from 'antd';
-import { userInfo } from 'os';
+import axios from "axios";
+import {API_URL} from '@pages/constant';
 
 const BCrumb = [
   {
@@ -174,12 +173,21 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   
 
 export default function EnhanceTable() {
-  const dispatch = useDispatch(); 
+  const fetchUsers = async() => {
+    const response = await axios.post(`${API_URL}/user/ApprovalList`);
+    setAccounts(response.data)
+  }
+
+  const updateUser = async(userData:any) => {
+    const response = await axios.post(`${API_URL}/user/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
+    fetchUsers()
+  }
+
   React.useEffect(() => {
-    dispatch(fetchUsers());
-  }, [dispatch]);
+    fetchUsers();
+  }, []);
  
-  const accounts: UserType[] = useSelector((state) => state.user.users);
+  const [accounts, setAccounts] = React.useState([]);
 
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
@@ -196,7 +204,7 @@ export default function EnhanceTable() {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = accounts.map((n) => n.user_id!.toString());
+      const newSelecteds = accounts.map((n:any) => n.user_id!.toString());
       setSelected(newSelecteds); 
       return;
     }
@@ -219,6 +227,8 @@ export default function EnhanceTable() {
     admin_name: "",
     admin_phone: "",
     approval: 0,
+    company_name: "",
+    id: "",
   });
 
   const handleClick = (event: React.MouseEvent<unknown>, id: string | number) => {
@@ -239,6 +249,7 @@ export default function EnhanceTable() {
     }
 
     setSelected(newSelected);
+    console.log(newSelected)
   };
 
   const handleShow = (event: React.MouseEvent<unknown>, user: UserType) => { 
@@ -278,16 +289,10 @@ export default function EnhanceTable() {
               }),
             }}
           > 
-            {selected.length > 0 ? (
-              <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
-                {selected.length} 건 선택됨
-              </Typography>
-            ) : (
-              <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
-                총  {accounts.length} 건
-              </Typography>
-            )} 
-            <DeleteUser selectedUserIds={selected.join(',')} onClose={()=>{setSelected([])}}/>
+            <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
+              총  {accounts.length} 건, 요청 {accounts.filter((x:any) => x.approval == 0).length }건, 거절 {accounts.filter((x:any) => x.approval == 1).length }건
+            </Typography>
+            <DeleteUser selectedUserIds={selected.join(',')} onClose={()=>{setSelected([]),fetchUsers()}}/>
           </Toolbar>
           <Box mb={2} sx={{ mb: 2 }}> 
           
@@ -308,9 +313,9 @@ export default function EnhanceTable() {
                 
                 <TableBody>
                   {stableSort(accounts, getComparator(order, orderBy))
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row: any, index) => {
-                      const isItemSelected = isSelected(row.user_id);
+                      console.log(row)
+                      const isItemSelected = isSelected(row.user_id.toString());
                       const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
@@ -343,7 +348,7 @@ export default function EnhanceTable() {
                           <TableCell> 
                             <Box>
                               <Typography variant="h6" fontWeight="600">
-                                {row.admin_name}
+                                {row.id}
                               </Typography> 
                             </Box> 
                           </TableCell>
@@ -354,20 +359,10 @@ export default function EnhanceTable() {
                           </TableCell> 
                           <TableCell>
                             <Stack spacing={1} direction="row" alignItems="center">
-                              <Badge
-                                color={ 
-                                     row.approval === 0
-                                      ? 'warning' 
-                                        : row.approval === 2
-                                          ? 'error'
-                                          : 'secondary'
-                                }
-                                variant="dot"
-                              ></Badge>
                               <Typography color="textSecondary" variant="body1">
                                 {row.approval === 0
-                                      ? '준비중' 
-                                        : '미사용'}
+                                      ? '-' 
+                                        : 'N'}
                               </Typography>
                             </Stack>
                           </TableCell>
@@ -388,16 +383,6 @@ export default function EnhanceTable() {
               </Table>
             </TableContainer>
 
-           
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={accounts.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
           </Box>  
         </BlankCard> 
         {showRegistrationInfo && (
@@ -415,22 +400,12 @@ export default function EnhanceTable() {
               <AccountDetail selectedUserInfo={selectedUserInfo} />
               <Box display="flex"   alignItems="center" justifyContent={'flex-end'} sx={{ mt: 1 }}>
                 <Button variant="contained" color='error' onClick={()=>{
-                   dispatch(updateUser({...selectedUserInfo, approval:1}))
-                   .then(() => { 
-                   })
-                   .catch((error) => {
-                     // 에러 처리
-                   });
+                   updateUser({...selectedUserInfo, approval:1})
                 }} sx={{ mr: 1 }}>
                   승인 거부
                 </Button>
                 <Button variant="contained" onClick={()=>{
-                  dispatch(updateUser({...selectedUserInfo, approval:2}))
-                  .then(() => { 
-                  })
-                  .catch((error) => {
-                    // 에러 처리
-                  });
+                  updateUser({...selectedUserInfo, approval:2})
                 }} sx={{ mr: 1 }}>
                 승인
                 </Button>

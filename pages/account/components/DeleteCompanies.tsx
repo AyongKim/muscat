@@ -9,8 +9,8 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material'; 
-import { deleteCompanies } from '../../../store/apps/CompanySlice';
-import { AppDispatch } from '../../../store/Store';
+import { deleteCompanies } from '@src/store/apps/CompanySlice';
+import { AppDispatch } from '@src/store/Store';
 
 interface DeleteCompaniesProps {
   selectedCompanyIds: string;

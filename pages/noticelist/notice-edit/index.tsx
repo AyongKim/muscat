@@ -16,6 +16,11 @@ import {
   MenuItem,
   IconButton,
   Chip,
+  Dialog, 
+  DialogActions, 
+  DialogContent, 
+  DialogContentText,  
+  DialogTitle
 } from '@mui/material';
 import PageContainer from '@src/components/container/PageContainer';
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -44,7 +49,7 @@ const ReactQuill: any = dynamic(
 // Breadcrumb 경로
 const BCrumb = [
   {
-    to: '/noricelist',
+    to: '/noticelist',
     title: '공지사항',
   },
   {
@@ -69,30 +74,40 @@ export default function QuillEditor() {
   const [create_time, setCreateTime] = useState('');
   const [attachment, setAttachment] = useState('');
   const [views, setViews] = useState(0);
+  const [projectName, setProjectName] = useState('');
+
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleClosePopup = () => {
+    // Close both success and error popups
+    setShowSuccess(false)
+  };
+
+  const fetchDetail = async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id') || ''; 
+      const API_URL = `http://${apiUrl}notice`;
+      const response = await axios.post(`${API_URL}/Detail`, { id: id });
+      console.log(response);
+      // 파라미터에서 받아온 공지사항 정보 설정
+      setId(id);
+      setTitle(response.data.title);
+      setProjectName(response.data.project_name);
+      setCategory(response.data.project_id);
+      setContent(response.data.content);  
+
+      setCreatedBy(response.data.create_by);  
+      setCreateTime(response.data.create_time);  
+      setAttachment(response.data.attachment);  
+      setViews(response.data.views);   
+    } catch (error) {
+      console.error('Error fetching notice info:', error);
+      // Handle error if necessary
+    }
+  };
 
   useEffect(() => {
-    const fetchDetail = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = urlParams.get('id') || ''; 
-        const API_URL = `http://${apiUrl}notice`;
-        const response = await axios.post(`${API_URL}/Detail`, { id: id });
-        console.log(response);
-        // 파라미터에서 받아온 공지사항 정보 설정
-        setId(id);
-        setTitle(response.data.title);
-        setCategory(response.data.project_name);
-        setContent(response.data.content);  
-
-        setCreatedBy(response.data.create_by);  
-        setCreateTime(response.data.create_time);  
-        setAttachment(response.data.attachment);  
-        setViews(response.data.views);   
-      } catch (error) {
-        console.error('Error fetching notice info:', error);
-        // Handle error if necessary
-      }
-    };
     dispatch(fetchProjects());
     fetchDetail();
   }, []); // 페이지 로드시 한번만 실행 
@@ -120,19 +135,22 @@ export default function QuillEditor() {
 
   // 저장 핸들러
   const handleSave = () => {
-    if (!selectedFile) {
-      console.error("No file selected.");
-      return;
-    }
-  
     const formData = new FormData();
     
     formData.append('notice_id', id);
-    formData.append('file', selectedFile.file);
+    if (selectedFile)  {
+      formData.append('file', selectedFile.file);
+      formData.append('change', '1');
+    }
+    else {
+      formData.append('file', '');
+      formData.append('change', '0');
+    }
+    
     formData.append('project_id', category);
     formData.append('title', title);
     formData.append('content', content);
-    formData.append('change', 'string');
+    
   
     fetch('http://localhost:5001/notice/Update', {
       method: 'POST',
@@ -145,9 +163,10 @@ export default function QuillEditor() {
         return response.json();
       })
       .then(() => { 
-        setContent('');
-        setTitle('');
-        setSelectedFile(null); 
+        setShowSuccess(true)
+        fetchDetail();
+        setIsEditing(false);
+        
       })
       .catch(error => {
         console.error("Failed to register the notice:", error);
@@ -174,7 +193,7 @@ export default function QuillEditor() {
         }
       >
         <>
-          <Card sx={{ p: 0, border: 1, borderColor: 'black' }} elevation={9} variant={'outlined'}>
+          <Card sx={{ p: 0, border: 1, borderColor: 'black' }} variant={'outlined'}>
             <TableContainer sx={{ borderColor: 'black' }}>
               <Table
                 aria-label="simple table"
@@ -214,14 +233,17 @@ export default function QuillEditor() {
                           sx={{width:200, mr:1}}
                           onChange={(e:any) => setCategory(e.target.value)}
                         >
+                          <MenuItem key={0} value={0}>
+                            전체
+                          </MenuItem>
                           {projects.map((project: any) => (
                             <MenuItem key={project.id} value={project.id}>
                               {project.name}
                             </MenuItem>
-                          ))}
+                          ))} 
                         </CustomSelect>
                       ) : (
-                        <Typography variant="h6">전체</Typography>
+                        <Typography variant="h6">{projectName}</Typography>
                       )}
                     </TableCell>
                     {!isEditing && <TableCell sx={{ backgroundColor: "primary.light", borderColor: 'black' }}>
@@ -247,7 +269,7 @@ export default function QuillEditor() {
                     <TableCell sx={{ backgroundColor: "primary.light", borderColor: 'black' }}>
                       <Typography color={'dark'} variant="h6">첨부파일</Typography>
                     </TableCell>
-                    <TableCell> 
+                    <TableCell colSpan={7}> 
                       {isEditing ? 
                       <Row align={'middle'}>
                       <InputLabel htmlFor="file-upload" style={{textAlign:'center', width:80, borderBottom: '1px solid black' }} component="label">
@@ -279,7 +301,7 @@ export default function QuillEditor() {
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell>
+                    <TableCell colSpan={8}>
                       <ReactQuill
                         readOnly={!isEditing}
                         value={content}
@@ -299,6 +321,14 @@ export default function QuillEditor() {
           </Box>
         </>
       </DashboardCard>
+      <Dialog open={showSuccess} onClose={handleClosePopup}> 
+        <DialogContent sx={{width:200}} >
+          <DialogContentText>정확히 보관되었습니다.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePopup}>OK</Button>
+        </DialogActions>
+      </Dialog> 
     </PageContainer>
   );
 };

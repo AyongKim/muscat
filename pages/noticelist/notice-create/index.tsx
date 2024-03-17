@@ -48,7 +48,7 @@ const ReactQuill: any = dynamic(
 
 const BCrumb = [
   {
-    to: '/noricelist',
+    to: '/noticelist',
     title: '공지사항',
   },
   {
@@ -112,13 +112,10 @@ export default function QuillEditor() {
   // };
 
   const handleSave = () => {
-    if (!selectedFile) {
-      console.error("No file selected.");
-      return;
-    }
-  
     const formData = new FormData();
-    formData.append('file', selectedFile.file);
+    if (selectedFile) 
+      formData.append('file', selectedFile.file);
+    else formData.append('file', '');
     formData.append('project_id', category);
     formData.append('title', title);
     formData.append('content', content);
@@ -160,7 +157,7 @@ export default function QuillEditor() {
         }
       >
         <>
-          <Card sx={{ p: 0, border: 1, borderColor: 'black' }} elevation={9} variant={'outlined'}>
+          <Card sx={{ p: 0, border: 1, borderColor: 'black' }} variant={'outlined'}>
             <TableContainer sx={{ borderColor: 'black' }}>
               <Table
                 aria-label="simple table"
