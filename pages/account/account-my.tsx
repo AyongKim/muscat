@@ -23,6 +23,7 @@ export default function AccountDetailTable() {
     user_email: "", 
     user_password: "",
     register_num: "",
+    company_name: "",
     company_address: "",
     manager_name: "",
     manager_phone: "",
@@ -89,12 +90,12 @@ export default function AccountDetailTable() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box width={600}>
-        <Table>
-          <TableBody>
-            <Typography variant="h4" padding={1} marginTop={3}>
+      <Typography variant="h4" padding={1} marginTop={3}>
               기본정보
             </Typography>
-            <Divider />
+        <Table>
+          <TableBody>
+            
             <TableRow sx={{ padding: 1, border: '1px solid black' }}>
               <TableCell sx={{ backgroundColor: '#f0f0f0', width: '30%', border: '1px solid black' }}>
                 <InputLabel htmlFor="id" sx={{ fontWeight: 'bold' }}>

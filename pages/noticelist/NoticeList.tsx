@@ -301,7 +301,7 @@ const NoticeList = () => {
           id="month-dd"
           size="small" 
           value={searchType}
-          onChange = {(e) => setSearchType(e.target.value)} 
+          onChange = {(e:any) => setSearchType(e.target.value)} 
           sx={{width:200, mr:1,mb:2}}
         >
           <MenuItem value={1}>제목</MenuItem>

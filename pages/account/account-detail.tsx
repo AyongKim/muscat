@@ -103,13 +103,13 @@ export default function AccountDetailTable() {
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box component="form" width={600} >
         {userInfo.user_id != null ? (<>
-          {userInfo.user_type == 0 ? (
+          {userInfo.user_type == 0 ? (<>
+            <Typography variant="h4" padding={1} marginTop={3}>
+            관리자계정수정
+          </Typography>
             <Table>
           <TableBody>
-            <Typography variant="h4" padding={1} marginTop={3}>
-              관리자계정수정
-            </Typography>
-            <Divider />
+            
             <TableRow sx={{ padding: 1, border: '1px solid black' }}>
               <TableCell sx={{ backgroundColor: '#f0f0f0', width: '30%', border: '1px solid black' }}>
                 <InputLabel htmlFor="id" sx={{ fontWeight: 'bold' }}>
@@ -143,7 +143,7 @@ export default function AccountDetailTable() {
                     </InputLabel>
                   </TableCell>
                   <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-                    <TextField sx={{ px:1}} fullWidth type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} />
+                    <TextField sx={{ px:1, input: {color: (newPassword == confirmPassword ? 'blue' : 'red')}}} fullWidth type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} />
                     {!passwordMatch && <Typography  sx={{ px:1}} variant="body2" color="error">비밀번호가 일치하지 않습니다.</Typography>}
                   </TableCell>
                 </TableRow>
@@ -232,7 +232,7 @@ export default function AccountDetailTable() {
                 )}
           </TableBody>
         </Table>
-          ) : (
+          </>) : (
             <Table>
           <TableBody>
             <Typography sx={{ml:1}} variant="h4" padding={1} marginTop={3}>

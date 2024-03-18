@@ -29,7 +29,7 @@ import { IconDotsVertical, IconFilter, IconSearch, IconTrash } from '@tabler/ico
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import BlankCard from '@src/components/shared/BlankCard';
 const axios = require('axios');
-
+import { API_URL } from '@pages/constant';
 
 const CustomTableCell = (props: any) => {
   return (
@@ -216,12 +216,35 @@ const ProductTableList = () => {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [year, setYear] = React.useState(0);
+  const [years, setYears] = React.useState([]);
+  const [consignorName, setConsignorName] = React.useState('');
 
   async function fetchData() {
     try {
-      const response = await axios.post('http://localhost:5001/project/List');
+      const response = await axios.post(`${API_URL}/project/List`, {
+        year: year,
+        project_name: projectName,
+        consignor_name: consignorName
+      });
       setRows(response.data)
-      console.log(response.data);
+
+      if (response.data.length > 0) {
+        setSearchName('0')
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  async function fetchYears() {
+    try {
+      const response = await axios.post(`${API_URL}/project/Years`);
+      setYears(response.data)
+
+      if (response.data.length > 0) {
+        setSearchYear(0)
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -229,6 +252,7 @@ const ProductTableList = () => {
 
   //Fetch Products
   React.useEffect(() => {
+    fetchYears()
     fetchData()
   }, []);
 
@@ -236,12 +260,8 @@ const ProductTableList = () => {
   const [rows, setRows] = React.useState<any>([]);
   const [search, setSearch] = React.useState('');
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows: [] = rows.filter((row : any) => {
-      return row.title.toLowerCase().includes(event.target.value);
-    });
-    setSearch(event.target.value);
-    setRows(filteredRows);
+  const handleSearch = (event: any) => {
+    fetchData()
   };
 
   // This is for the sorting
@@ -268,7 +288,8 @@ const ProductTableList = () => {
   const borderColor = theme.palette.divider;
 
   const [projectName, setProjectName] = React.useState('');
-  const [year, setYear] = React.useState(0);
+  const [searchYear, setSearchYear] = React.useState(0);
+  const [searchName, setSearchName] = React.useState('');
   const [userId, setUserId] = React.useState(0);
   const [checkListId, setCheckListId] = React.useState(0);
   const [privacyPolicy, setPrivacyPolicy] = React.useState(0);
@@ -306,19 +327,55 @@ const ProductTableList = () => {
   return (
     <Box>
         <Box
-          sx={{mb: 2}}
+          sx={{mb: 2, display: 'flex', alignItems: 'center'}}
         > 
+          <Typography align='center' sx={{mr: 1}}>
+            연도:
+          </Typography> 
          <CustomSelect
           labelId="month-dd"
           id="month-dd"
           size="small" 
-          value={1}
-          sx={{width:200, mr:1}}
+          value={searchYear}
+          sx={{width:100, mr:2}}
+          onChange = {(e:any) => {
+            setSearchYear(e.target.value);
+          }}
         >
-          <MenuItem value={1}>제목</MenuItem>
-          <MenuItem value={2}>제목+내용</MenuItem>
-          <MenuItem value={3}>작성자</MenuItem>
+          <MenuItem value={0} key = {1000000}>전체</MenuItem>
+          {years.map((x, index) => {
+            return (
+              <MenuItem value={x} key = {index}>{x}</MenuItem>
+            );
+          })
+
+          }
         </CustomSelect>
+        <Typography align='center' sx={{mr: 1}}>
+          프로젝트 명:
+        </Typography> 
+        <CustomSelect
+          labelId="month-dd"
+          id="month-dd"
+          size="small" 
+          value={searchName}
+          sx={{width:200, mr:2}}
+          onChange = {(e:any) => {
+            setProjectName(e.target.value);
+          }}
+        >
+          <MenuItem value={0} key = {1000000}>전체</MenuItem>
+          {rows.map((x:any, index: number) => {
+            return (
+              <MenuItem value={x.name} key = {index}>{x.name}</MenuItem>
+            );
+          })
+
+          }
+        </CustomSelect>
+        <Typography align='center' sx={{mr: 1}}>
+          위탁사 명:
+        </Typography> 
         <TextField
             InputProps={{
               startAdornment: (
@@ -329,9 +386,19 @@ const ProductTableList = () => {
             }}
             placeholder="검색"
             size="small"
-            onChange={handleSearch}
-            value={search}
-          />
+            onChange={(e) => {
+              setConsignorName(e.target.value)
+            }}
+            value={consignorName}
+        />
+        <Button
+          variant={"contained"}
+          color={"primary"}
+          sx={{width:60, ml:1}}
+          onClick = {handleSearch}
+        >
+              조회
+        </Button> 
       </Box>
         <BlankCard>
           <EnhancedTableToolbar
