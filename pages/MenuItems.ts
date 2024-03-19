@@ -159,6 +159,12 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
+    title: '개인정보 상세설정',
+    icon: IconNotes,
+    href: '/privacy-info',
+  },
+  {
+    id: uniqueId(),
     title: '일정관리',
     icon: IconNotes,
     href: '/calendar',
