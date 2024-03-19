@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { alpha, useTheme } from '@mui/material/styles';
-import { format } from 'date-fns';
 import {
   Box,
   Table,
@@ -23,13 +22,21 @@ import {
   Button,
   MenuItem,
   CardContent,
+  Dialog, DialogActions, DialogContent, DialogContentText,  DialogTitle
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { IconDotsVertical, IconFilter, IconSearch, IconTrash } from '@tabler/icons-react';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import BlankCard from '@src/components/shared/BlankCard';
+import ProjectDetail from './ProjectDetail';
 const axios = require('axios');
 import { API_URL } from '@pages/constant';
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from 'react-datepicker'
+import { registerLocale, setDefaultLocale } from  "react-datepicker";
+import CloseIcon from '@mui/icons-material/Close';
+import ko from 'date-fns/locale/ko';
+registerLocale('ko', ko)
 
 const CustomTableCell = (props: any) => {
   return (
@@ -170,7 +177,7 @@ function EnhancedTableHead(props: any) {
 
 
 const EnhancedTableToolbar = (props: any) => {
-  const { numSelected, setEditMode, search,rows } = props;
+  const { numSelected, setEditMode, rows } = props;
 
   return (
     <Toolbar
@@ -218,20 +225,27 @@ const ProductTableList = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [year, setYear] = React.useState(0);
   const [years, setYears] = React.useState([]);
+  const [projectNames, setProjectNames] = React.useState([]);
   const [consignorName, setConsignorName] = React.useState('');
+  const [checklist, setChecklist] = React.useState([]);
+  const [personalCategory, setPersonalCategory] = React.useState([]);
+  const [consignorList, setConsignorList] = React.useState([]);
+
+  let registerYears: number[] = [];
+  const today = new Date();
+  let y = [];
+  for (let i = 0; i < 3; i++)
+    registerYears.push(today.getFullYear() - i);
 
   async function fetchData() {
     try {
       const response = await axios.post(`${API_URL}/project/List`, {
-        year: year,
-        project_name: projectName,
+        year: searchYear,
+        project_name: searchName,
         consignor_name: consignorName
       });
+      console.log(response.data)
       setRows(response.data)
-
-      if (response.data.length > 0) {
-        setSearchName('0')
-      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -239,12 +253,39 @@ const ProductTableList = () => {
 
   async function fetchYears() {
     try {
-      const response = await axios.post(`${API_URL}/project/Years`);
-      setYears(response.data)
+      const response = await axios.post(`${API_URL}/project/SearchItem`);
+      setYears(response.data.years)
+      setProjectNames(response.data.names)
 
-      if (response.data.length > 0) {
-        setSearchYear(0)
-      }
+      setSearchYear(0)
+      setSearchName('!@#')
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  const fetchChecklist = async() => {
+    try {
+      const response = await axios.post(`${API_URL}/checklist/List`);
+      setChecklist(response.data)
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  const fetchConsignor = async() => {
+    try {
+      const response = await axios.post(`${API_URL}/project/Consignor`);
+      setConsignorList(response.data)
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  const fetchPersonalCategory = async() => {
+    try {
+      const response = await axios.post(`${API_URL}/personal_category/List`);
+      setPersonalCategory(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -254,11 +295,13 @@ const ProductTableList = () => {
   React.useEffect(() => {
     fetchYears()
     fetchData()
+    fetchChecklist()
+    fetchConsignor()
+    fetchPersonalCategory()
   }, []);
 
 
   const [rows, setRows] = React.useState<any>([]);
-  const [search, setSearch] = React.useState('');
 
   const handleSearch = (event: any) => {
     fetchData()
@@ -290,7 +333,7 @@ const ProductTableList = () => {
   const [projectName, setProjectName] = React.useState('');
   const [searchYear, setSearchYear] = React.useState(0);
   const [searchName, setSearchName] = React.useState('');
-  const [userId, setUserId] = React.useState(0);
+  const [userId, setUserId] = React.useState<any>(0);
   const [checkListId, setCheckListId] = React.useState(0);
   const [privacyPolicy, setPrivacyPolicy] = React.useState(0);
   const [editMode, setEditMode] = React.useState(false);
@@ -306,26 +349,103 @@ const ProductTableList = () => {
       }
 
       const response = await axios.post('http://localhost:5001/project/Register', data);
-      console.log(response)
       fetchData()
       setEditMode(false)
     }
     else {
-      
+      setModalMsg('프로젝트명을 입력하세요.')
+      setShowModal(true)
     }
     
   }
 
   React.useEffect(() => {
     setProjectName('');
-    setYear(0);
-    setUserId(0);
-    setCheckListId(0);
-    setPrivacyPolicy(0);
+    setYear(registerYears[0]);
+    if (consignorList.length > 0)
+      setUserId(consignorList[0].user_id);
+    else setUserId(0);
+
+    if (checklist.length > 0)
+      setCheckListId(checklist[0].id); 
+    else setCheckListId(0);
+
+    if (personalCategory.length > 0)
+      setPrivacyPolicy(personalCategory[0])
+    else setCheckListId(0);
+
+    if (personalCategory.length > 0)
+      setPrivacyPolicy(personalCategory[0].id);
+    else setPrivacyPolicy(0)
   }, [editMode])
+
+  const [showModal, setShowModal] = React.useState(false)
+  const [showScheduleModal, setShowScheduleModal] = React.useState(false)
+  const [modalMsg, setModalMsg] = React.useState('')
+
+  const [dd, setDD] = React.useState('')
+  const [createFrom, setCreateFrom] = React.useState('')
+  const [createTo, setCreateTo] = React.useState('')
+  const [selfCheckFrom, setSelfCheckFrom] = React.useState('')
+  const [selfCheckTo, setSelfCheckTo] = React.useState('')
+  const [impCheckFrom, setImpCheckFrom] = React.useState('')
+  const [impCheckTo, setImpCheckTo] = React.useState('')
+  const [editId, setEditId] = React.useState(0)
+
+  const showSchedule = async(id:any) => {
+    setEditId(id)
+    const response = await axios.post('http://localhost:5001/project/Schedule', {
+      id: id
+    });
+    
+
+    let data = response.data.data
+    setCreateFrom(data.create_from)
+    setCreateTo(data.create_to)
+    setSelfCheckFrom(data.self_check_from)
+    setSelfCheckTo(data.self_check_to)
+    setImpCheckFrom(data.imp_check_from)
+    setImpCheckTo(data.imp_check_to)
+
+    setShowScheduleModal(true)
+  }
+
+  const onClose = () => {
+    setShowModal(false)
+  }
+
+  const onScheduleClose = () => {
+    setShowScheduleModal(false)
+  }
+
+  const onSave = async() => {
+    const response = await axios.put('http://localhost:5001/project/Schedule', {
+      id: editId,
+      create_from: createFrom,
+      create_to: createTo,
+      self_check_from: selfCheckFrom,
+      self_check_to: selfCheckTo,
+      imp_check_from: impCheckFrom,
+      imp_check_to: impCheckTo
+    });
+
+    if (response.data.result == 'SUCCESS') {
+      setModalMsg('일정보관이 성공하였습니다.')
+      setShowModal(true)
+      setShowScheduleModal(false)
+    }
+    else {
+      setModalMsg('일정보관이 실패하였습니다.')
+      setShowModal(true)
+    }
+  }
+
+  const [mode, setMode] = React.useState('List');
+  const [currentProject, setCurrentProject] = React.useState({})
   
   return (
     <Box>
+      { mode == 'List' ? (<>
         <Box
           sx={{mb: 2, display: 'flex', alignItems: 'center'}}
         > 
@@ -361,13 +481,13 @@ const ProductTableList = () => {
           value={searchName}
           sx={{width:200, mr:2}}
           onChange = {(e:any) => {
-            setProjectName(e.target.value);
+            setSearchName(e.target.value);
           }}
         >
-          <MenuItem value={0} key = {1000000}>전체</MenuItem>
-          {rows.map((x:any, index: number) => {
+          <MenuItem value={'!@#'} key = {1000000}>전체</MenuItem>
+          {projectNames.map((x:any, index: number) => {
             return (
-              <MenuItem value={x.name} key = {index}>{x.name}</MenuItem>
+              <MenuItem value={x} key = {index}>{x}</MenuItem>
             );
           })
 
@@ -403,7 +523,6 @@ const ProductTableList = () => {
         <BlankCard>
           <EnhancedTableToolbar
             numSelected={selected.length}
-            search={search}
             handleSearch={(event: any) => handleSearch(event)}
             setEditMode={setEditMode}
             rows={rows}
@@ -441,9 +560,11 @@ const ProductTableList = () => {
                           sx={{width:100, mr:1}}
                           onChange={(e:any)=>setYear(e.target.value)}
                         >
-                          <MenuItem value={2024}>2024</MenuItem>
-                          <MenuItem value={2023}>2023</MenuItem>
-                          <MenuItem value={2022}>2022</MenuItem>
+                          {registerYears.map((x, i) => {
+                            return (
+                              <MenuItem value={x} key = {i}>{x}</MenuItem>
+                            );
+                          })}
                         </CustomSelect>
                       </CustomTableCell>
 
@@ -466,9 +587,11 @@ const ProductTableList = () => {
                           sx={{width:150, mr:1}}
                           onChange={(e:any) => setUserId(e.target.value)}
                         >
-                          <MenuItem value={1}>A사</MenuItem>
-                          <MenuItem value={2}>B사</MenuItem>
-                          <MenuItem value={3}>C사</MenuItem>
+                          {consignorList.map((x, i) => {
+                            return (
+                              <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+                            );
+                          })}
                         </CustomSelect>
                       </CustomTableCell>
 
@@ -481,9 +604,11 @@ const ProductTableList = () => {
                           sx={{width:150, mr:1}}
                           onChange={(e:any) => setCheckListId(e.target.value)}
                         >
-                          <MenuItem value={1}>2024-1</MenuItem>
-                          <MenuItem value={2}>2024-2</MenuItem>
-                          <MenuItem value={3}>2024-3</MenuItem>
+                          {checklist.map((x, i) => {
+                            return (
+                              <MenuItem key={i} value={x.id}>{x.checklist_item}</MenuItem>
+                            );
+                          })}
                         </CustomSelect>
                       </CustomTableCell>
 
@@ -496,8 +621,11 @@ const ProductTableList = () => {
                           sx={{width:150, mr:1}}
                           onChange={(e:any) => setPrivacyPolicy(e.target.value)}
                         >
-                          <MenuItem value={1}>금융사 분류</MenuItem>
-                          <MenuItem value={2}>게임사 분류</MenuItem>
+                          {personalCategory.map((x, i) => {
+                            return (
+                              <MenuItem key={i} value={x.id}>{x.personal_category}</MenuItem>
+                            );
+                          })}
                         </CustomSelect>
                       </CustomTableCell>
                       <CustomTableCell>
@@ -574,7 +702,11 @@ const ProductTableList = () => {
 
                           <CustomTableCell>
                             <Box display={"flex"} justifyContent={"center"}>
-                              <Button variant="contained" onClick={() => {}}>
+                              <Button variant="contained" onClick={() => {
+                                console.log(row)
+                                setCurrentProject(row)
+                                setMode('Detail')
+                              }}>
                                 수탁사 현황
                               </Button>
                             </Box>
@@ -583,7 +715,7 @@ const ProductTableList = () => {
 
                           <CustomTableCell>
                             <Box display={"flex"} justifyContent={"center"}>
-                              <Button variant="contained" onClick={() => {}}>
+                              <Button variant="contained" onClick={() => {showSchedule(row.id)}}>
                                 일정
                               </Button>
                             </Box>
@@ -621,7 +753,75 @@ const ProductTableList = () => {
 
             }
           </Box>
-        </BlankCard>         
+        </BlankCard>
+        <Dialog open={showModal} onClose={onClose}>
+          <DialogTitle></DialogTitle>
+          <DialogContent sx={{width:300}} >
+            <DialogContentText>{modalMsg}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => { onClose(); }}>OK</Button>
+          </DialogActions>
+        </Dialog> 
+
+        <Dialog open={showScheduleModal} onClose={onScheduleClose}>
+          <Toolbar>
+            <Typography sx={{ mr: 'auto' }} variant="h6" component="div">
+              프로젝트 일정 설정
+            </Typography>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={onScheduleClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+          <DialogContent >
+            <Typography sx={{ mr: 'auto', mb:1 }} variant="h6" component="div">
+              계정 생성 기간
+            </Typography>
+            <Box sx={{display: 'flex'}}>
+              <input type={"date"} value={createFrom} onChange={(e:any) => setCreateFrom(e.target.value)}/>
+              <Typography sx={{ ml:1, mr:1 }} variant="h6" component="div">
+                ~
+              </Typography>
+              <input type={"date"} value={createTo} onChange={(e:any) => setCreateTo(e.target.value)}/>              
+            </Box>
+            <Typography sx={{ mt:2, mr: 'auto', mb:1 }} variant="h6" component="div">
+              자가 점검 기간
+            </Typography>
+            <Box sx={{display: 'flex'}}>
+              <input type={"date"} value={selfCheckFrom} onChange={(e:any) => setSelfCheckFrom(e.target.value)}/>
+              <Typography sx={{ ml:1, mr:1 }} variant="h6" component="div">
+                ~
+              </Typography>
+              <input type={"date"} value={selfCheckTo} onChange={(e:any) => setSelfCheckTo(e.target.value)}/>
+            </Box>
+            <Typography sx={{ mt:2, mr: 'auto', mb:1 }} variant="h6" component="div">
+              이행점검 보완제출 기간
+            </Typography>
+            <Box sx={{display: 'flex'}}>
+              <input type={"date"} value={impCheckFrom} onChange={(e:any) => setImpCheckFrom(e.target.value)}/>
+              <Typography sx={{ ml:1, mr:1 }} variant="h6" component="div">
+                ~
+              </Typography>
+              <input type={"date"} value={impCheckTo} onChange={(e:any) => setImpCheckTo(e.target.value)}/>              
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button variant={"contained"}
+                    color={"primary"} 
+                    onClick={() => { onSave(); }}>
+              저장
+            </Button>
+          </DialogActions>
+        </Dialog> 
+        </>
+        ):(
+          <ProjectDetail setMode={setMode} data={currentProject}/>
+        )}
     </Box>
   );
 };
