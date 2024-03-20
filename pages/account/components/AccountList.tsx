@@ -172,7 +172,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 
 const AccountList = () => {  
-  const isMaster = true;
+  const [isMaster, setIsMaster] = React.useState(false);
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
   const [selected, setSelected] = React.useState<string[]>([]);
@@ -182,22 +182,36 @@ const AccountList = () => {
 
  
   const fetchUsers = async() => {
+    const str = sessionStorage.getItem('user')
+    const type = JSON.parse(str).type
+    if (type == 3)
+      setIsMaster(true)
+    else setIsMaster(false)
+
     const response = await axios.post(`${API_URL}/user/List`);
-    setAccounts(response.data)
-    setRows(response.data)
+
+    console.log(type)
+    let data = response.data
+    if (type != 3) {
+      data = response.data.filter((x:any) => x.user_type != 0)
+
+      console.log(data)
+    }
+
+    setAccounts(data)
+    setRows(data)
   }
 
   React.useEffect(() => {
     fetchUsers();
   }, []);
 
+  const [rows, setRows] = React.useState([]);
   const [accounts, setAccounts] = React.useState([]);
-
-  const [rows, setRows] = React.useState<any>(accounts);
   const [search, setSearch] = React.useState('');
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredAccounts: UserType[] = accounts.filter((row:any) => {
+    const filteredAccounts = accounts.filter((row:any) => {
       return row.user_email!.toString().toLowerCase().includes(event.target.value);
     });
     setSearch(event.target.value);

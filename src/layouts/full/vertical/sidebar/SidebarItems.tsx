@@ -1,4 +1,5 @@
-import Menuitems from '@pages/MenuItems';
+import React from 'react';
+import { AdminMenuitems, ConsignorMenuitems, ConsigneeMenuitems } from '@pages/MenuItems';
 import { useRouter } from 'next/router';
 import { Box, List, useMediaQuery } from '@mui/material';
 import { useDispatch, useSelector } from '../../../../store/Store';
@@ -17,6 +18,21 @@ const SidebarItems = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu: any = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
   const dispatch = useDispatch();
+  const [Menuitems, setMenuitems] = React.useState([])
+
+  React.useEffect(() => {
+    const str = sessionStorage.getItem('user')
+    const type = JSON.parse(str).type
+    if (type == 0 || type == 3) {
+      setMenuitems(AdminMenuitems)
+    }
+    else if (type == 1) {
+      setMenuitems(ConsigneeMenuitems)
+    }
+    else if (type == 2)
+      setMenuitems(ConsignorMenuitems)
+  }, [])
+
   return (
     <Box sx={{ px: 3 }}>
       <List sx={{ pt: 0 }} className="sidebarNav">

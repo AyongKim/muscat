@@ -17,6 +17,7 @@ import {
   MenuItem,
   Paper,
   Button, 
+  Dialog, DialogActions, DialogContent, DialogContentText,  DialogTitle
 } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { visuallyHidden } from '@mui/utils';
@@ -99,13 +100,13 @@ const headCells: readonly HeadCell[] = [
     label: '위탁 업무',
   }, 
   {
-    id: 'pname',
+    id: 'checker',
     numeric: false,
     disablePadding: false,
     label: '점검 담당자',
   }, 
   {
-    id: 'pname',
+    id: 'check_type',
     numeric: false,
     disablePadding: false,
     label: '점검방식',
@@ -177,23 +178,54 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
   const [selected, setSelected] = React.useState<string[]>([]);
   const [dense, setDense] = React.useState(false);
   const [userList, setUserList] = React.useState([])
+  const [adminList, setAdminList] = React.useState([])
 
   const [consignee, setConsignee] = React.useState(0)
   const [workName, setWorkName] = React.useState('')
-  const [checker, setChecker] = React.useState('')
+  const [checker, setChecker] = React.useState(0)
   const [checkType, setCheckType] = React.useState(0)
 
   const onRegister = async() => {
-    let response = await axios.post(`${API_URL}/project_detail/Register`, {
-      project_id: data.id,
-      user_id: consignee,
-      work_name: workName,
-      check_type: checkType
-    });
-
-    if (response.data.result == 'SUCCESS') {
-      setRegisterMode(false)
-      fetchData()
+    if (editMode == 'register') {
+      let response = await axios.post(`${API_URL}/project_detail/Register`, {
+        project_id: data.id,
+        user_id: consignee,
+        work_name: workName,
+        checker_id: checker,
+        check_type: checkType
+      });
+  
+      if (response.data.result == 'SUCCESS') {
+        setModalMsg('정확히 보관되었습니다.')
+        setShowModal(true)
+        setEditMode('list')
+        fetchData()
+      }
+      else {
+        setModalMsg('보관이 실패하였습니다.' + response.data.error_message)
+        setShowModal(true)
+      }  
+    }
+    else if (editMode == 'edit') {
+      let response = await axios.post(`${API_URL}/project_detail/Update`, {
+        id: editData.id,
+        project_id: data.id,
+        user_id: consignee,
+        work_name: workName,
+        checker_id: checker,
+        check_type: checkType
+      });
+  
+      if (response.data.result == 'SUCCESS') {
+        setModalMsg('정확히 보관되었습니다.')
+        setShowModal(true)
+        setEditMode('list')
+        fetchData()
+      }
+      else {
+        setModalMsg('보관이 실패하였습니다.' + response.data.error_message)
+        setShowModal(true)
+      }  
     }
   }
 
@@ -201,11 +233,19 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
     let response = await axios.post(`${API_URL}/project_detail/List`, {
       project_id: data.id
     });
+    console.log(response.data)
     setRows(response.data)
     
-    response = await axios.post(`${API_URL}/project/Consignee`);
+    response = await axios.post(`${API_URL}/project/Users`);
+    data = response.data
 
-    setUserList(response.data)
+    setUserList(data.consignee)
+    if (data.consignee.length > 0)
+      setConsignee(data.consignee[0].user_id)
+
+    setAdminList(response.data.admin)
+    if (data.admin.length > 0)
+      setChecker(data.admin[0].user_id)
   }
   //Fetch Products
   React.useEffect(() => {
@@ -215,28 +255,6 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
 
   const [rows, setRows] = React.useState([]);
  
-  const [companyNameSearch, setCompanyNameSearch] = React.useState('');
-  const [registrationNumberSearch, setRegistrationNumberSearch] = React.useState('');
-
-
-  // 기존 handleSearch 함수 수정
-  const handleCompanyNameSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows = rows.filter((row) => {
-      return row.company_name.toLowerCase().includes(event.target.value);
-      // || row.register_num.includes(searchQuery);
-    });
-    setCompanyNameSearch(event.target.value);
-    setRows(filteredRows);
-  };
-
-  const handleRegistrationNumberSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows = rows.filter((row) => {
-      return row.register_num.toLowerCase().includes(event.target.value);
-    });
-    setRegistrationNumberSearch(event.target.value);
-    setRows(filteredRows);
-  };
-
  
 
   // This is for the sorting
@@ -280,9 +298,6 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
     setSelected(newSelected);
   };
 
-  const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDense(event.target.checked);
-  };
 
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
@@ -291,11 +306,75 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
   const theme = useTheme();
   const borderColor = theme.palette.divider;
 
-  const [registerMode, setRegisterMode] = React.useState(false);
-  const [editMode, setEditMode] = React.useState(false);
-  const [editData, setEditData] = React.useState(false);
+  const [editMode, setEditMode] = React.useState('list');
+  const [editData, setEditData] = React.useState(null);
+
+  const [deleteModal, setDeleteModal] = React.useState(false)
+
+  const onDelete = () => {
+    setDeleteModal(true)
+  }
+
+  const onCloseDeleteModal = () => {
+    setDeleteModal(false)
+  }
+
+  const handleDelete = async() => {
+    const response = await axios.delete(`${API_URL}/project_detail/Delete`, {
+      data: { str_ids: selected.join(",") }
+    });
+
+    if (response.data.result == 'SUCCESS') {
+      setDeleteModal(false)
+      setModalMsg('정확히 삭제되었습니다.');
+      setShowModal(true)
+      fetchData()
+
+    }
+    else {
+      setModalMsg('삭제가 실패하였습니다.');
+      setShowModal(true)
+    }
+  }
+
+  const [showModal, setShowModal] = React.useState(false)
+  const [modalMsg, setModalMsg] = React.useState('')
+  const onClose = () => {
+    setShowModal(false)
+  }
+
+  const onEdit = () => {
+    if (editMode == 'edit') {
+      setEditMode('list')
+    }
+    else if (selected.length == 1) {
+      setEditMode('edit')
+
+      let selectedData = rows.find((x) => x.id == selected[0])
+      setEditData({...selectedData})
+
+      setConsignee(selectedData.user_id)
+      setWorkName(selectedData.work_name)
+      setChecker(selectedData.checker_id)
+      setCheckType(selectedData.check_type)
+    }
+  }
+
+  React.useEffect(() => {
+    console.log('---Row Data---')
+    console.log(rows)
+    console.log('--------------')
+  }, [rows])
   
-  
+  const fileInputRef = React.useRef(null);
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  }
+  const handleFileChange = (e:any) => {
+    const selectedFile = e.target.files[0];
+    // 파일 선택이 완료된 후 추가 작업 수행
+  };
+
   return (
     <Box> 
           {/* <Button type="submit" color="success" variant="contained" sx={{width:150}}>조회</Button>  */}
@@ -328,11 +407,12 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                 수탁사 총 {rows.length}개사
               </Typography>
             )} 
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{display: 'none'}}/>
             <Button
               variant="contained"
               color="primary" 
               sx={{width:150}}
-              onClick={() => {setRegisterMode(true)}}
+              onClick={handleButtonClick}
             >
               엑셀 업로드
             </Button> 
@@ -341,7 +421,11 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
               variant="contained"
               color="primary" 
               sx={{width:80, ml:1}}
-              onClick={() => {setRegisterMode(true)}}
+              onClick={() => {
+                if (editMode == 'register')
+                  setEditMode('list')
+                else setEditMode('register')
+              }}
             >
               추가
             </Button> 
@@ -350,7 +434,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
               variant="contained"
               color="primary" 
               sx={{width:80, ml: 1}}
-              onClick={() => {setRegisterMode(true)}}
+              onClick={onEdit}
             >
               수정
             </Button> 
@@ -359,7 +443,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
               variant="contained"
               color="primary" 
               sx={{width:80, ml: 1}}
-              onClick={() => {setRegisterMode(true)}}
+              onClick={onDelete}
             >
               삭제
             </Button> 
@@ -380,7 +464,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                   rowCount={rows.length}
                 />
                 <TableBody>
-                {registerMode &&
+                {editMode == 'register' &&
                     <TableRow
                       hover
                       role="checkbox"
@@ -423,11 +507,15 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                           labelId="month-dd"
                           id="month-dd"
                           size="small" 
-                          value={data.checker}
-                          sx={{width:150, mr:1}}
-                          onChange={(e:any) => setChecker(e.target.value)}
+                          value={checker}
+                          sx={{width:100, mr:1}}
+                          onChange={(e:any)=>setChecker(e.target.value)}
                         >
-                          <MenuItem value={data.checker}>{data.checker}</MenuItem>
+                          {adminList.map((x, i) => {
+                            return (
+                              <MenuItem value={x.user_id} key = {i}>{x.name}</MenuItem>
+                            );
+                          })}
                         </CustomSelect>
                       </CustomTableCell>
 
@@ -445,20 +533,6 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                         </CustomSelect>
                       </CustomTableCell>
 
-                      <CustomTableCell>
-                        <Box 
-                          sx={{width: 100}}
-                        >
-
-                        </Box>
-                      </CustomTableCell>
-                      <CustomTableCell>
-                      <Box 
-                          sx={{width: 50}}
-                        >
-
-                        </Box>
-                      </CustomTableCell>
                     </TableRow>
                   }
                   {stableSort(rows, getComparator(order, orderBy))
@@ -466,71 +540,150 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                       const isItemSelected = isSelected(row.id);
                       const labelId = `enhanced-table-checkbox-${index}`;
 
-                      return (
-                        <TableRow
-                          hover
-                          onClick={(event) => handleClick(event, row.id)}
-                          role="checkbox"
-                          aria-checked={isItemSelected}
-                          tabIndex={-1}
-                          key={row.id}
-                          selected={isItemSelected}
-                        >
-                          <CustomTableCell padding="checkbox">
-                            <CustomCheckbox
-                              color="primary"
-                              checked={isItemSelected}
-                              inputProps={{
-                                'aria-labelledby': labelId,
-                              }}
-                            />
-                          </CustomTableCell>
+                      console.log('-----------------------')
+                      console.log(row)
+                      console.log(editData)
 
-                          <CustomTableCell>
-                            <Box display="flex" alignItems="center"> 
-                              <Box
-                                sx={{
-                                  ml: 2,
+                      if (editMode != 'edit' || row.id != editData?.id)
+                        return (
+                          <TableRow
+                            hover
+                            onClick={(event) => handleClick(event, row.id)}
+                            role="checkbox"
+                            aria-checked={isItemSelected}
+                            tabIndex={-1}
+                            key={row.id}
+                            selected={isItemSelected}
+                          >
+                            <CustomTableCell padding="checkbox">
+                              <CustomCheckbox
+                                color="primary"
+                                checked={isItemSelected}
+                                inputProps={{
+                                  'aria-labelledby': labelId,
                                 }}
-                              >
-                                <Typography variant="h6" fontWeight="600">
-                                  {index + 1}
-                                </Typography> 
-                              </Box>
-                            </Box>
-                          </CustomTableCell>
-                                
-                          <CustomTableCell>
-                            <Box display="flex" alignItems="center"> 
-                              <Box
-                                sx={{
-                                  ml: 2,
-                                }}
-                              >
-                                <Typography variant="h6" fontWeight="600">
-                                  {row.user_name}
-                                </Typography> 
-                              </Box>
-                            </Box>
-                          </CustomTableCell>
-                          <CustomTableCell>
-                              <Typography variant="h6" fontWeight="600">
-                                {row.work_name}
-                              </Typography>  
-                          </CustomTableCell> 
-                          <CustomTableCell>
-                              <Typography variant="h6" fontWeight="600">
-                                {row.checker_name}
-                              </Typography>  
-                          </CustomTableCell> 
+                              />
+                            </CustomTableCell>
 
-                          <CustomTableCell>
-                              <Typography variant="h6" fontWeight="600">
-                                {row.check_type == 1 ? '현장' : '서면'}
-                              </Typography>  
-                          </CustomTableCell> 
-                        </TableRow>
-                      );
+                            <CustomTableCell>
+                              <Box display="flex" alignItems="center"> 
+                                <Box
+                                  sx={{
+                                    ml: 2,
+                                  }}
+                                >
+                                  <Typography variant="h6" fontWeight="600">
+                                    {index + 1}
+                                  </Typography> 
+                                </Box>
+                              </Box>
+                            </CustomTableCell>
+                                  
+                            <CustomTableCell>
+                              <Box display="flex" alignItems="center"> 
+                                <Box
+                                  sx={{
+                                    ml: 2,
+                                  }}
+                                >
+                                  <Typography variant="h6" fontWeight="600">
+                                    {row.user_name}
+                                  </Typography> 
+                                </Box>
+                              </Box>
+                            </CustomTableCell>
+                            <CustomTableCell>
+                                <Typography variant="h6" fontWeight="600">
+                                  {row.work_name}
+                                </Typography>  
+                            </CustomTableCell> 
+                            <CustomTableCell>
+                                <Typography variant="h6" fontWeight="600">
+                                  {row.checker_name}
+                                </Typography>  
+                            </CustomTableCell> 
+
+                            <CustomTableCell>
+                                <Typography variant="h6" fontWeight="600">
+                                  {row.check_type == 1 ? '현장' : '서면'}
+                                </Typography>  
+                            </CustomTableCell> 
+                          </TableRow>
+                        );
+                      else {
+                        return (
+                          <TableRow
+                            hover
+                            role="checkbox"
+                            tabIndex={-1}
+                            key={row.id}
+                          >
+                            <CustomTableCell>
+                            </CustomTableCell>
+                            <CustomTableCell>
+                            </CustomTableCell>
+      
+                            <CustomTableCell>
+                              <CustomSelect
+                                labelId="month-dd"
+                                id="month-dd"
+                                size="small" 
+                                value={consignee}
+                                sx={{width:100, mr:1}}
+                                onChange={(e:any)=>setConsignee(e.target.value)}
+                              >
+                                {userList.map((x, i) => {
+                                  return (
+                                    <MenuItem value={x.user_id} key = {i}>{x.name}</MenuItem>
+                                  );
+                                })}
+                              </CustomSelect>
+                            </CustomTableCell>
+      
+                            <CustomTableCell>
+                              <TextField
+                                placeholder="위탁 업무"
+                                size="small"
+                                onChange={(e:any) => {setWorkName(e.target.value)}}
+                                value={workName}
+                                sx={{width:150, mr:1}}
+                              />
+                            </CustomTableCell>
+      
+                            <CustomTableCell>
+                              <CustomSelect
+                                labelId="month-dd"
+                                id="month-dd"
+                                size="small" 
+                                value={checker}
+                                sx={{width:100, mr:1}}
+                                onChange={(e:any)=>setChecker(e.target.value)}
+                              >
+                                {adminList.map((x, i) => {
+                                  return (
+                                    <MenuItem value={x.user_id} key = {i}>{x.name}</MenuItem>
+                                  );
+                                })}
+                              </CustomSelect>
+                            </CustomTableCell>
+      
+                            <CustomTableCell>
+                              <CustomSelect
+                                labelId="month-dd"
+                                id="month-dd"
+                                size="small" 
+                                value={checkType}
+                                sx={{width:150, mr:1}}
+                                onChange={(e:any) => setCheckType(e.target.value)}
+                              >
+                                <MenuItem value={0}>서면</MenuItem>
+                                <MenuItem value={1}>현장</MenuItem>
+                              </CustomSelect>
+                            </CustomTableCell>
+      
+                          </TableRow>
+                        )
+                      }
                     })}
                   
                 </TableBody>
@@ -538,7 +691,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
             </TableContainer>
           </Paper> 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginY: 1, mr: 2 }}>
-            {registerMode &&
+            {editMode != 'list' &&
             <Button variant="contained" onClick={onRegister}>
               저장
             </Button>
@@ -546,7 +699,27 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
             }
           </Box>
         </BlankCard> 
-      
+        <Dialog open={deleteModal} onClose={onCloseDeleteModal}>
+          <DialogTitle>삭제</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              선택한 수탁사들을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onCloseDeleteModal}>취소</Button>
+            <Button onClick={handleDelete} color="error">삭제</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={showModal} onClose={onClose}>
+          <DialogTitle></DialogTitle>
+          <DialogContent sx={{width:300}} >
+            <DialogContentText>{modalMsg}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => { onClose(); }}>OK</Button>
+          </DialogActions>
+        </Dialog> 
     </Box>
   );
 };

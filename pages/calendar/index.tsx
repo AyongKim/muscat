@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CardContent,
   Button,
@@ -31,6 +31,8 @@ import MenuItem from '@mui/material/MenuItem';
 import { Label } from '@mui/icons-material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
+const axios = require('axios');
+import { API_URL } from '@pages/constant';
 
 moment.locale('ko'); // 한국어로 설정
 const localizer = momentLocalizer(moment);
@@ -52,6 +54,56 @@ export default function BigCalendar() {
   const [end, setEnd] = React.useState<any | null>();
   const [color, setColor] = React.useState<string>('default');
   const [update, setUpdate] = React.useState<EvType | undefined | any>();
+  const [projects, setProjects] = useState([])
+  const [project, setProject] = useState(0)
+  const [schedule, setSchedule] = useState({
+    create_from: '',
+    create_to: '',
+    self_check_from: '',
+    self_check_to: '',
+    imp_check_from: '',
+    imp_check_to: ''
+  })
+
+  const fetchSchedule = async() => {
+    if (project) {
+      const response = await axios.post(`${API_URL}/project/Schedule`, {
+        id: project
+      });
+      console.log(response.data)
+      setSchedule(response.data)  
+    }
+  }
+  useEffect(() => {
+    fetchSchedule()
+  }, [project])
+
+  const fetchData = async() => {
+    const response = await axios.post(`${API_URL}/project/List`);
+    console.log(response.data)
+    setProjects(response.data)
+  }
+
+  useEffect(() => {
+    // 프로젝트 목록 가져오기
+    fetchData();
+    
+    const str = sessionStorage.getItem('user')
+  }, []);
+
+  const customSlotPropGetter = (date: Date, resourceId?: number | string) => {
+    if (date.getDate() === 7 || date.getDate() === 15)
+      return {
+        style: {
+          backgroundColor: '#fec'
+        }
+      }
+    else return {
+      style: {
+        height: 300
+      }
+    }
+  }
 
   const ColorVariation = [
     {
@@ -184,13 +236,16 @@ export default function BigCalendar() {
         <Typography sx={{mr:1}} >프로젝트 명</Typography>
         <CustomSelect
           id="account-type-select"
-          sx={{mr:4}}
-          value={projectName} 
+          sx={{mr:4, width: 200}}
+          value={project} 
           onChange={(event:any) => {
-            setProjectName(event.target.value as string)}}
+            setProject(event.target.value)}}
         >
-          <MenuItem value="trustee">프로젝트1</MenuItem>
-          <MenuItem value="consignor">프로젝트2</MenuItem>
+          {projects.map((x, i) => {
+            return (
+              <MenuItem value={x.id}>{x.name}</MenuItem>
+            );
+          })}
         </CustomSelect>
         <FormControlLabel
           sx={{mr:4}}
@@ -233,6 +288,7 @@ export default function BigCalendar() {
           onSelectEvent={(event) => editEvent(event)}
           onSelectSlot={(slotInfo: any) => addNewEventAlert(slotInfo)}
           eventPropGetter={(event: any) => eventColors(event)}
+          slotPropGetter={(date: Date) => customSlotPropGetter(date)}
           messages={{
             allDay: '종일',
             previous: '이전',

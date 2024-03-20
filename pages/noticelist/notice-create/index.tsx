@@ -25,11 +25,13 @@ import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import Link from 'next/link';
 import { AppDispatch, useDispatch, useSelector } from '@src/store/Store';
 import { fetchNotices, registerNotice } from '@src/store/apps/NoticeSlice';
-import { fetchProjects } from '@src/store/apps/ProjectSlice';
 import { Delete as DeleteIcon } from '@mui/icons-material'; // 삭제 아이콘 추가
 import { ProjectType } from '@src/types/apps/project';
 import { Row } from 'antd';
 import { Router, useRouter } from 'next/router';
+const axios = require('axios');
+import { API_URL } from '@pages/constant';
+
 
 interface SelectedFile {
   file: File;
@@ -61,15 +63,26 @@ export default function QuillEditor() {
   
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(0);
+  const [name, setName] = useState('');
 
   const theme = useTheme();
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const dispatch: AppDispatch = useDispatch(); 
-  const projects: ProjectType[] = useSelector((state) => state.projectReducer.projects);
+  const [projects, setProjects] = useState([])
+
+  const fetchData = async() => {
+    const response = await axios.post(`${API_URL}/project/List`);
+    console.log(response.data)
+    setProjects(response.data)
+  }
+
   useEffect(() => {
     // 프로젝트 목록 가져오기
-    dispatch(fetchProjects());
+    fetchData();
+    
+    const str = sessionStorage.getItem('user')
+    setName(JSON.parse(str).name)
   }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,10 +129,10 @@ export default function QuillEditor() {
     if (selectedFile) 
       formData.append('file', selectedFile.file);
     else formData.append('file', '');
-    formData.append('project_id', category);
+    formData.append('project_id', category.toString());
     formData.append('title', title);
     formData.append('content', content);
-    formData.append('create_by', 'string');
+    formData.append('create_by', name);
   
     fetch('http://localhost:5001/notice/Register', {
       method: 'POST',
@@ -192,6 +205,9 @@ export default function QuillEditor() {
                         sx={{ width: 200, mr: 1 }}
                         onChange={(e: any) => setCategory(e.target.value)}
                       > 
+                        <MenuItem value={0}>
+                          전체
+                        </MenuItem>
                         {projects.map((project: any) => (
                           <MenuItem key={project.id} value={project.id}>
                             {project.name}

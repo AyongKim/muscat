@@ -6,6 +6,7 @@ import { loginSuccess } from '../src/store/authSlice';
 import { AppDispatch, useDispatch } from '../src/store/Store';
 import axios from 'axios';
 import { apiUrl } from '../src/utils/commonValues';
+import Cookies from 'js-cookie';
 
 interface LoginResponse {
   loginResult: number;
@@ -57,9 +58,9 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();  
-    dispatch(loginSuccess({id: 3, email:'123456' }));
-    router.replace('/');
-    return;
+    //dispatch(loginSuccess({id: 3, email:'123456' }));
+    //Cookies.set('user', JSON.stringify({'email': '123', 'nickname': '123123'}))
+    
     setLoading(true);
 
     if (loginAttempts >= 5) {
@@ -75,21 +76,22 @@ export default function Login() {
        let response: { [key: string]: any };
        response = {};
        if (authSent) {
-        response = await await axios.post(`${API_URL}/Login`, { email: email, password: password, code: validCode });  
+        response = await axios.post(`${API_URL}/Login`, { email: email, password: password, code: validCode });  
        }else{
         response = await  axios.post(`${API_URL}/Login`, { email: email, password: password });   
        }
     
 
+       response = response.data
        if (response.loginResult === 1 && response.authRequired) {
-         setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
-         setAuthSent(true); 
+        sessionStorage.setItem('user', JSON.stringify(response.userData))
+
+        router.push('/');
+        //setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
+        //setAuthSent(true); 
        } else if (response.loginResult === 1) { 
             // 로그인 성공 로직
-            localStorage.setItem('loginUser', response.userData!.userEmail);
-            sessionStorage.setItem('accessTime', nowEpoch().toString());
-            console.log(response.userData!.userEmail)
-            dispatch(loginSuccess({  id: response.userData.id  ,email: response.userData.userEmail }));
+            sessionStorage.setItem('user', JSON.stringify(response.userData))
             router.push('/');
        } else {
          setLoginAttempts(prev => prev + 1);

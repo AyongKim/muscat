@@ -419,6 +419,36 @@ const ProductTableList = () => {
   }
 
   const onSave = async() => {
+    if (createFrom > createTo) {
+      setModalMsg('계정생성 기간을 정확히 입력하세요.')
+      setShowModal(true)
+      return;
+    }
+    
+    if (selfCheckFrom > selfCheckTo) {
+      setModalMsg('자가점검 기간을 정확히 입력하세요.')
+      setShowModal(true)
+      return;
+    }
+
+    if (impCheckFrom > impCheckTo) {
+      setModalMsg('이행점검 기간을 정확히 입력하세요.')
+      setShowModal(true)
+      return;
+    }
+
+    if (createTo >= selfCheckFrom) {
+      setModalMsg('자가점검 시작날짜가 계정생성 마감날짜보다 앞서있습니다.')
+      setShowModal(true)
+      return;
+    }
+
+    if (selfCheckTo >= impCheckFrom) {
+      setModalMsg('이행점검 시작날짜가 자가점검 마감날짜보다 앞서있습니다.')
+      setShowModal(true)
+      return;
+    }
+
     const response = await axios.put('http://localhost:5001/project/Schedule', {
       id: editId,
       create_from: createFrom,

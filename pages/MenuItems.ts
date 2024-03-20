@@ -65,7 +65,7 @@ import {
   IconAppWindow
 } from '@tabler/icons-react';
 
-const Menuitems: MenuitemsType[] = [
+export const AdminMenuitems: MenuitemsType[] = [
   {
     id: uniqueId(),
     title: '메인',
@@ -99,39 +99,12 @@ const Menuitems: MenuitemsType[] = [
          href: '/account/account-accept',
        }
      ],
-  
   },
   {
     id: uniqueId(),
     title: '점검 및 결과',
     icon: IconNotes,
-    href: '/account/account-manager',
-    children: [
-      {
-        id: uniqueId(),
-        title: '분류',
-        icon: IconPoint,
-        href: '/result/category',
-      },
-      {
-        id: uniqueId(),
-        title: '수탁사 전체 결과',
-        icon: IconPoint,
-        href: '/result/all_result',
-      },
-      {
-        id: uniqueId(),
-        title: '일반 현황',
-        icon: IconPoint,
-        href: '/result/detail',
-      },
-      {
-        id: uniqueId(),
-        title: '점검 수행',
-        icon: IconPoint,
-        href: '/result/individual_after',
-      }
-    ],
+    href: '/result',
   },
   {
     id: uniqueId(),
@@ -189,4 +162,100 @@ const Menuitems: MenuitemsType[] = [
   }, 
 ];
 
-export default Menuitems;
+export const ConsigneeMenuitems: MenuitemsType[] = [
+  {
+    id: uniqueId(),
+    title: '메인',
+    icon: IconAperture,
+    href: '/',
+    //chip: 'New',
+    chipColor: 'secondary',
+    children: [
+       {
+         id: uniqueId(),
+         title: '메인',
+         icon: IconPoint,
+         href: '/consignee_main',
+       },
+       {
+         id: uniqueId(),
+         title: '공지사항',
+         icon: IconPoint,
+         href: '/noticelist',
+       },
+     ],
+  },
+  {
+    id: uniqueId(),
+    title: '점검 및 결과',
+    icon: IconNotes,
+    href: '/consignee_result',
+  },
+  {
+    id: uniqueId(),
+    title: '일정관리',
+    icon: IconNotes,
+    href: '/calendar',
+  },
+  {
+    id: uniqueId(),
+    title: '문의',
+    icon: IconNotes,
+    href: '/inquiry',
+  },
+  {
+    id: uniqueId(),
+    title: '마이페이지',
+    icon: IconUserCircle,
+    href: '/account/account-my',
+  }, 
+];
+
+export const ConsignorMenuitems: MenuitemsType[] = [
+  {
+    id: uniqueId(),
+    title: '메인',
+    icon: IconAperture,
+    href: '/',
+    //chip: 'New',
+    chipColor: 'secondary',
+    children: [
+       {
+         id: uniqueId(),
+         title: '메인',
+         icon: IconPoint,
+         href: '/consignor_main',
+       },
+       {
+         id: uniqueId(),
+         title: '공지사항',
+         icon: IconPoint,
+         href: '/noticelist',
+       },
+     ],
+  },
+  {
+    id: uniqueId(),
+    title: '점검 및 결과',
+    icon: IconNotes,
+    href: '/consignor_result',
+  },
+  {
+    id: uniqueId(),
+    title: '일정관리',
+    icon: IconNotes,
+    href: '/calendar',
+  },
+  {
+    id: uniqueId(),
+    title: '문의',
+    icon: IconNotes,
+    href: '/inquiry',
+  },
+  {
+    id: uniqueId(),
+    title: '마이페이지',
+    icon: IconUserCircle,
+    href: '/account/account-my',
+  }, 
+];

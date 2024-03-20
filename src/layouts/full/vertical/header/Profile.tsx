@@ -13,6 +13,7 @@ import * as dropdownData from './data';
 
 import { IconMail } from '@tabler/icons-react';
 import { Stack } from '@mui/system';
+import { useRouter } from 'next/router';
 
 
 const Profile = () => {
@@ -23,6 +24,7 @@ const Profile = () => {
   const handleClose2 = () => {
     setAnchorEl2(null);
   };
+  const router = useRouter();
 
   return (
     <Box>
@@ -156,7 +158,10 @@ const Profile = () => {
               <img src={"/images/backgrounds/unlimited-bg.png"} alt="unlimited" className="signup-bg" width={150} height={183}></img>
             </Box>
           </Box>
-          <Button href="/auth/login" variant="outlined" color="primary" component={Link} fullWidth>
+          <Button variant="outlined" color="primary" fullWidth onClick={() => {
+            sessionStorage.removeItem('user')
+            router.push('/login')
+          }}>
             Logout
           </Button>
         </Box>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -67,10 +67,9 @@ const checkBusinessNumber = async (number: string): Promise<string> => {
 };
 
 const AccountTab: React.FC = () => {
-  const isMaster = true;
-  
   // Form state
-  const [accountType, setAccountType] = useState<number>(isMaster ? 0 : 1);
+  const [isMaster, setIsMaster] = useState(true)
+  const [accountType, setAccountType] = useState<number>(0);
   const [id, setId] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -99,6 +98,19 @@ const AccountTab: React.FC = () => {
   const handleAccountTypeChange = (event:any) => {
     setAccountType(event.target.value);
   };
+
+  useEffect(() => {
+    const str = sessionStorage.getItem('user')
+    const type = JSON.parse(str).type
+    if (type == 3) {
+      setIsMaster(true)
+      setAccountType(0)
+    }
+    else {
+      setIsMaster(false)
+      setAccountType(1)
+    }
+  }, [])
 
   // ...other handlers here...
 
