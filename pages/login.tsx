@@ -25,7 +25,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [authSent, setAuthSent] = useState(false);
-  const [timer, setTimer] = useState<number>(300);
+  const [timer, setTimer] = useState<number>(180);
   const router = useRouter();
   const dispatch: AppDispatch = useDispatch();  
 
@@ -84,11 +84,12 @@ export default function Login() {
 
        response = response.data
        if (response.loginResult === 1 && response.authRequired) {
-        sessionStorage.setItem('user', JSON.stringify(response.userData))
+        //sessionStorage.setItem('user', JSON.stringify(response.userData))
 
-        router.push('/');
-        //setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
-        //setAuthSent(true); 
+        //router.push('/');
+        setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
+        setAuthSent(true); 
+        setTimer(180)
        } else if (response.loginResult === 1) { 
             // 로그인 성공 로직
             sessionStorage.setItem('user', JSON.stringify(response.userData))

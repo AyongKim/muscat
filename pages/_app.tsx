@@ -24,6 +24,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Login from './login';
 import Cookies from 'js-cookie';
+import "./calendar/Calendar.css"; 
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();

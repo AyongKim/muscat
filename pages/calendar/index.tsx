@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   CardContent,
   Button,
@@ -71,7 +71,7 @@ export default function BigCalendar() {
         id: project
       });
       console.log(response.data)
-      setSchedule(response.data)  
+      setSchedule(response.data.data)
     }
   }
   useEffect(() => {
@@ -90,20 +90,6 @@ export default function BigCalendar() {
     
     const str = sessionStorage.getItem('user')
   }, []);
-
-  const customSlotPropGetter = (date: Date, resourceId?: number | string) => {
-    if (date.getDate() === 7 || date.getDate() === 15)
-      return {
-        style: {
-          backgroundColor: '#fec'
-        }
-      }
-    else return {
-      style: {
-        height: 300
-      }
-    }
-  }
 
   const ColorVariation = [
     {
@@ -215,6 +201,50 @@ export default function BigCalendar() {
   const handleEndChange = (newValue: any) => {
     setEnd(newValue);
   };
+
+  const dayPropGetter = useCallback(
+    (date:Date) => {
+      
+      const year = date.getFullYear();
+      const month = `0${date.getMonth() + 1}`.slice(-2);
+      const day = `0${date.getDate()}`.slice(-2);
+
+      const dateStr = `${year}-${month}-${day}`;
+      console.log(dateStr)
+      console.log(schedule)
+
+      if (dateStr >= schedule.create_from && dateStr <= schedule.create_to)  {
+        return {
+          style: {
+            backgroundImage: 'linear-gradient(to bottom right, #ffff85, #ffffda)'
+          }
+        };  
+      }
+      else if (dateStr >= schedule.self_check_from && dateStr <= schedule.self_check_to)  {
+        return {
+          style: {
+            backgroundImage: 'linear-gradient(to bottom right, #ffc7b1, #fbe5d6)'
+          }
+        };  
+      }
+      else if (dateStr >= schedule.imp_check_from && dateStr <= schedule.imp_check_to)  {
+        return {
+          style: {
+            backgroundColor: 'green'
+          }
+        };  
+      }
+      else if (dateStr > schedule.self_check_to && dateStr < schedule.imp_check_from)  {
+        return {
+          style: {
+            backgroundColor: 'grey'
+          }
+        };  
+      }
+    },
+    [schedule]
+  )
+
   const [managerName, setManagerName] = useState<string>('김하늘');
   const [projectName, setProjectName] = useState<string>('trustee');
   return (
@@ -280,15 +310,16 @@ export default function BigCalendar() {
         <Calendar
           selectable
           events={calevents}
+          views={['month']}
           defaultView="month"
           scrollToTime={new Date(1970, 1, 1, 6)}
           defaultDate={new Date()}
           localizer={localizer}
-          style={{ height: 'calc(100vh - 350px)' }} // 스타일 속성 값에 닫는 괄호를 추가했습니다.
+          style={{ height: 'calc(100vh)' }} // 스타일 속성 값에 닫는 괄호를 추가했습니다.
           onSelectEvent={(event) => editEvent(event)}
           onSelectSlot={(slotInfo: any) => addNewEventAlert(slotInfo)}
           eventPropGetter={(event: any) => eventColors(event)}
-          slotPropGetter={(date: Date) => customSlotPropGetter(date)}
+          dayPropGetter={dayPropGetter}
           messages={{
             allDay: '종일',
             previous: '이전',
