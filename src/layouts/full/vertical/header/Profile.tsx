@@ -42,7 +42,6 @@ const Profile = () => {
         onClick={handleClick2}
       >
         <Avatar
-          src={"/images/profile/user-1.jpg"}
           alt={'ProfileImg'}
           sx={{
             width: 35,
@@ -155,7 +154,6 @@ const Profile = () => {
                   Upgrade
                 </Button>
               </Box>
-              <img src={"/images/backgrounds/unlimited-bg.png"} alt="unlimited" className="signup-bg" width={150} height={183}></img>
             </Box>
           </Box>
           <Button variant="outlined" color="primary" fullWidth onClick={() => {

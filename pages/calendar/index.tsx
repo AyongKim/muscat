@@ -5,6 +5,8 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogTitle,
+  DialogContentText,
   Fab,
   TextField,
   Typography,
@@ -15,6 +17,7 @@ import {
 } from '@mui/material';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import moment from 'moment';
@@ -48,14 +51,46 @@ type EvType = {
 export default function BigCalendar() {
   const [calevents, setCalEvents] = React.useState<any>(Events);
   const [open, setOpen] = React.useState<boolean>(false);
+  const [checkOpen, setCheckOpen] = React.useState<boolean>(false);
+  const [checkMode, setCheckMode] = React.useState('register');
+  const [checkDate, setCheckDate] = React.useState(new Date());
+  const [checkTitle, setCheckTitle] = React.useState('');
+  const [checkAddress, setCheckAddress] = React.useState('');
+  const [checkManager, setCheckManager] = React.useState('');
+  const [checkManagerPhone, setCheckManagerPhone] = React.useState('');
+  const [toggle, setToggle] = React.useState(false);
+  const [checkSchedule, setCheckSchedule] = React.useState<any>([]);
   const [title, setTitle] = React.useState<string>('');
-  const [slot, setSlot] = React.useState<EvType>();
   const [start, setStart] = React.useState<any | null>();
   const [end, setEnd] = React.useState<any | null>();
-  const [color, setColor] = React.useState<string>('default');
-  const [update, setUpdate] = React.useState<EvType | undefined | any>();
+  const [editIndex, setEditIndex] = React.useState(-1)
+  const [initialEnd, setInitialEnd] = React.useState<any | null>();
+
+  const [admins, setAdmins] = useState([])
+  const [admin, setAdmin] = useState(0)
+
   const [projects, setProjects] = useState([])
   const [project, setProject] = useState(0)
+
+  const [consignees, setConsignees] = useState([])
+  const [consignee, setConsignee] = useState(0)
+
+  const [delayType, setDelayType] = useState('create')
+  const [checkAll, setCheckAll] = React.useState(false)
+
+  const [projectDetail, setProjectDetail] = useState({
+    id: 0,
+    create_date: '',
+    self_check_date: '',
+    imp_check_date: '',
+    delay: {
+      create: [],
+      self_check: [],
+      imp_check: []
+    },
+    set: false,
+  })
+
   const [schedule, setSchedule] = useState({
     create_from: '',
     create_to: '',
@@ -65,126 +100,453 @@ export default function BigCalendar() {
     imp_check_to: ''
   })
 
-  const fetchSchedule = async() => {
+  useEffect(() => {
+    if (open) {
+      if (delayType == 'create') {
+        setStart(schedule.create_from)
+        
+        let len = projectDetail.delay.create.length;
+        if (len == 0) {
+          setEnd(schedule.create_to)
+          setInitialEnd(schedule.create_to)
+        }
+        else {
+          setEnd(projectDetail.delay.create[len - 1])
+          setInitialEnd(projectDetail.delay.create[len - 1])
+        }
+      }
+
+      if (delayType == 'self_check') {
+        setStart(schedule.self_check_from)
+        
+        let len = projectDetail.delay.self_check.length;
+        if (len == 0) {
+          setEnd(schedule.self_check_to)
+          setInitialEnd(schedule.self_check_to)
+        }
+        else {
+          setEnd(projectDetail.delay.self_check[len - 1])
+          setInitialEnd(projectDetail.delay.self_check[len - 1])
+        }
+      }
+
+      if (delayType == 'imp_check') {
+        setStart(schedule.imp_check_from)
+        
+        let len = projectDetail.delay.imp_check.length;
+        if (len == 0) {
+          setEnd(schedule.imp_check_to)
+          setInitialEnd(schedule.imp_check_to)
+        }
+        else {
+          setEnd(projectDetail.delay.imp_check[len - 1])
+          setInitialEnd(projectDetail.delay.imp_check[len - 1])
+        }
+      }
+    }
+  }, [open, delayType]);
+
+  useEffect(() => {
+    let newEvents = [];
+
+    if (!checkAll)
+    {
+      if (projectDetail.set) {
+        let delay = projectDetail.delay;
+        let len;
+
+        len = delay.create.length
+        if (len > 0) {
+          for (let i = 0; i < len; i++) {
+            let eventStart, eventEnd;
+            let startDate;
+
+            if (i == 0) 
+              startDate = schedule.create_to;
+            else
+              startDate = delay.create[i - 1]
+
+            let afterCreate = new Date(startDate);
+            afterCreate.setDate(afterCreate.getDate() + 1)
+            eventStart = getDateStr(afterCreate);
+              
+            eventEnd = delay.create[i]
+
+            newEvents.push({
+              title: `계정생성 기간 연기(${i + 1}차)`,
+              allDay: true,
+              start: eventStart,
+              end: eventEnd,
+              color: 'create',
+            })
+          }
+        }
+
+        len = delay.self_check.length
+        if (len > 0) {
+          for (let i = 0; i < len; i++) {
+            let eventStart, eventEnd;
+            let startDate;
+
+            if (i == 0) 
+              startDate = schedule.self_check_to;
+            else
+              startDate = delay.self_check[i - 1]
+
+            let afterCreate = new Date(startDate);
+            afterCreate.setDate(afterCreate.getDate() + 1)
+            eventStart = getDateStr(afterCreate);
+              
+            eventEnd = delay.self_check[i]
+
+            newEvents.push({
+              title: `자가점검 제출 기간 연기(${i + 1}차)`,
+              allDay: true,
+              start: eventStart,
+              end: eventEnd,
+              color: 'self-check',
+            })
+          }
+        }
+
+        len = delay.imp_check.length
+        if (len > 0) {
+          for (let i = 0; i < len; i++) {
+            let eventStart, eventEnd;
+            let startDate;
+
+            if (i == 0) 
+              startDate = schedule.imp_check_to;
+            else
+              startDate = delay.imp_check[i - 1]
+
+            let afterCreate = new Date(startDate);
+            afterCreate.setDate(afterCreate.getDate() + 1)
+            eventStart = getDateStr(afterCreate);
+              
+            eventEnd = delay.imp_check[i]
+
+            newEvents.push({
+              title: `이행점검 보완제출 기간 연기(${i + 1}차)`,
+              allDay: true,
+              start: eventStart,
+              end: eventEnd,
+              color: 'imp-check',
+            })
+          }
+        }
+
+        if (projectDetail.create_date) {
+          newEvents.push({
+            title: '계정 생성',
+            allDay: true,
+            start: new Date(projectDetail.create_date),
+            end: new Date(projectDetail.create_date),
+            color: 'default',
+          })
+        }
+
+        if (projectDetail.self_check_date) {
+          newEvents.push({
+            title: '자가 점검 제출',
+            allDay: true,
+            start: new Date(projectDetail.self_check_date),
+            end: new Date(projectDetail.self_check_date),
+            color: 'default',
+          })
+        }
+
+        if (projectDetail.imp_check_date) {
+          newEvents.push({
+            title: '이행 점검 보완 제출',
+            allDay: true,
+            start: new Date(projectDetail.imp_check_date),
+            end: new Date(projectDetail.imp_check_date),
+            color: 'default',
+          })
+        }
+
+        
+      }
+
+      newEvents.push({
+        title: '계정 생성 기간',
+        allDay: true,
+        start: new Date(schedule.create_from),
+        end: new Date(schedule.create_from),
+        color: 'transparent',
+      })
+      
+      newEvents.push({
+        title: '계정 생성 마감',
+        allDay: true,
+        start: new Date(schedule.create_to),
+        end: new Date(schedule.create_to),
+        color: 'transparent',
+      })
+
+      newEvents.push({
+        title: '자가점검 제출 기간',
+        allDay: true,
+        start: new Date(schedule.self_check_from),
+        end: new Date(schedule.self_check_from),
+        color: 'transparent',
+      })
+
+      newEvents.push({
+        title: '자가점검 마감',
+        allDay: true,
+        start: new Date(schedule.self_check_to),
+        end: new Date(schedule.self_check_to),
+        color: 'transparent',
+      })
+
+      let first_check = new Date(schedule.self_check_to);
+      first_check.setDate(first_check.getDate() + 1)
+
+      if (getDateStr(first_check) > schedule.self_check_to && getDateStr(first_check) < schedule.imp_check_from) {
+        newEvents.push({
+          title: '1차 검수 기간',
+          allDay: true,
+          start: first_check,
+          end: first_check,
+          color: 'transparent',
+        })
+      }
+
+      newEvents.push({
+        title: '이행점검 보완제출 기간',
+        allDay: true,
+        start: new Date(schedule.imp_check_from),
+        end: new Date(schedule.imp_check_from),
+        color: 'transparent',
+      })
+
+      newEvents.push({
+        title: '이행점검 보완제출 마감',
+        allDay: true,
+        start: new Date(schedule.imp_check_to),
+        end: new Date(schedule.imp_check_to),
+        color: 'transparent',
+      })
+    }
+    else if (project) {
+      console.log(checkSchedule)
+      checkSchedule.map((x:any, i: Number) => {
+        newEvents.push({
+          title: '현장점검-' + x.user_name,
+          allDay: true,
+          start: new Date(x.data.time),
+          end: new Date(x.data.time),
+          color: 'check',
+          index: i,
+        })
+      })
+    }
+
+    setCalEvents(newEvents)
+    setToggle(!toggle)
+  }, [schedule, projectDetail, checkAll, checkSchedule])
+
+  const fetchDetail = async() => {
+    const response = await axios.post(`${API_URL}/project/Detail`, {
+      project_id: project,
+      admin_id: admin,
+      consignee_id: consignee
+    }); 
+
+    let delay = response.data.delay
+
+    if (delay)
+      delay = JSON.parse(delay);
+    else
+      delay = {
+        create: [],
+        self_check: [],
+        imp_check: []
+      }
+
+    setProjectDetail({...response.data, delay: delay, set: true})
+  }
+
+  useEffect(() => {
+    if (consignee) {
+      fetchDetail()
+    }
+    else {
+      setProjectDetail({...projectDetail, set: false})
+    }
+  }, [consignee])
+
+  const fetchSchedule = () => {
     if (project) {
-      const response = await axios.post(`${API_URL}/project/Schedule`, {
-        id: project
-      });
-      console.log(response.data)
-      setSchedule(response.data.data)
+      let data = projects.find((x) => x.project_id == project);
+      setSchedule({
+        create_from: data.create_from,
+        create_to: data.create_to,
+        self_check_from: data.self_check_from,
+        self_check_to: data.self_check_to,
+        imp_check_from: data.imp_check_from,
+        imp_check_to: data.imp_check_to
+      })
+
+      
+    }
+    else {
+      setSchedule({
+        create_from: '',
+        create_to: '',
+        self_check_from: '',
+        self_check_to: '',
+        imp_check_from: '',
+        imp_check_to: ''
+      })
     }
   }
+
   useEffect(() => {
     fetchSchedule()
+    fetchConsignee()
+    fetchCheckSchedule()
   }, [project])
 
-  const fetchData = async() => {
-    const response = await axios.post(`${API_URL}/project/List`);
-    console.log(response.data)
+  const fetchCheckSchedule = async() => {
+    if (project) {
+      const response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
+        project_id: project,
+        admin_id: admin
+      });  
+
+      let data = response.data
+      let newData: { id:any; user_id: any; project_id: any; checker_id: any; user_name: any; data: { time: any; address: any; manager: any; phone: any; }; }[] = []
+      
+      data.map((x:any) => {
+        if (x.check_schedule) {
+          let checks = JSON.parse(x.check_schedule)
+
+          checks.map((ch:any) => {
+            newData.push({
+              id: x.id,
+              user_id: x.user_id,
+              project_id: x.project_id,
+              checker_id: x.checker_id,
+              user_name: x.user_name,
+              data: {
+                time: ch.time,
+                address: ch.address,
+                manager: ch.manager,
+                phone: ch.phone
+              } 
+            })
+          })
+        }
+      })
+
+      setCheckSchedule(newData)
+    }
+    else {
+      setCheckSchedule([])
+    }
+  }
+
+  const fetchConsignee = async() => {
+    if (project) {
+      const response = await axios.post(`${API_URL}/project/ConsigneeByAdmin`, {
+        project_id: project,
+        admin_id: admin
+      });  
+      setConsignees(response.data)
+      
+    }
+    else {
+      setConsignees([])
+    }
+    setConsignee(0)
+  }
+
+  const fetchProjects = async() => {
+    const response = await axios.post(`${API_URL}/project/List`, {
+      admin_id: admin
+    });
     setProjects(response.data)
   }
 
+  const fetchAdmins = async() => {
+    const response = await axios.post(`${API_URL}/project/Users`);
+    let data = response.data
+
+    setAdmins(data.admin)
+    if (data.admin.length > 0)
+      setAdmin(data.admin[0].user_id)
+  }
+
+  const [userData, setUserData] = React.useState({
+    type: 0,
+    user_id: 0,
+    name: ''
+  });
+
   useEffect(() => {
-    // 프로젝트 목록 가져오기
-    fetchData();
+    if (userData.user_id) {
+      if (userData.type == 3) {
+        fetchAdmins();
+      }
+      else if (userData.type == 0) {
+        let newAdmins = [{
+          user_id: userData.user_id,
+          name: userData.name,
+        }]
+
+        setAdmins(newAdmins);
+        setAdmin(userData.user_id);
+      }
+    }
+  }, [userData])
+
+  useEffect(() => {
+    if (admin) {
+      fetchProjects()
+    }
+    else setProjects([])
+    setProject(0)
+  }, [admin])
+
+  useEffect(() => {
     
     const str = sessionStorage.getItem('user')
+    let data = JSON.parse(str);
+    setUserData(data)
   }, []);
 
-  const ColorVariation = [
-    {
-      id: 1,
-      eColor: '#1a97f5',
-      value: 'default',
-    },
-    {
-      id: 2,
-      eColor: '#39b69a',
-      value: 'green',
-    },
-    {
-      id: 3,
-      eColor: '#fc4b6c',
-      value: 'red',
-    },
-    {
-      id: 4,
-      eColor: '#615dff',
-      value: 'azure',
-    },
-    {
-      id: 5,
-      eColor: '#fdd43f',
-      value: 'warning',
-    },
-  ];
-  const addNewEventAlert = (slotInfo: EvType) => {
-    setOpen(true);
-    setSlot(slotInfo);
-    setStart(slotInfo.start);
-    setEnd(slotInfo.end);
-  };
-
   const editEvent = (event: any) => {
-    setOpen(true);
-    const newEditEvent = calevents.find((elem: EvType) => elem.title === event.title);
-    setColor(event.color);
-    setTitle(newEditEvent.title);
-    setColor(newEditEvent.color);
-    setStart(newEditEvent.start);
-    setEnd(newEditEvent.end);
-    setUpdate(event);
+    let data = checkSchedule[event.index]
+    let aa = admins.find((x) => x.user_id == admin)
+
+    setCheckOpen(true)
+    setCheckMode('view')
+    setCheckTitle(data.user_name + " - " + aa.name)
+    setCheckDate(data.data.time)
+    setCheckAddress(data.data.address)
+    setCheckManager(data.data.manager)
+    setCheckManagerPhone(data.data.phone)
+    setEditIndex(event.index)
   };
 
-  const updateEvent = (e: any) => {
-    e.preventDefault();
-    setCalEvents(
-      calevents.map((elem: EvType) => {
-        if (elem.title === update.title) {
-          return { ...elem, title, start, end, color };
-        }
+  const addNewEventAlert = (slotInfo: EvType) => {
+    if (checkAll && project && consignee) {
 
-        return elem;
-      }),
-    );
-    setOpen(false);
-    setTitle('');
-    setColor('');
-    setStart('');
-    setEnd('');
-    setUpdate(null);
-  };
-  const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value);
-  const selectinputChangeHandler = (id: string) => setColor(id);
+      let cc = consignees.find((x) => x.user_id == consignee)
+      let aa = admins.find((x) => x.user_id == admin)
 
-  const submitHandler = (e: React.ChangeEvent<any>) => {
-    e.preventDefault();
-    const newEvents = calevents;
-    newEvents.push({
-      title,
-      start,
-      end,
-      color,
-    });
-    setOpen(false);
-    e.target.reset();
-    setCalEvents(newEvents);
-    setTitle('');
-    setStart(new Date());
-    setEnd(new Date());
-  };
-  const deleteHandler = (event: EvType) => {
-    const updatecalEvents = calevents.filter((ind: EvType) => ind.title !== event.title);
-    setCalEvents(updatecalEvents);
-  };
+      setCheckMode('register');
+      setCheckTitle(cc.name + " - " + aa.name)
+      setCheckDate(slotInfo.start)
+      setCheckAddress(cc.company_address)
+      setCheckManager(cc.manager_name)
+      setCheckManagerPhone(cc.manager_phone)
 
-  const handleClose = () => {
-    // eslint-disable-line newline-before-return
-    setOpen(false);
-    setTitle('');
-    setStart(new Date());
-    setEnd(new Date());
-    setUpdate(null);
+      setCheckOpen(true);
+    }
   };
 
   const eventColors = (event: EvType) => {
@@ -195,23 +557,30 @@ export default function BigCalendar() {
     return { className: `event-default` };
   };
 
-  const handleStartChange = (newValue: any) => {
-    setStart(newValue);
-  };
-  const handleEndChange = (newValue: any) => {
-    setEnd(newValue);
-  };
+  
+  const getDateStr = (d: Date) => {
+    let date = new Date(d)
+    const year = date.getFullYear();
+    const month = `0${date.getMonth() + 1}`.slice(-2);
+    const day = `0${date.getDate()}`.slice(-2);
+
+    return `${year}-${month}-${day}`;
+  }
+
+  const getDateTimeStr = (d: Date) => {
+    let date = new Date(d)
+    const year = date.getFullYear();
+    const month = `0${date.getMonth() + 1}`.slice(-2);
+    const day = `0${date.getDate()}`.slice(-2);
+    const hour = `0${date.getHours()}`.slice(-2);
+    const minute = `0${date.getMinutes()}`.slice(-2);
+
+    return `${year}-${month}-${day} ${hour}:${minute}:00`;
+  }
 
   const dayPropGetter = useCallback(
     (date:Date) => {
-      
-      const year = date.getFullYear();
-      const month = `0${date.getMonth() + 1}`.slice(-2);
-      const day = `0${date.getDate()}`.slice(-2);
-
-      const dateStr = `${year}-${month}-${day}`;
-      console.log(dateStr)
-      console.log(schedule)
+      const dateStr = getDateStr(date)
 
       if (dateStr >= schedule.create_from && dateStr <= schedule.create_to)  {
         return {
@@ -230,14 +599,14 @@ export default function BigCalendar() {
       else if (dateStr >= schedule.imp_check_from && dateStr <= schedule.imp_check_to)  {
         return {
           style: {
-            backgroundColor: 'green'
+            backgroundImage: 'linear-gradient(to bottom right, #c4e3b6, #e6f2e0)'
           }
         };  
       }
       else if (dateStr > schedule.self_check_to && dateStr < schedule.imp_check_from)  {
         return {
           style: {
-            backgroundColor: 'grey'
+            backgroundImage: 'linear-gradient(to bottom right, #b6b3b3, #e8e7e7)'
           }
         };  
       }
@@ -245,8 +614,160 @@ export default function BigCalendar() {
     [schedule]
   )
 
-  const [managerName, setManagerName] = useState<string>('김하늘');
-  const [projectName, setProjectName] = useState<string>('trustee');
+  const [showModal, setShowModal] = React.useState(false)
+  const [modalMsg, setModalMsg] = React.useState('')
+  const onClose = () => {
+    setShowModal(false)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  const handleCheckClose = () => {
+    setCheckOpen(false)
+  }
+
+  const handleStartChange = (newValue: any) => {
+    setStart(newValue);
+  };
+  const handleEndChange = (newValue: any) => {
+    setEnd(newValue);
+  };
+
+  const onDelay = async () => {
+    if (getDateStr(end) <= initialEnd) {
+      setModalMsg('연기된 날짜를 정확히 입력하세요.');
+      setShowModal(true);
+      return;
+    }
+
+    let newDelay = projectDetail.delay;
+    if (delayType == 'create') {
+      newDelay.create.push(end);
+    }
+    if (delayType == 'self_check') {
+      newDelay.self_check.push(end);
+    }
+    if (delayType == 'imp_check') {
+      newDelay.imp_check.push(end);
+    }
+
+    const response = await axios.post(`${API_URL}/project_detail/Update`, {
+      id: projectDetail.id,
+      delay: JSON.stringify(projectDetail.delay)
+    });
+
+    if (response.data.result == 'SUCCESS') {
+      setOpen(false)
+      setProjectDetail({...projectDetail, delay: newDelay});
+      setModalMsg('정확히 보관되었습니다.')
+      setShowModal(true)
+    }
+    else {
+      setModalMsg(response.data.error_message)
+      setShowModal(true)
+    }
+  }
+
+  const onSaveCheck = async () => {
+    if (checkMode == 'register') {
+      let newData = {
+        time: getDateTimeStr(checkDate),
+        address: checkAddress,
+        manager: checkManager,
+        phone: checkManagerPhone
+      }
+  
+      let res = [];
+      for (let i = 0; i < checkSchedule.length; i++) {
+        if (checkSchedule[i].user_id == consignee && checkSchedule[i].project_id == project && checkSchedule[i].checker_id == admin) {
+          res.push(checkSchedule[i].data)
+        }
+      }
+  
+      res.push(newData)
+  
+      const response = await axios.post(`${API_URL}/project_detail/Update`, {
+        id: projectDetail.id,
+        check_schedule: JSON.stringify(res)
+      });
+  
+      if (response.data.result == 'SUCCESS') {
+        setCheckOpen(false)
+  
+        let newSchedule = checkSchedule.map((x:any) => x);
+        let cc = consignees.find((x) => x.user_id == consignee)
+        newSchedule.push({
+          id: projectDetail.id,
+          user_id: consignee,
+          project_id: project,
+          checker_id: admin,
+          user_name: cc.name,
+          data: newData
+        })
+        setCheckSchedule(newSchedule)
+        setToggle(!toggle)
+        setModalMsg('정확히 보관되었습니다.')
+        setShowModal(true)
+      }
+      else {
+        setModalMsg(response.data.error_message)
+        setShowModal(true)
+      }  
+    }
+    else {
+      let newSchedule = checkSchedule.map((x:any) => x);
+      newSchedule[editIndex].data = {
+        time: getDateTimeStr(checkDate),
+        address: checkAddress,
+        manager: checkManager,
+        phone: checkManagerPhone
+      }
+  
+      let res = [];
+      for (let i = 0; i < newSchedule.length; i++) {
+        if (newSchedule[i].user_id == newSchedule[editIndex].user_id && newSchedule[i].project_id == newSchedule[editIndex].project_id && newSchedule[i].checker_id == newSchedule[editIndex].checker_id) {
+          res.push(newSchedule[i].data)
+        }
+      }
+  
+      const response = await axios.post(`${API_URL}/project_detail/Update`, {
+        id: newSchedule[editIndex].id,
+        check_schedule: JSON.stringify(res)
+      });
+  
+      if (response.data.result == 'SUCCESS') {
+        setCheckOpen(false)
+  
+        setCheckSchedule(newSchedule)
+        setModalMsg('정확히 보관되었습니다.')
+        setShowModal(true)
+      }
+      else {
+        setModalMsg(response.data.error_message)
+        setShowModal(true)
+      }  
+    }
+  }
+
+  const onEditCheck = async () => {
+    setCheckMode('edit')
+  }
+
+  const getKoreanDateTime = (date: any) => {
+    let dd = new Date(date)
+    const year = dd.getFullYear();
+    const month = dd.getMonth() + 1;
+    const day = dd.getDate();
+    const hour = dd.getHours();
+    const minute = dd.getMinutes();
+    const d = dd.getDay();
+    const day_names=['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+
+    return `${year}년 ${month}월 ${day}일(${day_names[d]}) ${hour}시 ${minute}분`;
+  }
+
   return (
     <PageContainer>
       <Breadcrumb title="일정관리"   />
@@ -255,34 +776,39 @@ export default function BigCalendar() {
         <CustomSelect
           id="account-type-select"
           sx={{mr:4}}
-          value={managerName} 
+          value={admin} 
           onChange={(event:any) => {
-            setManagerName(event.target.value as string)}}
+            setAdmin(event.target.value)}}
         >
-          <MenuItem value="이예니">이예니</MenuItem>
-          <MenuItem value="김하늘">김하늘</MenuItem>
+          {admins.map((x, i) => {
+            return (
+              <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+            );
+          })
+          }
         </CustomSelect>
 
         <Typography sx={{mr:1}} >프로젝트 명</Typography>
         <CustomSelect
           id="account-type-select"
-          sx={{mr:4, width: 200}}
+          sx={{mr:2, width: 200}}
           value={project} 
           onChange={(event:any) => {
             setProject(event.target.value)}}
         >
           {projects.map((x, i) => {
             return (
-              <MenuItem value={x.id}>{x.name}</MenuItem>
+              <MenuItem key={i} value={x.project_id}>{x.name}</MenuItem>
             );
           })}
         </CustomSelect>
         <FormControlLabel
-          sx={{mr:4}}
+          sx={{mr:2}}
           control={
             <CustomCheckbox
-              defaultChecked
               color="success"
+              checked={checkAll}
+              onChange={(e:any) => {setCheckAll(e.target.checked);}}
               inputProps={{ 'aria-label': 'checkbox with default color' }}
             />
           }
@@ -293,13 +819,30 @@ export default function BigCalendar() {
         <Typography sx={{mr:1}} >수탁사</Typography>
         <CustomSelect
           id="account-type-select" 
-          value={'www'} 
+          value={consignee} 
+          sx={{width: 150}}
           onChange={(event:any) => {
-            setProjectName(event.target.value as string)}}
+            setConsignee(event.target.value)}}
         >
-          <MenuItem value="www">수탁사1</MenuItem>
-          <MenuItem value="222">수탁사2</MenuItem>
+          {consignees.map((x, i) => {
+            return (
+              <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+            );
+          })}
         </CustomSelect>
+
+        {(consignee > 0) && (
+          <Button
+            onClick={() => {
+              setOpen(true)
+            }}
+            variant="contained"
+            color="primary" 
+            sx={{width:100, ml:2}}
+          >
+            일정연기
+          </Button> )
+        }
       </Box>
       
       <BlankCard>
@@ -344,95 +887,69 @@ export default function BigCalendar() {
       {/* Add Calendar Event Dialog */}
       {/* ------------------------------------------- */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
-        <form onSubmit={update ? updateEvent : submitHandler}>
+        <form>
           <DialogContent>
             {/* ------------------------------------------- */}
             {/* Add Edit title */}
             {/* ------------------------------------------- */}
             <Typography variant="h4" sx={{ mb: 2 }}>
-              {update ? '일정 수정' : '일정 추가'}
-            </Typography>
-            <Typography mb={3} variant="subtitle2">
-              {!update
-                ? '일정를 추가하려면 제목을 입력하고 색상을 선택한 후 추가 버튼을 누르세요'
-                : '일정를 수정/업데이트하려면 제목을 변경하고 색상을 선택한 후 업데이트 버튼을 누르세요'}
-              {slot?.title}
+              일정 연기
             </Typography>
 
-            <TextField
-              id="Event Title"
-              placeholder="일정 제목을 입력하세요"
-              variant="outlined"
-              fullWidth
-              label="일정 제목"
-              value={title}
-              sx={{ mb: 3 }}
-              onChange={inputChangeHandler}
-            />
+            <CustomSelect
+              value={delayType} 
+              sx={{mb:3}}
+              onChange={(event:any) => {
+                setDelayType(event.target.value)}}
+            >
+              <MenuItem value={'create'}>계정 생성 기간</MenuItem>
+              <MenuItem value={'self_check'}>자가점검 제출 기간</MenuItem>
+              <MenuItem value={'imp_check'}>이행점검 보완제출 기간</MenuItem>
+            </CustomSelect>
             {/* ------------------------------------------- */}
             {/* Selection of Start and end date */}
             {/* ------------------------------------------- */}
-            <LocalizationProvider dateAdapter={AdapterDateFns} locale={koLocale}> 
-              <DatePicker
-                label="시작 날짜"
-                inputFormat="yyyy-MM-dd"
-                value={start}
-                onChange={handleStartChange}
-                renderInput={(params: any) => (
-                  <TextField
-                    {...params}
-                    fullWidth
-                    sx={{ mb: 3 }}
-                    error={Boolean(params.error)}
-                    helperText={params.error ? '시작 날짜가 올바르지 않습니다.' : ''}
+            <Box sx={{display: 'flex', alignItems: 'center'}}>
+              <Box sx={{flex: 1}}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={koLocale}> 
+                  <DatePicker
+                    label="시작 날짜"
+                    inputFormat="yyyy-MM-dd"
+                    value={start}
+                    onChange={handleStartChange}
+                    disabled={true}
+                    renderInput={(params: any) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={Boolean(params.error)}
+                        helperText={params.error ? '시작 날짜가 올바르지 않습니다.' : ''}
+                      />
+                    )}
+                  /> 
+                  </LocalizationProvider>    
+              </Box>
+              <Box sx={{ml:1, mr: 1}}>~</Box>
+              <Box sx={{flex: 1}}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={koLocale}> 
+                  <DatePicker
+                    label="종료 날짜"
+                    inputFormat="yyyy-MM-dd"
+                    value={end}
+                    onChange={handleEndChange}
+                    renderInput={(params: any) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={start && end && start > end}
+                        helperText={start && end && start > end ? '종료 날짜는 시작 날짜보다 늦어야 합니다.' : ''}
+                      />
+                    )}
                   />
-                )}
-              /> 
+                </LocalizationProvider>
+              </Box>
+            </Box>
 
-              <DatePicker
-                label="종료 날짜"
-                inputFormat="yyyy-MM-dd"
-                value={end}
-                onChange={handleEndChange}
-                renderInput={(params: any) => (
-                  <TextField
-                    {...params}
-                    fullWidth
-                    sx={{ mb: 3 }}
-                    error={start && end && start > end}
-                    helperText={start && end && start > end ? '종료 날짜는 시작 날짜보다 늦어야 합니다.' : ''}
-                  />
-                )}
-              />
-            </LocalizationProvider>
-
-            {/* ------------------------------------------- */}
-            {/* Calendar Event Color*/}
-            {/* ------------------------------------------- */}
-            <Typography variant="h6" fontWeight={600} my={2}>
-              일정 색상 선택
-            </Typography>
-            {/* ------------------------------------------- */}
-            {/* colors for event */}
-            {/* ------------------------------------------- */}
-            {ColorVariation.map((mcolor) => {
-              return (
-                <Fab
-                  color="primary"
-                  style={{ backgroundColor: mcolor.eColor }}
-                  sx={{
-                    marginRight: '3px',
-                    transition: '0.1s ease-in',
-                    scale: mcolor.value === color ? '0.9' : '0.7',
-                  }}
-                  size="small"
-                  key={mcolor.id}
-                  onClick={() => selectinputChangeHandler(mcolor.value)}
-                >
-                  {mcolor.value === color ? <IconCheck width={16} /> : ''}
-                </Fab>
-              );
-            })}
           </DialogContent>
           {/* ------------------------------------------- */}
           {/* Action for dialog */}
@@ -440,20 +957,9 @@ export default function BigCalendar() {
           <DialogActions sx={{ p: 3 }}>
             <Button onClick={handleClose}>취소</Button>
 
-            {update ? (
-              <Button
-                type="submit"
-                color="error"
-                variant="contained"
-                onClick={() => deleteHandler(update)}
-              >
-                삭제
-              </Button>
-            ) : (
-              ''
-            )}
-            <Button type="submit" disabled={!title} variant="contained">
-              {update ? '일정 수정' : '일정 추가'}
+            
+            <Button variant="contained" onClick={onDelay}>
+              연기
             </Button>
           </DialogActions>
           {/* ------------------------------------------- */}
@@ -461,7 +967,152 @@ export default function BigCalendar() {
           {/* ------------------------------------------- */}
         </form>
       </Dialog>
+      <Dialog open={showModal} onClose={onClose}>
+        <DialogTitle></DialogTitle>
+        <DialogContent sx={{width:300}} >
+          <DialogContentText>{modalMsg}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { onClose(); }}>OK</Button>
+        </DialogActions>
+      </Dialog> 
+      {/* ------------------------------------------- */}
+      <Dialog open={checkOpen} onClose={handleCheckClose} fullWidth maxWidth="xs">
+        <form>
+          <DialogContent>
+            {/* ------------------------------------------- */}
+            {/* Add Edit title */}
+            {/* ------------------------------------------- */}
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              {checkMode == 'register' ? '현장점검 일정수립' : (checkMode == 'view' ? '현장점검 일정확인' : '현장점검 일정수정')}
+            </Typography>
+
+            
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              {checkTitle}
+            </Typography>
+
+            {checkMode == 'view' ? (
+              <Typography sx={{ mb: 2 }}>
+                {getKoreanDateTime(checkDate)}
+              </Typography>
+            ) : (
+              <Box sx={{mb:2}}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={koLocale}> 
+                  <DateTimePicker
+                    label="점검 날짜"
+                    inputFormat="yyyy-MM-dd HH:mm"
+                    value={checkDate}
+                    onChange={(val) => {setCheckDate(val)}}
+                    renderInput={(params: any) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={Boolean(params.error)}
+                        helperText={params.error ? '날짜가 올바르지 않습니다.' : ''}
+                      />
+                    )}
+                  /> 
+                </LocalizationProvider>  
+              </Box>
+            )}
+  
+
+            <Box sx={{display: 'flex', alignItems: 'center', mb:1}}>
+              <Box sx={{width: 60}}>
+                <Typography>
+                  주소:
+                </Typography>
+              </Box>
+              <Box sx={{flex: 1, display: 'flex'}}>
+                {checkMode == 'view' ? (
+                  <Typography>
+                    {checkAddress}
+                </Typography>
+                ) : (
+                <TextField
+                  placeholder=""
+                  size="small"
+                  onChange={(e:any) => {setCheckAddress(e.target.value)}}
+                  value={checkAddress}
+                  sx={{flex: 1, mr:1}}
+                />
+                )}
+              </Box>
+            </Box>
+
+            <Box sx={{display: 'flex', alignItems: 'center', mb:1}}>
+              <Box sx={{width: 60}}>
+                <Typography>
+                  담당자:
+                </Typography>
+              </Box>
+              <Box sx={{flex: 1, display: 'flex'}}>
+                {checkMode == 'view' ? (
+                  <Typography>
+                    {checkManager}
+                </Typography>
+                ) : (
+                <TextField
+                  placeholder=""
+                  size="small"
+                  onChange={(e:any) => {setCheckManager(e.target.value)}}
+                  value={checkManager}
+                  sx={{flex: 1, mr:1}}
+                />
+                )}
+              </Box>
+            </Box>
+
+            <Box sx={{display: 'flex', alignItems: 'center'}}>
+              <Box sx={{width: 60}}>
+                <Typography>
+                  연락처:
+                </Typography>
+              </Box>
+              <Box sx={{flex: 1, display: 'flex'}}>
+                {checkMode == 'view' ? (
+                  <Typography>
+                    {checkManagerPhone}
+                </Typography>
+                ) : (
+                <TextField
+                  placeholder=""
+                  size="small"
+                  onChange={(e:any) => {setCheckManagerPhone(e.target.value)}}
+                  value={checkManagerPhone}
+                  sx={{flex: 1, mr:1}}
+                />
+                )}
+              </Box>
+            </Box>
+
+          </DialogContent>
+
+          {checkMode != 'view' && 
+          <DialogActions sx={{ p: 3 }}>
+            <Button onClick={handleCheckClose}>취소</Button>
+
+              <Button variant="contained" onClick={onSaveCheck}>
+              저장
+            </Button>
+            
+          </DialogActions>
+          }
+
+          {checkMode == 'view' && 
+          <DialogActions sx={{ p: 3 }}>
+
+              <Button variant="contained" onClick={onEditCheck}>
+              수정
+              </Button>
+            
+          </DialogActions>
+          }
+        </form>
+      </Dialog>
     </PageContainer>
   );
 };
+
 

@@ -33,8 +33,8 @@ import { Delete as DeleteIcon } from '@mui/icons-material'; // 삭제 아이콘 
 import { Row } from 'antd';
 import { fetchProjects } from '@src/store/apps/ProjectSlice';
 import { ProjectType } from '@src/types/apps/project'; 
-import axios from 'axios'; 
-import { apiUrl } from '@src/utils/commonValues';
+const axios = require('axios');
+import { API_URL } from '@pages/constant';
 // ReactQuill 동적 import
 const ReactQuill: any = dynamic(
   async () => {
@@ -68,11 +68,12 @@ export default function QuillEditor() {
   const [isEditing, setIsEditing] = useState(false);
   const [category, setCategory] = useState('');
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null); 
-  const projects: ProjectType[] = useSelector((state) => state.projectReducer.projects);
+  const [projects, setProjects] = useState([]);
 
   const [create_by, setCreatedBy] = useState('');
   const [create_time, setCreateTime] = useState('');
   const [attachment, setAttachment] = useState('');
+  const [editAttachment, setEditAttachment] = useState('');
   const [views, setViews] = useState(0);
   const [projectName, setProjectName] = useState('');
 
@@ -87,8 +88,7 @@ export default function QuillEditor() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get('id') || ''; 
-      const API_URL = `http://${apiUrl}notice`;
-      const response = await axios.post(`${API_URL}/Detail`, { id: id });
+      const response = await axios.post(`${API_URL}/notice/Detail`, { id: id });
       console.log(response);
       // 파라미터에서 받아온 공지사항 정보 설정
       setId(id);
@@ -100,15 +100,22 @@ export default function QuillEditor() {
       setCreatedBy(response.data.create_by);  
       setCreateTime(response.data.create_time);  
       setAttachment(response.data.attachment);  
-      setViews(response.data.views);   
+      setEditAttachment(response.data.attachment);  
+      setViews(response.data.views);
     } catch (error) {
       console.error('Error fetching notice info:', error);
       // Handle error if necessary
     }
   };
 
+  const fetchProjects = async() => {
+    const response = await axios.post(`${API_URL}/project/List`, {
+      
+    });
+    setProjects(response.data)
+  }
   useEffect(() => {
-    dispatch(fetchProjects());
+    fetchProjects()
     fetchDetail();
   }, []); // 페이지 로드시 한번만 실행 
   // 파라미터에서 공지사항 정보 추출 
@@ -128,6 +135,10 @@ export default function QuillEditor() {
     setSelectedFile(null);
   };
 
+  const handleAttachmentDelete = () => {
+    setEditAttachment('')
+  }
+
   // 수정 모드로 변경
   const handleEdit = () => {
     setIsEditing(true);
@@ -140,6 +151,10 @@ export default function QuillEditor() {
     formData.append('notice_id', id);
     if (selectedFile)  {
       formData.append('file', selectedFile.file);
+      formData.append('change', '1');
+    }
+    else if (editAttachment != attachment) {
+      formData.append('file', '');
       formData.append('change', '1');
     }
     else {
@@ -284,13 +299,24 @@ export default function QuillEditor() {
                         }}
                         style={{ display: 'none' }}
                       />
-                      {selectedFile && (
+                      {selectedFile ? (
                         <Chip
                           style={{ marginLeft: 2 }}
                           label={selectedFile.file.name}
                           onDelete={handleDelete}
                         />
+                      ): (
+                        <>
+                        {editAttachment && <Chip
+                          style={{ marginLeft: 2 }}
+                          label={editAttachment}
+                          onDelete={handleAttachmentDelete}
+                        />}
+                        </>
                       )}
+                      {
+
+                      }
                       
                       
                       </Row>: 

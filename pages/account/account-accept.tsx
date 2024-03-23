@@ -14,6 +14,11 @@ import {
   Toolbar,
   Typography,
   Button, 
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  DialogContentText,
   Badge, 
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton'; 
@@ -180,6 +185,12 @@ export default function EnhanceTable() {
 
   const updateUser = async(userData:any) => {
     const response = await axios.post(`${API_URL}/user/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
+
+    if (response.data.result == 'success') {
+      setModalMsg('정확히 설정되었습니다.');
+      setShowModal(true)
+      setShowRegistrationInfo(false)
+    }
     fetchUsers()
   }
 
@@ -195,6 +206,12 @@ export default function EnhanceTable() {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const [showModal, setShowModal] = React.useState(false)
+  const [modalMsg, setModalMsg] = React.useState('')
+  const onClose = () => {
+    setShowModal(false)
+  }
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof []) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -415,7 +432,15 @@ export default function EnhanceTable() {
           </DashboardCard>
         )} 
         </Box>
-      
+      <Dialog open={showModal} onClose={onClose}>
+        <DialogTitle></DialogTitle>
+        <DialogContent sx={{width:300}} >
+          <DialogContentText>{modalMsg}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { onClose(); }}>OK</Button>
+        </DialogActions>
+      </Dialog> 
     </PageContainer>
   );
 };

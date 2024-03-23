@@ -39,7 +39,7 @@ const Events: EventType[] = [
     start: new Date(y, m, d + 1, 19, 0),
     end: new Date(y, m, d + 1, 22, 30),
     allDay: false,
-    color: 'azure',
+    color: 'transparent',
   },
   {
     title: '이행점검 보완제출 기간',
