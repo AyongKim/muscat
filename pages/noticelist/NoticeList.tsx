@@ -197,6 +197,7 @@ const NoticeList = () => {
         .unwrap()
         .then(() => {
           console.log("Companies successfully deleted");
+          fetchNotices();
           handleClose();
         })
         .catch((error: any) => {

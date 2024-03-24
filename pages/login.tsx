@@ -110,6 +110,10 @@ export default function Login() {
        else if (response.loginResult == 'no user') {
         setErrorMessage(`사용자가 존재하지 않습니다.`);
        }
+       else if (response.loginResult == 'not allowed') {
+        setErrorMessage(`승인된 사용자가 아닙니다.`);
+       }
+       
     } catch (error) {
       console.error('Login error', error);
       setErrorMessage('서버와의 연결에 실패했습니다.');
