@@ -104,8 +104,7 @@ function CompanyTableHead(props: CompaynyTableProps) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property: any) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
-  };
-
+  }; 
   return (
     <TableHead>
       <TableRow>
@@ -144,25 +143,31 @@ function CompanyTableHead(props: CompaynyTableProps) {
     </TableHead>
   );
 }
+ 
 
-interface CompanyTableToolbarProps {
-  numSelected: number;
-  rows: any; 
-}
-
-const CompanyList = () => {
+const CompanyList = ({ handleCompanySelect  }: { handleCompanySelect :  (registerNum:string) => void }) => { 
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
   const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [selectedRegisterNum, setSelectedRegisterNum] = React.useState('');
 
   const dispatch = useDispatch();
-
+  const [isMaster, setIsMaster] = React.useState(true)
   //Fetch Products
   React.useEffect(() => {
     dispatch(fetchCompanies());
+    const str = sessionStorage.getItem('user')
+    const type = JSON.parse(str).type
+    if (type == 3) {
+      setIsMaster(true) 
+      setSelectedRegisterNum('000-00-00000')
+    }
+    else {
+      setIsMaster(false) 
+    }
   }, [dispatch]);
 
   const getCompanies: CompanyType[] = useSelector((state) => state.companyReducer.companies);
@@ -195,7 +200,10 @@ const CompanyList = () => {
     setRegistrationNumberSearch(event.target.value);
     setRows(filteredRows);
   };
-
+  const handleRegisterNumClick = (registerNum : string) => {
+    handleCompanySelect(registerNum);
+    setSelectedRegisterNum(registerNum); 
+  };
  
 
   // This is for the sorting
@@ -238,6 +246,8 @@ const CompanyList = () => {
 
     setSelected(newSelected);
   };
+
+ 
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -322,7 +332,7 @@ const CompanyList = () => {
                 />
 
             <DeleteCompanies selectedCompanyIds={selected.join(',')} onClose={()=>{setSelected([])}}/>
-            <AddCompany   />
+            <AddCompany   onClose={()=>{dispatch(fetchCompanies());}} />
         
           </Toolbar>
           <Paper variant="outlined" sx={{ mx: 2, my: 1, border: `1px solid ${borderColor}` }}>
@@ -341,30 +351,14 @@ const CompanyList = () => {
                   rowCount={rows.length}
                 />
                 <TableBody>
-                  {stableSort(rows, getComparator(order, orderBy))
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row: any, index) => {
-                      const isItemSelected = isSelected(row.id);
-                      const labelId = `enhanced-table-checkbox-${index}`;
-
-                      return (
-                        <TableRow
-                          hover
-                          onClick={(event) => handleClick(event, row.id)}
-                          role="checkbox"
-                          aria-checked={isItemSelected}
+                    { isMaster && (<TableRow
+                          hover 
+                          role="checkbox" 
                           tabIndex={-1}
-                          key={row.id}
-                          selected={isItemSelected}
+                          key={-1} 
                         >
                           <TableCell padding="checkbox">
-                            <CustomCheckbox
-                              color="primary"
-                              checked={isItemSelected}
-                              inputProps={{
-                                'aria-labelledby': labelId,
-                              }}
-                            />
+                           
                           </TableCell>
 
                           <TableCell>
@@ -375,15 +369,93 @@ const CompanyList = () => {
                                 }}
                               >
                                 <Typography variant="h6" fontWeight="600">
-                                  {row.id}
+                                  1
                                 </Typography> 
                               </Box>
                             </Box>
                           </TableCell>
                           <TableCell>
+                            <Box display="flex" alignItems="center"> 
+                              <Typography
+                                  key={-1}
+                                  sx={{
+                                    ml: 1,
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid black',
+                                    color: selectedRegisterNum === '000-00-00000' ? 'blue' : 'black',
+                                  }}
+                                  variant="h6"
+                                  fontWeight="600"
+                                  onClick={() => handleRegisterNumClick('000-00-00000')}
+                                >
+                                000-00-00000
+                              </Typography>  
+                              </Box>
+                          </TableCell> 
+                          <TableCell>
                               <Typography variant="h6" fontWeight="600">
+                                주(머스캣)
+                              </Typography>  
+                          </TableCell>  
+                        </TableRow>)}
+                  {stableSort(rows, getComparator(order, orderBy))
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row: any, index) => {
+                      const isItemSelected = isSelected(row.id);
+                      const labelId = `enhanced-table-checkbox-${index}`;
+
+                      return (
+                        <TableRow
+                          hover
+                        
+                          role="checkbox"
+                          aria-checked={isItemSelected}
+                          tabIndex={-1}
+                          key={row.id}
+                          selected={isItemSelected}
+                        >
+                          <TableCell padding="checkbox">
+                           <CustomCheckbox
+                              onClick={(event) => handleClick(event, row.id)}
+                              color="primary"
+                              
+                              checked={isItemSelected}
+                              inputProps={{
+                                'aria-labelledby': labelId,
+                              }}
+                            /> 
+                          </TableCell>
+
+                          <TableCell>
+                            <Box display="flex" alignItems="center"> 
+                              <Box
+                                sx={{
+                                  ml: 2,
+                                }}
+                              >
+                                <Typography variant="h6" fontWeight="600">
+                                  {isMaster?index*page+1:index}
+                                </Typography> 
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box display="flex" alignItems="center"> 
+                              <Typography
+                                  key={row.id}
+                                  sx={{
+                                    ml: 1,
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid black',
+                                    color: selectedRegisterNum === row.register_num ? 'blue' : 'black',
+                                  }}
+                                  variant="h6"
+                                  fontWeight="600"
+                                  onClick={() => handleRegisterNumClick(row.register_num)}
+                                >
                                 {row.register_num}
                               </Typography>  
+                              </Box>
                           </TableCell> 
                           <TableCell>
                               <Typography variant="h6" fontWeight="600">

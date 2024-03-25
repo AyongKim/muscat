@@ -3,7 +3,6 @@ import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack, Typogra
 import { useSelector, useDispatch } from '../../../../store/Store';
 import { toggleSidebar, toggleMobileSidebar } from '../../../../store/customizer/CustomizerSlice';
 import { IconMenu2 } from '@tabler/icons-react';
-import Profile from './Profile';
 import { AppState } from '../../../../store/Store';
 
 const Header = () => {
@@ -65,7 +64,7 @@ const Header = () => {
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
           <Typography> {user.type == 0 ? '어드민' : (user.type == 1 ? '수탁사' : (user.type == 2? '위탁사': '마스터'))}({user.name}) 로 로그인되었습니다.</Typography>
-          <Profile />
+       
         </Stack>
       </ToolbarStyled>
     </AppBarStyled>

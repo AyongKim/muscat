@@ -65,7 +65,10 @@ const checkBusinessNumber = async (number: string): Promise<string> => {
     return ''; // API 호출 실패 시 null 반환
   }
 };
-
+const isValidRegisterNum = (num: string) => {
+  const regex = /^\d{3}-\d{2}-\d{5}$/;
+  return regex.test(num);
+};
 const AccountTab: React.FC = () => {
   // Form state
   const [isMaster, setIsMaster] = useState(true)
@@ -79,6 +82,7 @@ const AccountTab: React.FC = () => {
   const [phone, setPhone] = useState<string>('');
   const [department, setDepartment] = useState<string>('');
   const [position, setPosition] = useState<string>('');
+  const [other, setOther] = useState<string>('');
  
 
   // Dialog state
@@ -97,6 +101,8 @@ const AccountTab: React.FC = () => {
   // Handlers
   const handleAccountTypeChange = (event:any) => {
     setAccountType(event.target.value);
+    if(event.target.value==1)
+      setBusinessNumber('000-00-00000');
   };
 
   useEffect(() => {
@@ -105,6 +111,7 @@ const AccountTab: React.FC = () => {
     if (type == 3) {
       setIsMaster(true)
       setAccountType(0)
+      setBusinessNumber('000-00-00000');
     }
     else {
       setIsMaster(false)
@@ -166,17 +173,22 @@ const AccountTab: React.FC = () => {
       manager_phone: accountType > 0 ? phone : '',
       manager_depart: department,
       manager_grade: position,
-      other: '', // 필요에 따라 설정
+      other: other, // 필요에 따라 설정
       admin_name: accountType == 0 ? name : '', // 필요에 따라 설정
       admin_phone: accountType == 0 ? phone : '', // 필요에 따라 설정
       approval:2,
       id: id,
     })
-    .then(() => {
-        // 다이얼로그 메시지 설정
-      setDialogTitle('계정 생성');
-      setDialogContent('계정이 생성되었습니다.');
-      setDialog1Open(true);
+    .then((response : any) => {
+      if (response.data.result === 'success') {
+        setDialogTitle('계정 생성');
+        setDialogContent('계정이 생성되었습니다.');
+        setDialog1Open(true);
+      } else if (response.data.result === 'fail') {
+          setDialogTitle('계정 생성');
+          setDialogContent('계정생성에 실패했습니다.');
+          setDialog1Open(true);
+      }
     })
     .catch((error:any) => {
       // 액션 실패 시 실행할 로직 (에러 처리)
@@ -459,6 +471,9 @@ const AccountTab: React.FC = () => {
                   value={businessNumber}
                   onChange={(e) => setBusinessNumber(e.target.value)}
                   required
+                  error={!isValidRegisterNum(businessNumber)}
+                  InputProps={{ placeholder: '000-00-00000' }} 
+                  // helperText={!isValidRegisterNum(businessNumber) && '(000-00-00000)'}
                 /> 
               )}
                 
@@ -553,7 +568,7 @@ const AccountTab: React.FC = () => {
                 />
               </TableCell>
             </TableRow>
-            {/* Position */}
+            {/* 직급 */}
             <TableRow>
               <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
                 <InputLabel htmlFor="position">
@@ -567,6 +582,23 @@ const AccountTab: React.FC = () => {
                   variant="outlined"
                   value={position}
                   onChange={(e) => setPosition(e.target.value)}
+                />
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="other">
+                  <AssignmentIndIcon sx={{ marginRight: 1 }} />
+                  비고
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={other}
+                  onChange={(e) => setOther(e.target.value)}
                 />
               </TableCell>
             </TableRow>

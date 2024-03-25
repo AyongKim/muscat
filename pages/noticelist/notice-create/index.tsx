@@ -99,31 +99,7 @@ export default function QuillEditor() {
     setSelectedFile(null);
   };
 
-  // const handleSave = () => {
-  //   if (!selectedFile) {
-  //     console.error("No file selected.");
-  //     return;
-  //   }
-
-  //   dispatch(registerNotice({
-  //     content: "content",
-  //     create_by: 'string',
-  //     file: {},
-  //     project_id: category,
-  //     title: title
-  //   }))
-  //     .unwrap()
-  //     .then(() => {
-  //       dispatch(fetchNotices());
-  //       setContent('');
-  //       setTitle('');
-  //       setSelectedFile(null);
-  //     })
-  //     .catch((error: any) => {
-  //       console.error("Failed to register the notice:", error);
-  //     });
-  // };
-
+   
   const handleSave = () => {
     const formData = new FormData();
     if (selectedFile) 
@@ -248,11 +224,26 @@ export default function QuillEditor() {
                 <TableBody>
                   <TableRow>
                     <TableCell colSpan={2}>
-                      <ReactQuill
-                        value={content}
-                        onChange={(value: any) => setContent(value)}
-                        placeholder="Type here..."
-                      />
+                        <ReactQuill
+                          value={content}
+                          onChange={setContent}
+                          modules={{
+                            toolbar: [
+                              [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
+                              [{size: []}],
+                              ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                              [{'list': 'ordered'}, {'list': 'bullet'}, 
+                              {'indent': '-1'}, {'indent': '+1'}],
+                              ['link', 'image'],
+                              ['clean']
+                            ],
+                            clipboard: { 
+                              matchVisual: false,
+                            }
+                          }}
+                          placeholder="Type here..."
+                        /> 
+                       
                     </TableCell>
                   </TableRow>
                 </TableBody>

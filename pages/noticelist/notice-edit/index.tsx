@@ -327,13 +327,27 @@ export default function QuillEditor() {
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell colSpan={8}>
+                    <TableCell colSpan={8}> 
                       <ReactQuill
-                        readOnly={!isEditing}
-                        value={content}
-                        onChange={(value: any) => setContent(value)}
-                        placeholder="Type here..."
-                      />
+                          readOnly={!isEditing}
+                          value={content}
+                          onChange={setContent}
+                          modules={{
+                            toolbar: [
+                              [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
+                              [{size: []}],
+                              ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                              [{'list': 'ordered'}, {'list': 'bullet'}, 
+                              {'indent': '-1'}, {'indent': '+1'}],
+                              ['link', 'image'],
+                              ['clean']
+                            ],
+                            clipboard: { 
+                              matchVisual: false,
+                            }
+                          }}
+                          placeholder="Type here..."
+                        />
                     </TableCell>
                   </TableRow>
                 </TableBody>

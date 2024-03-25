@@ -3,6 +3,7 @@ import PageContainer from '@src/components/container/PageContainer';
 import BlankCard from '@src/components/shared/BlankCard';
 import CompanyList from './components/CompanyList';
 import AccountList from './components/AccountList';
+import { useState } from 'react';
 
 const BCrumb = [
   {
@@ -15,7 +16,11 @@ const BCrumb = [
 ];
 
 export default function EcomProductList() {
+  const [selectedRegisterNum, setSelectedRegisterNum] = useState('000-00-00000');
 
+  const handleCompanySelect = (registerNum:string) => {
+    setSelectedRegisterNum(registerNum);
+  };
   return (
     <PageContainer>
       {/* breadcrumb */}
@@ -24,9 +29,10 @@ export default function EcomProductList() {
         {/* ------------------------------------------- */}
         {/* Left part */}
         {/* ------------------------------------------- */}
-        <CompanyList />
-
-        <AccountList/>
+        <CompanyList handleCompanySelect={handleCompanySelect} />
+      
+        {/* Right part */}
+        <AccountList register_num={selectedRegisterNum} />
        
     </PageContainer>
   );

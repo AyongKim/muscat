@@ -13,8 +13,7 @@ import {
 
 import { useSelector, useDispatch } from '../../../../store/Store';
 import { toggleMobileSidebar } from '../../../../store/customizer/CustomizerSlice';
-import { IconMenu2 } from '@tabler/icons-react';
-import Profile from '../../../../layouts/full/vertical/header/Profile';
+import { IconMenu2 } from '@tabler/icons-react'; 
 import Logo from '../../../../layouts/full/shared/logo/Logo';
 import { AppState } from '../../../../store/Store';
 
@@ -67,8 +66,7 @@ const Header = () => {
          
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          <Typography>{user} 으로 로그인됨</Typography>
-          <Profile />
+          <Typography>{user} 으로 로그인됨</Typography> 
         </Stack>
       </ToolbarStyled>
     </AppBarStyled>

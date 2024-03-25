@@ -131,6 +131,18 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ selectedUserInfo }) => {
             </TableCell>
           </TableRow>
 
+
+          <TableRow sx={{ padding: 1, border: '1px solid black' }}>
+            <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+              <InputLabel htmlFor="other" sx={{ fontWeight: 'bold' }}>비고</InputLabel>
+            </TableCell>
+            <TableCell sx={{ padding: 1, border: '1px solid black' }}>
+              <InputLabel htmlFor="other" sx={{ flex: 1 }}>
+                {selectedUserInfo.other}
+              </InputLabel>
+            </TableCell>
+          </TableRow>
+
         </TableBody>
       </Table>
     </>

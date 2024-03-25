@@ -3,8 +3,7 @@ import SidebarItems from './SidebarItems';
 import Logo from '../../shared/logo/Logo';
 import { useSelector, useDispatch } from '../../../../store/Store';
 import { hoverSidebar, toggleMobileSidebar } from '../../../../store/customizer/CustomizerSlice';
-import Scrollbar from '../../../../components/custom-scroll/Scrollbar';
-import { Profile } from './SidebarProfile/Profile';
+import Scrollbar from '../../../../components/custom-scroll/Scrollbar'; 
 import { AppState } from '../../../../store/Store';
 
 const Sidebar = () => {
@@ -77,8 +76,7 @@ const Sidebar = () => {
               {/* Sidebar Items */}
               {/* ------------------------------------------- */}
               <SidebarItems />
-            </Scrollbar>
-            <Profile />
+            </Scrollbar> 
           </Box>
         </Drawer>
       </Box>

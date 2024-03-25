@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { alpha, useTheme } from '@mui/material/styles';
-import { format } from 'date-fns';
+import { alpha, useTheme } from '@mui/material/styles'; 
 import {
   Box,
   Table,
@@ -19,14 +18,9 @@ import {
   TextField,
   InputAdornment,
 } from '@mui/material';
-import { visuallyHidden } from '@mui/utils';
-import { useSelector, useDispatch } from '@src/store/Store';
-import { fetchUsers  } from '@src/store/apps/UserSlice';
-import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
-import CustomSwitch from '@src/components/forms/theme-elements/CustomSwitch';
-import { IconDotsVertical, IconFilter, IconSearch, IconTrash } from '@tabler/icons-react';
-import { UserType } from '@src/types/apps/account';
-import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
+import { visuallyHidden } from '@mui/utils'; 
+import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox'; 
+import {  IconSearch,   } from '@tabler/icons-react'; 
 import BlankCard from '@src/components/shared/BlankCard';
 import Link from 'next/link';
 import DeleteUser from './DeleteUser';
@@ -171,7 +165,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
  
 
 
-const AccountList = () => {  
+const AccountList = ({ register_num }: { register_num: string }) => {  
   const [isMaster, setIsMaster] = React.useState(false);
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<any>('calories');
@@ -197,10 +191,17 @@ const AccountList = () => {
 
       console.log(data)
     }
-
+    data = data.filter((x:any) => x.register_num === register_num);
     setAccounts(data)
+    
     setRows(data)
   }
+  React.useEffect(() => {
+    if (register_num) {
+      const data = accounts.filter((x:any) => x.register_num === register_num);
+      setRows(data)
+    } 
+  }, [register_num]);
 
   React.useEffect(() => {
     fetchUsers();
@@ -295,8 +296,7 @@ const AccountList = () => {
                   alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
               }),
             }}
-          >
-          
+          > 
             {selected.length > 0 ? (
               <Typography sx={{ flex: '1 1 100%' }} color="inherit"  component="div">
                 {selected.length} 건 선택됨
@@ -322,7 +322,10 @@ const AccountList = () => {
                 value={search}
               />
 
-            <DeleteUser selectedUserIds={selected.join(',')} onClose={()=>{setSelected([])}}/>
+            <DeleteUser selectedUserIds={selected.join(',')} onClose={()=>{
+              fetchUsers()
+              setSelected([])
+              }}/>
             
             <Button component={Link}
                   href="/account/account-create" color="primary" variant="contained" sx={{width:150}}

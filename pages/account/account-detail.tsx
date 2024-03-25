@@ -36,8 +36,7 @@ export default function AccountDetailTable() {
     id: "",
   }); // State to hold user info
   const router = useRouter(); // useRouter hook to handle navigation
-
-
+  const [accountType, setAccountType] = useState<number>(0);
   useEffect(() => {
     const fetchDetail = async () => {
       try {
@@ -53,7 +52,14 @@ export default function AccountDetailTable() {
         // Handle error if necessary
       }
     };
-    
+    const str = sessionStorage.getItem('user')
+    const type = JSON.parse(str).type
+    if (type == 3 || type == 0) {
+      setAccountType(0)
+    }
+    else {
+      setAccountType(1)
+    }
     fetchDetail();
   }, []); // 페이지 로드시 한번만 실행
 
@@ -436,6 +442,50 @@ export default function AccountDetailTable() {
                 )}
               </TableCell>
             </TableRow>
+
+            <TableRow sx={{ padding: 1, border: '1px solid black' }}>
+              <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                <InputLabel htmlFor="position" sx={{padding: 1, fontWeight: 'bold' }}>
+                  비고
+                </InputLabel>
+              </TableCell>
+              <TableCell sx={{ padding: 1, border: '1px solid black' }}>
+                {editMode ? (
+                  <TextField
+                  fullWidth
+                  
+                    type="text"
+                    value={userInfo.other}
+                    onChange={(e) => setUserInfo({ ...userInfo, other: e.target.value })}
+                  />
+                ) : (
+                  <Typography sx={{ml:1}}  >{userInfo.other}</Typography>
+                )}
+              </TableCell>
+            </TableRow>
+
+            {  editMode && accountType==0 && (
+                <TableRow sx={{ padding: 1, border: '1px solid black' }}>
+                  <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
+                    <InputLabel htmlFor="phone" sx={{ fontWeight: 'bold' }}>
+                      사용여부
+                    </InputLabel>
+                  </TableCell>
+                  <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+                  <CustomSelect
+                      id="account-type-select"
+                      sx={{mx:1 , px:0, }} 
+                      value={userInfo.approval} 
+                      onChange={(event:any) => {
+                        setUserInfo({ ...userInfo, approval: event.target.value })}}
+                    >
+                      <MenuItem value={2}>사용</MenuItem>
+                      <MenuItem value={0}>미사용</MenuItem>
+                    </CustomSelect>
+                  </TableCell>
+              </TableRow>
+              )}
+
           </TableBody>
         </Table>
         

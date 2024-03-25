@@ -69,13 +69,13 @@ export default function ChecklistManagement() {
       if (response.status === 200) {
         fetchChecklistItems();
         setSelected([]);
+        setDeleteDialogOpen(false)
       } else {
         console.error('Failed to delete checklist items');
       }
     } catch (error) {
       console.error('Error deleting checklist items:', error);
-    }
-    setDeleteDialogOpen(false);
+    } 
   };
 
   const openDeleteDialog = () => {

@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState, useRef, useEffect } from 'react';
 import {
   Button,
   Dialog,
@@ -9,18 +8,19 @@ import {
   DialogContentText,
   Typography,
 } from '@mui/material';
-
-// 예제로 사용할 addCompany 액션입니다.
-// 실제로 이 액션을 사용하기 위해서는 해당 액션을 정의하고 Redux 스토어에 추가해야 합니다.
-import { registerCompany,fetchCompanies } from '@src/store/apps/CompanySlice';
-import { AppDispatch } from '@src/store/Store';
-
-const AddCompany = () => { 
-  const dispatch: AppDispatch = useDispatch(); // 여기에서 타입을 명시합니다.
+import axios from 'axios';
+import { apiUrl } from '@src/utils/commonValues';
+interface AddCompaniesProps {
+  onClose?: () => void;
+}
+ 
+const AddCompany : React.FC<AddCompaniesProps> = ({  onClose }) => {
 
   const [open, setOpen] = useState(false);
   const [registerNum, setRegisterNum] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [errorTitle, setErrorTitle] = useState('');
+  const dialogContentRef = useRef<HTMLDivElement>(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -29,13 +29,30 @@ const AddCompany = () => {
   const handleClose = () => {
     setOpen(false);
   };
+ 
+  const handleDialogVibrate = () => {
+    if (navigator.vibrate) {
+      navigator.vibrate(200); // 200ms 동안 진동
+    }
+  };
+
+  const isValidRegisterNum = (num: string) => {
+    const regex = /^\d{3}-\d{2}-\d{5}$/;
+    return regex.test(num);
+  };
+
+  useEffect(() => {
+    if (dialogContentRef.current) {
+      dialogContentRef.current.scrollTop = 0;
+    }
+  }, []);
 
   return (
     <>
       <Button onClick={handleClickOpen} disableElevation color="primary" variant="contained" sx={{width:150}}>업체 등록</Button>
        
       <Dialog open={open} onClose={handleClose}>
-        <DialogContent>
+        <DialogContent ref={dialogContentRef}>
           <Typography variant="h5" mb={2} fontWeight={700}>
             새로운 회사 등록
           </Typography>
@@ -52,6 +69,8 @@ const AddCompany = () => {
             fullWidth
             size="small"
             variant="outlined"
+            error={!isValidRegisterNum(registerNum)}
+            helperText={!isValidRegisterNum(registerNum) && '유효한 사업자 등록 번호를 입력하세요 (000-00-00000)'}
           />
           <TextField
             value={companyName}
@@ -64,34 +83,39 @@ const AddCompany = () => {
             size="small"
             variant="outlined"
           />
+           <Typography color={'red'}> {errorTitle}  </Typography> 
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
           <Button
-            disabled={!registerNum || !companyName} // 등록번호와 회사이름이 모두 입력되지 않으면 버튼 비활성화
-            onClick={() => {
-              // registerCompany 액션에 필요한 데이터 포맷으로 매개변수를 전달하고, 비동기 액션을 디스패치합니다. 
-              dispatch(registerCompany(  { register_num: registerNum, company_name: companyName  }))
-                .unwrap() // createAsyncThunk에서 반환된 promise 처리
-                .then(() => {
-                  dispatch(fetchCompanies());
-                  // 액션 성공 시 실행할 로직
-                  setOpen(false); // 다이얼로그 닫기
-                  setRegisterNum(''); // 입력 필드 초기화
-                  setCompanyName(''); // 입력 필드 초기화
-                })
-                .catch((error:any) => {
-                  // 액션 실패 시 실행할 로직 (에러 처리)
-                  console.error("Failed to register the company:", error);
-                });
+            disabled={!registerNum || !companyName || !isValidRegisterNum(registerNum)}
+            onClick={ async () => {
+              const API_URL = `http://${apiUrl}company`;
+              try {
+                const response = await axios.post(`${API_URL}/Register`, { register_num: registerNum, company_name: companyName });
+                
+                if (response.data.result === 'success') {
+                  setOpen(false);
+                  setRegisterNum('');
+                  setCompanyName('');
+                  onClose();
+                } else if (response.data.result === 'fail') {
+                  setErrorTitle(response.data.error_message);
+                  handleDialogVibrate();
+                  setTimeout(() => {
+                    setErrorTitle('');
+                  }, 3000);
+                }
+              } catch (error) {
+              }
             }}
             variant="contained"
           >
             제출
           </Button>
-
         </DialogActions>
       </Dialog>
+      
     </>
   );
 };

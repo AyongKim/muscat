@@ -18,7 +18,7 @@ import {
   TextField,
   InputAdornment,
   Paper, 
-  Dialog, DialogTitle, DialogContent, DialogActions, Button
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, InputLabel
 } from '@mui/material'; 
 
 import { visuallyHidden } from '@mui/utils'; 
@@ -192,6 +192,7 @@ const InquiryList = () => {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(12); 
   const [rows, setRows] = React.useState<any>([]);
+  const [accounts, setAccounts] = React.useState([]);
   const [passwordDialogOpen, setPasswordDialogOpen] = React.useState(false);
   const [selectedInquiry, setSelectedInquiry] = React.useState<InquiryType>({id:1, 
     title: '',
@@ -205,20 +206,25 @@ const InquiryList = () => {
     if (row.password) {
       setSelectedInquiry(row);
       setPasswordDialogOpen(true);
-    } else {
-      // Handle unsecured inquiry selection
+    } else { 
+      setSelectedInquiry(row);
+      setDetailsDialogOpen(true);
     }
   };
   const verifyPassword = async (password:any) => { 
     // const isPasswordCorrect = await checkPassword(selectedInquiry.id, password);
-  
-    if (selectedInquiry.password == password) {
-      setDetailsDialogOpen(true); // Show the details dialog
-      setPasswordDialogOpen(false); // Close the password dialog
-    } else {
-      // Handle incorrect password case
-      alert("Incorrect password");
-    }
+    hashingPassword(password)
+    .then(hashedPassword => {
+      if (selectedInquiry.password == hashedPassword) {
+        setDetailsDialogOpen(true); // Show the details dialog
+        setPasswordDialogOpen(false); // Close the password dialog
+      } else {
+        // Handle incorrect password case
+        alert("Incorrect password");
+      }
+    })
+    .catch(error => console.error('Error occurred:', error));
+   
   };
   const fetchData = async () => {
     const API_URL = `http://${apiUrl}inquiry`;
@@ -230,6 +236,7 @@ const InquiryList = () => {
         // Assuming the data structure matches the Model for success
         // You can access individual fields like data.id, data.title, etc.
         setRows(data);
+        setAccounts(data);
       } else if (response.status === 400) {
         // Handle failed response (status code 400)
         const { result, reason, error_message } = response.data;
@@ -242,31 +249,32 @@ const InquiryList = () => {
     }
   };
   React.useEffect(() => { 
-    fetchData();
+    fetchData(); 
   }, []);
   
   
 
  
   const [inquiryNameSearch, setInquiryNameSearch] = React.useState('');
-  const [registrationNumberSearch, setRegistrationNumberSearch] = React.useState('');
+  const [registrationNumberSearch, setAuthorSearch] = React.useState('');
 
 
   // 기존 handleSearch 함수 수정
-  const handleInquiryNameSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows: InquiryType[] = rows.filter((row:any) => {
+  const handleInquiryTitleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value);
+    const filteredRows: InquiryType[] = accounts.filter((row:any) => {
       return row.title.toLowerCase().includes(event.target.value);
       // || row.register_num.includes(searchQuery);
     });
     setInquiryNameSearch(event.target.value);
-    setRows(filteredRows);
+    setRows(filteredRows); 
   };
 
-  const handleRegistrationNumberSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredRows: InquiryType[] = rows.filter((row:any) => {
-      return row.content.toLowerCase().includes(event.target.value);
+  const handleAuthorSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const filteredRows: InquiryType[] = accounts.filter((row:any) => {
+      return row.author.toLowerCase().includes(event.target.value);
     });
-    setRegistrationNumberSearch(event.target.value);
+    setAuthorSearch(event.target.value);
     setRows(filteredRows);
   };
 
@@ -334,7 +342,17 @@ const InquiryList = () => {
   const theme = useTheme();
   const borderColor = theme.palette.divider;
 
-
+  const hashingPassword = (passwd : string) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(passwd);
+    return crypto.subtle.digest('SHA-1', data)
+      .then(hash => {
+        const hexString = Array.from(new Uint8Array(hash))
+          .map(byte => byte.toString(16).padStart(2, '0'))
+          .join('');
+        return hexString;
+      });
+  };
   
   
   return (
@@ -376,7 +394,7 @@ const InquiryList = () => {
                   placeholder="제목"
                   size="small"
                   sx={{mr:1,width:300 }}
-                  onChange={handleInquiryNameSearch}
+                  onChange={handleInquiryTitleSearch}
                   value={inquiryNameSearch}
                 />
                 <TextField
@@ -391,7 +409,7 @@ const InquiryList = () => {
                   placeholder="글쓴이"
                   size="small" 
                   sx={{ mr: 1, width: 300,   }} // 배경색을 흰색으로 설정
-                  onChange={handleRegistrationNumberSearch}
+                  onChange={handleAuthorSearch}
                   value={registrationNumberSearch}
                 />
 
@@ -423,8 +441,7 @@ const InquiryList = () => {
 
                       return (
                         <TableRow
-                          hover
-                          onClick={(event) => handleClick(event, row.id)}
+                          hover 
                           role="checkbox"
                           aria-checked={isItemSelected}
                           tabIndex={-1}
@@ -435,6 +452,7 @@ const InquiryList = () => {
                             <CustomCheckbox
                               color="primary"
                               checked={isItemSelected}
+                              onClick={(event) => handleClick(event, row.id)}
                               inputProps={{
                                 'aria-labelledby': labelId,
                               }}
@@ -520,11 +538,27 @@ const InquiryList = () => {
                 <Button onClick={() => verifyPassword(passwordInput)}>Submit</Button>
               </DialogActions>
             </Dialog>
-            <Dialog open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="md" fullWidth>
-              <DialogTitle>{selectedInquiry.title}</DialogTitle>
-              <DialogContent>
-                {/* Display inquiry content here */}
-                <Typography variant="body1">{selectedInquiry.content}</Typography>
+            <Dialog  open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="sm" fullWidth>
+              <DialogTitle  sx={{ textAlign: 'center',   }} >{selectedInquiry.title}</DialogTitle>
+              <DialogContent >
+                <TextField
+                  value={selectedInquiry.content} 
+                  margin="normal"  
+                  contentEditable={false} 
+                  type="text"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  size="small" 
+                  variant="filled"
+                  InputProps={{
+                    readOnly: true,
+                    disableUnderline: true,  
+                    sx: { 
+                      paddingTop: '10px', // 원하는 스타일 수정
+                    },
+                  }}
+                /> 
               </DialogContent>
               <DialogActions>
                 <Button onClick={() => setDetailsDialogOpen(false)}>Close</Button>

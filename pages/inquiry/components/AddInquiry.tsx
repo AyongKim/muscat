@@ -15,12 +15,10 @@ import { useSelector } from '@src/store/Store';
 interface AddInquiryProps {
   onClose?: () => void;
 }
-
 const AddInquiry : React.FC<AddInquiryProps> = ({  onClose }) => {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [author, setauthor] = useState('');
   const [password, setPassword] = useState(''); 
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const handleClickOpen = () => {
@@ -37,7 +35,8 @@ const AddInquiry : React.FC<AddInquiryProps> = ({  onClose }) => {
   };
   // const author: string | undefined = useSelector((state) => state.auth.user?.email);
   const handleSubmit = async () => {
-    
+    const str = sessionStorage.getItem('user')
+    const author = JSON.parse(str).name
     const inquiryData = {
       title,
       content,
@@ -67,6 +66,10 @@ const AddInquiry : React.FC<AddInquiryProps> = ({  onClose }) => {
       console.error('Error submitting the inquiry:', error.message);
     }
   };
+  const handleContentChange = (e : any) => { 
+    console.log(e.target.value);
+    setContent(e.target.value);
+  };
 
   return (
     <>
@@ -95,7 +98,7 @@ const AddInquiry : React.FC<AddInquiryProps> = ({  onClose }) => {
           />
           <TextField
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleContentChange}
             margin="normal"
             id="inquiry-content"
             label="내용"

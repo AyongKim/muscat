@@ -70,6 +70,7 @@ export default function PrivacyItemManagement() {
       if (response.status === 200) {
         fetchPrivacyItems(); // 성공 후 목록 새로고침
         setSelected([]);
+        setDeleteDialogOpen(false)
       } else {
         console.error('Failed to delete items');
       }
@@ -147,10 +148,11 @@ export default function PrivacyItemManagement() {
             총  {privacyItems.length} 건
           </Typography>
         )} 
-        <Button variant="contained" onClick={handleAddItemToggle}>추가</Button>
+        
         <Button variant="outlined" color="error" onClick={openDeleteDialog} sx={{ ml: 1 }}>
           삭제
         </Button>
+        <Button variant="contained" onClick={handleAddItemToggle}>추가</Button>
       </Toolbar>
       <TableContainer component={Paper}>
         <Table>
