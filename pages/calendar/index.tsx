@@ -519,6 +519,8 @@ export default function BigCalendar() {
   }, []);
 
   const editEvent = (event: any) => {
+    if (!event.index)
+      return;
     let data = checkSchedule[event.index]
     let aa = admins.find((x) => x.user_id == admin)
 
