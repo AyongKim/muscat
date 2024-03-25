@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from '../../../../store/Store';
 import { hoverSidebar, toggleMobileSidebar } from '../../../../store/customizer/CustomizerSlice';
 import Scrollbar from '../../../../components/custom-scroll/Scrollbar'; 
 import { AppState } from '../../../../store/Store';
+import { Profile } from './SidebarProfile/Profile';
 
 const Sidebar = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
@@ -77,6 +78,7 @@ const Sidebar = () => {
               {/* ------------------------------------------- */}
               <SidebarItems />
             </Scrollbar> 
+            <Profile />
           </Box>
         </Drawer>
       </Box>
