@@ -28,7 +28,6 @@ import koLocale from 'date-fns/locale/ko';
 
 import PageContainer from '@src/components/container/PageContainer';
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
-import { IconCheck } from '@tabler/icons-react';
 import BlankCard from '@src/components/shared/BlankCard'; 
 import MenuItem from '@mui/material/MenuItem';
 import { Label } from '@mui/icons-material';
@@ -354,6 +353,12 @@ export default function BigCalendar() {
       response = await axios.post(`${API_URL}/project/Detail`, {
         project_id: project,
         consignee_id: userData.user_id
+      }); 
+    }
+    else if (userData.type == 2) {
+      response = await axios.post(`${API_URL}/project/Detail`, {
+        project_id: project,
+        consignee_id: consignee
       }); 
     }
     else {
