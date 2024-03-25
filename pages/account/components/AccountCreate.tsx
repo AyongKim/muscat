@@ -183,11 +183,11 @@ const AccountTab: React.FC = () => {
       if (response.data.result === 'success') {
         setDialogTitle('계정 생성');
         setDialogContent('계정이 생성되었습니다.');
-        setDialog1Open(true);
+        setDialog1Open(true); 
       } else if (response.data.result === 'fail') {
-          setDialogTitle('계정 생성');
-          setDialogContent('계정생성에 실패했습니다.');
-          setDialog1Open(true);
+          setDialogTitle('계정 생성 실패');
+          setDialogContent(response.data.error_message); 
+          setDialog1Open(true); 
       }
     })
     .catch((error:any) => {
