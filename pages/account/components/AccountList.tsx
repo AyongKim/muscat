@@ -191,14 +191,14 @@ const AccountList = ({ register_num }: { register_num: string }) => {
 
       console.log(data)
     }
-    data = data.filter((x:any) => x.register_num === register_num);
     setAccounts(data)
-    
+    data = data.filter((x:any) => x.register_num === register_num); 
     setRows(data)
   }
   React.useEffect(() => {
-    if (register_num) {
-      const data = accounts.filter((x:any) => x.register_num === register_num);
+    if (register_num) { 
+      console.log(accounts)
+      const data = accounts.filter((x:any) => x.register_num === register_num); 
       setRows(data)
     } 
   }, [register_num]);
