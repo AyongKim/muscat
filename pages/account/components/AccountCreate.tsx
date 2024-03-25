@@ -46,7 +46,7 @@ const checkDuplicateId = async (id: string): Promise<boolean> => {
     const response = await axios.post(`${API_URL}/user/CheckId`,{
       "id": id
     });
-    return response.data.isDuplicate;
+    return response.data.result=='fail';
   } catch (error) {
     console.error('Error checking duplicate ID:', error);
     return true; // API 호출 실패 시 중복으로 간주
@@ -246,12 +246,14 @@ const AccountTab: React.FC = () => {
             </TableCell>
           </TableRow>
         </TableHead>
-        <Divider />
+      </Table>
 
         {accountType == 0 ? (
+          <>
+          <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
+          <Table>
           <TableBody  >
-            <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
-            <Divider />
+            
             {/* ID */}
             
             <TableRow>
@@ -312,7 +314,6 @@ const AccountTab: React.FC = () => {
                 />
               </TableCell>
             </TableRow> 
-            <Divider/>
             {/* Email */}
             <TableRow>
               <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
@@ -368,10 +369,13 @@ const AccountTab: React.FC = () => {
               </TableCell>
             </TableRow>  
           </TableBody>
+          </Table>
+          </>
         ): (
-          <TableBody  >
-            <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
-            <Divider />
+          <>
+          <Typography variant="h4" padding={1} marginTop={3}>기본정보</Typography>
+          <Table>
+          <TableBody>
             {/* ID */}
             
             <TableRow>
@@ -433,7 +437,6 @@ const AccountTab: React.FC = () => {
                 />
               </TableCell>
             </TableRow> 
-            <Divider/>
             {/* Email */}
             <TableRow>
               <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
@@ -451,9 +454,13 @@ const AccountTab: React.FC = () => {
                 />
               </TableCell>
             </TableRow>
+          </TableBody>
+          </Table>
             
-            <Typography variant="h4" padding={1} marginTop={3}>회사정보</Typography>
+          <Typography variant="h4" padding={1} marginTop={3}>회사정보</Typography>
             {/* Business Registration Number */}
+          <Table>
+          <TableBody>
             <TableRow>
               <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
                 <InputLabel htmlFor="businessNumber">
@@ -514,8 +521,12 @@ const AccountTab: React.FC = () => {
                 />
               </TableCell>
             </TableRow>
+          </TableBody>
+          </Table>
             <Typography variant="h4" padding={1} marginTop={3}>담당자 정보</Typography>
             {/* Name */}
+          <Table>
+            <TableBody>
             <TableRow>
               <TableCell sx={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center' }}>
                 <InputLabel htmlFor="name">
@@ -603,11 +614,12 @@ const AccountTab: React.FC = () => {
               </TableCell>
             </TableRow>
           </TableBody>
+          </Table>
+          </>
         )
 
         }
         
-      </Table>
     </TableContainer>
 
 
