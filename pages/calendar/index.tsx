@@ -563,7 +563,6 @@ export default function BigCalendar() {
   useEffect(() => {
     const str = sessionStorage.getItem('user')
     let data = JSON.parse(str);
-    setUserData(data)
 
     if (admin) {
       fetchProjects()
@@ -583,7 +582,9 @@ export default function BigCalendar() {
   }, [admin])
 
   useEffect(() => {
-    
+    const str = sessionStorage.getItem('user')
+    let data = JSON.parse(str);
+    setUserData(data)
   }, []);
 
   const editEvent = (event: any) => {
