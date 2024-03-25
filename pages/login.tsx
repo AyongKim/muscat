@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'; 
 import { useRouter } from 'next/router';
-import { TextField, Button, Box, Typography, Link, CircularProgress } from '@mui/material';
+import { TextField, Button, Box, Typography, Link, CircularProgress, FormControlLabel, } from '@mui/material';
 import { nowEpoch } from '../src/utils/commonFunctions'
 import { loginSuccess } from '../src/store/authSlice';
 import { AppDispatch, useDispatch } from '../src/store/Store';
 import axios from 'axios';
 import { apiUrl } from '../src/utils/commonValues';
+import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
 import Cookies from 'js-cookie';
 
 interface LoginResponse {
@@ -26,6 +27,7 @@ export default function Login() {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [authSent, setAuthSent] = useState(false);
   const [timer, setTimer] = useState<number>(180);
+  const [checkTwo, setCheckTwo] = React.useState(false)
   const router = useRouter();
   const dispatch: AppDispatch = useDispatch();  
 
@@ -84,12 +86,16 @@ export default function Login() {
 
        response = response.data
        if (response.loginResult === 'send email') {
-        sessionStorage.setItem('user', JSON.stringify(response.userData))
+        if (checkTwo) {
+          setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
+          setAuthSent(true); 
+          setTimer(180)
+        }
+        else {
+          sessionStorage.setItem('user', JSON.stringify(response.userData))
 
-        router.push('/');
-        //setErrorMessage('이메일 주소로 인증번호가 전송되었습니다.');
-        //setAuthSent(true); 
-        //setTimer(180)
+          router.push('/');  
+        }
        } else if (response.loginResult === 'success') { 
             // 로그인 성공 로직
             sessionStorage.setItem('user', JSON.stringify(response.userData))
@@ -144,6 +150,18 @@ export default function Login() {
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled={loading}>
             {loading ? <CircularProgress size={24} /> : '로그인'}
           </Button>
+          <FormControlLabel
+            sx={{mr:2}}
+            control={
+              <CustomCheckbox
+                color="success"
+                checked={checkTwo}
+                onChange={(e:any) => {setCheckTwo(e.target.checked);}}
+                inputProps={{ 'aria-label': 'checkbox with default color' }}
+              />
+            }
+            label="2단계 인증"
+          />
           {errorMessage && <Typography color="error">{errorMessage}</Typography>}
         </Box>
       </Box>

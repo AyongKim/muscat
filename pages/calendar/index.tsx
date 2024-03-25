@@ -330,7 +330,7 @@ export default function BigCalendar() {
         color: 'transparent',
       })
     }
-    else if (project) {
+    if ((checkAll || userData.type == 1) && project) {
       console.log(checkSchedule)
       checkSchedule.map((x:any, i: Number) => {
         newEvents.push({
@@ -349,11 +349,20 @@ export default function BigCalendar() {
   }, [schedule, projectDetail, checkAll, checkSchedule])
 
   const fetchDetail = async() => {
-    const response = await axios.post(`${API_URL}/project/Detail`, {
-      project_id: project,
-      admin_id: admin,
-      consignee_id: consignee
-    }); 
+    let response;
+    if (userData.type == 1) {
+      response = await axios.post(`${API_URL}/project/Detail`, {
+        project_id: project,
+        consignee_id: userData.user_id
+      }); 
+    }
+    else {
+      response = await axios.post(`${API_URL}/project/Detail`, {
+        project_id: project,
+        admin_id: admin,
+        consignee_id: consignee
+      }); 
+    }
 
     let delay = response.data.delay
 
@@ -389,8 +398,6 @@ export default function BigCalendar() {
         imp_check_from: data.imp_check_from,
         imp_check_to: data.imp_check_to
       })
-
-      
     }
     else {
       setSchedule({
@@ -406,19 +413,36 @@ export default function BigCalendar() {
 
   useEffect(() => {
     fetchSchedule()
-    fetchConsignee()
+    if (userData.type != 1)
+      fetchConsignee()
     fetchCheckSchedule()
+    if (userData.type == 1)
+      fetchDetail()
   }, [project])
 
   const fetchCheckSchedule = async() => {
     if (project) {
-      const response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
-        project_id: project,
-        admin_id: admin
-      });  
+      let response;
+      if (userData.type == 1) {
+        response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
+          project_id: project,
+          consignee_id: userData.user_id
+        });  
+      }
+      else if (userData.type == 2) {
+        response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
+          project_id: project
+        });  
+      }
+      else {
+        response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
+          project_id: project,
+          admin_id: admin
+        });  
+      }
 
       let data = response.data
-      let newData: { id:any; user_id: any; project_id: any; checker_id: any; user_name: any; data: { time: any; address: any; manager: any; phone: any; }; }[] = []
+      let newData: { id:any; user_id: any; project_id: any; checker_id: any; user_name: any; admin_name:any; data: { time: any; address: any; manager: any; phone: any; }; }[] = []
       
       data.map((x:any) => {
         if (x.check_schedule) {
@@ -431,6 +455,7 @@ export default function BigCalendar() {
               project_id: x.project_id,
               checker_id: x.checker_id,
               user_name: x.user_name,
+              admin_name: x.admin_name,
               data: {
                 time: ch.time,
                 address: ch.address,
@@ -451,10 +476,19 @@ export default function BigCalendar() {
 
   const fetchConsignee = async() => {
     if (project) {
-      const response = await axios.post(`${API_URL}/project/ConsigneeByAdmin`, {
-        project_id: project,
-        admin_id: admin
-      });  
+      let response;
+      if (admin) {
+        response = await axios.post(`${API_URL}/project/ConsigneeByAdmin`, {
+          project_id: project,
+          admin_id: admin
+        });  
+      }
+      else {
+        response = await axios.post(`${API_URL}/project/ConsigneeByAdmin`, {
+          project_id: project,
+        });
+      }
+
       setConsignees(response.data)
       
     }
@@ -467,6 +501,20 @@ export default function BigCalendar() {
   const fetchProjects = async() => {
     const response = await axios.post(`${API_URL}/project/List`, {
       admin_id: admin
+    });
+    setProjects(response.data)
+  }
+
+  const fetchProjectsByConsignee = async(id:any) => {
+    const response = await axios.post(`${API_URL}/project/List`, {
+      consignee_id: id
+    });
+    setProjects(response.data)
+  }
+
+  const fetchProjectsByConsignor = async(id:any) => {
+    const response = await axios.post(`${API_URL}/project/List`, {
+      consignor_id: id
     });
     setProjects(response.data)
   }
@@ -500,33 +548,48 @@ export default function BigCalendar() {
         setAdmins(newAdmins);
         setAdmin(userData.user_id);
       }
+      else if (userData.type == 1) {
+        setAdmins([])
+        setAdmin(0)
+      }
     }
   }, [userData])
 
   useEffect(() => {
+    const str = sessionStorage.getItem('user')
+    let data = JSON.parse(str);
+    setUserData(data)
+
     if (admin) {
       fetchProjects()
     }
-    else setProjects([])
+    else {
+      setProjects([])
+
+      if (data.type == 1) {
+        fetchProjectsByConsignee(data.user_id)
+      }
+
+      if (data.type == 2) {
+        fetchProjectsByConsignor(data.user_id)
+      }
+    }
     setProject(0)
   }, [admin])
 
   useEffect(() => {
     
-    const str = sessionStorage.getItem('user')
-    let data = JSON.parse(str);
-    setUserData(data)
   }, []);
 
   const editEvent = (event: any) => {
-    if (!event.index)
+    console.log(event)
+    if (event.index == undefined)
       return;
     let data = checkSchedule[event.index]
-    let aa = admins.find((x) => x.user_id == admin)
 
     setCheckOpen(true)
     setCheckMode('view')
-    setCheckTitle(data.user_name + " - " + aa.name)
+    setCheckTitle(data.user_name + " - " + data.admin_name)
     setCheckDate(data.data.time)
     setCheckAddress(data.data.address)
     setCheckManager(data.data.manager)
@@ -774,21 +837,25 @@ export default function BigCalendar() {
     <PageContainer>
       <Breadcrumb title="일정관리"   />
       <Box display={'flex'} sx={{margin:1}} alignItems="center">
-        <Typography sx={{mr:1}} >담당자 명</Typography>
-        <CustomSelect
-          id="account-type-select"
-          sx={{mr:4}}
-          value={admin} 
-          onChange={(event:any) => {
-            setAdmin(event.target.value)}}
-        >
-          {admins.map((x, i) => {
-            return (
-              <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
-            );
-          })
-          }
-        </CustomSelect>
+        {(userData.type == 3 || userData.type == 0) && (
+          <>
+            <Typography sx={{mr:1}} >담당자 명</Typography>
+            <CustomSelect
+              id="account-type-select"
+              sx={{mr:4}}
+              value={admin} 
+              onChange={(event:any) => {
+                setAdmin(event.target.value)}}
+            >
+              {admins.map((x, i) => {
+                  return (
+                  <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+                );
+              })
+              }
+            </CustomSelect>
+          </>
+        )}
 
         <Typography sx={{mr:1}} >프로젝트 명</Typography>
         <CustomSelect
@@ -804,34 +871,40 @@ export default function BigCalendar() {
             );
           })}
         </CustomSelect>
-        <FormControlLabel
-          sx={{mr:2}}
-          control={
-            <CustomCheckbox
-              color="success"
-              checked={checkAll}
-              onChange={(e:any) => {setCheckAll(e.target.checked);}}
-              inputProps={{ 'aria-label': 'checkbox with default color' }}
-            />
-          }
-          label="모든 수탁사 현장점검 일정"
-        />
+        {userData.type != 1 && (
+            <FormControlLabel
+            sx={{mr:2}}
+            control={
+              <CustomCheckbox
+                color="success"
+                checked={checkAll}
+                onChange={(e:any) => {setCheckAll(e.target.checked);}}
+                inputProps={{ 'aria-label': 'checkbox with default color' }}
+              />
+            }
+            label="모든 수탁사 현장점검 일정"
+          />        
+        )}
         
+        {userData.type != 1 && (
+          <>
+            <Typography sx={{mr:1}} >수탁사</Typography>
+            <CustomSelect
+              id="account-type-select" 
+              value={consignee} 
+              sx={{width: 150}}
+              onChange={(event:any) => {
+                setConsignee(event.target.value)}}
+            >
+              {consignees.map((x, i) => {
+                return (
+                  <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+                );
+              })}
+            </CustomSelect>
 
-        <Typography sx={{mr:1}} >수탁사</Typography>
-        <CustomSelect
-          id="account-type-select" 
-          value={consignee} 
-          sx={{width: 150}}
-          onChange={(event:any) => {
-            setConsignee(event.target.value)}}
-        >
-          {consignees.map((x, i) => {
-            return (
-              <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
-            );
-          })}
-        </CustomSelect>
+          </>
+        )}
 
         {(consignee > 0) && (
           <Button
@@ -1102,7 +1175,7 @@ export default function BigCalendar() {
           </DialogActions>
           }
 
-          {checkMode == 'view' && 
+          {(checkMode == 'view' && (userData.type == 0 || userData.type == 3)) && 
           <DialogActions sx={{ p: 3 }}>
 
               <Button variant="contained" onClick={onEditCheck}>
