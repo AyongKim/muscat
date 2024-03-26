@@ -59,7 +59,7 @@ const MyApp = (props: MyAppProps) => {
 
     setLoginUser(currentUser)
     
-    if (!currentUser && router.pathname !== '/login' && router.pathname !== '/introduction' && router.pathname !== '/privacy_policy') {
+    if (!currentUser && router.pathname !== '/login' && router.pathname !== '/introduction' && router.pathname !== '/privacy_policy' && router.pathname !== '/sign_up') {
       router.push('/login');
     } else if (currentUser && router.pathname === '/login') { // 로그인 후 메인 페이지로 바로 이동
       setLoading(false)
@@ -84,7 +84,7 @@ const MyApp = (props: MyAppProps) => {
               <Component {...pageProps} />
             </Layout>
           ) :(<>
-              {(router.pathname == '/introduction' ||  router.pathname == '/privacy_policy') ? (
+              {(router.pathname == '/introduction' ||  router.pathname == '/privacy_policy' ||  router.pathname == '/sign_up') ? (
                 <Component {...pageProps} />
               ) : (
                 <Login></Login> 
