@@ -5,6 +5,7 @@ import { IconCheck, IconX } from '@tabler/icons-react';
 import { alpha, useTheme } from '@mui/material/styles';
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { apiUrl } from '@src/utils/commonValues';
+import CheckInfoTable from '@pages/check-info';
 
 const API_URL = `http://${apiUrl}checklist`; // 서버 API 주소로 수정 필요
 
@@ -20,6 +21,9 @@ export default function ChecklistManagement() {
   const [newItem, setNewItem] = useState<{ checklist_item: string; description: string }>({ checklist_item: '', description: '' });
   const [isAddingNewItem, setIsAddingNewItem] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const [showCheckInfo, setShowCheckInfo] = useState(false);
+  const [selectCheckItem, setSelectCheckItem] = useState<ChecklistItem>();
 
   const handleAddItemToggle = () => {
     setIsAddingNewItem(!isAddingNewItem);
@@ -116,6 +120,8 @@ export default function ChecklistManagement() {
   };
 
   return (
+    <>
+    {showCheckInfo==false ? 
     <Box sx={{ width: '100%' }}>
       <Breadcrumb title="점검 항목 관리" items={[{ to: '/', title: '메인' }, { title: '점검 항목 관리' }]} />
       <Toolbar sx={{ pl: { sm: 2 }, pr: { xs: 1, sm: 1 }, bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity), ...(selected.length > 0 && { bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity), }), }}>
@@ -133,7 +139,7 @@ export default function ChecklistManagement() {
       </Toolbar>
       <TableContainer component={Paper}>
         <Table>
-          <TableHead>
+          <TableHead sx={{backgroundColor:'success'}}>
             <TableRow>
               <TableCell padding="checkbox"><Checkbox indeterminate={selected.length > 0 && selected.length < checklistItems.length} checked={checklistItems.length > 0 && selected.length === checklistItems.length} onChange={handleSelectAllClick} /></TableCell>
               <TableCell>번호</TableCell>
@@ -159,10 +165,29 @@ export default function ChecklistManagement() {
               </TableRow>
             )}
             {checklistItems.map((row, index) => (
-              <TableRow key={row.id} hover onClick={(event) => handleClick(event, row.id)} role="checkbox" aria-checked={selected.indexOf(row.id) !== -1} tabIndex={-1} selected={selected.indexOf(row.id) !== -1}>
-                <TableCell padding="checkbox"><Checkbox checked={selected.indexOf(row.id) !== -1} /></TableCell>
+              <TableRow key={row.id} hover role="checkbox" aria-checked={selected.indexOf(row.id) !== -1} tabIndex={-1} selected={selected.indexOf(row.id) !== -1}>
+                <TableCell onClick={(event) => handleClick(event, row.id)}  padding="checkbox"><Checkbox checked={selected.indexOf(row.id) !== -1} /></TableCell>
                 <TableCell component="th" scope="row">{index + 1}</TableCell>
-                <TableCell>{row.checklist_item}</TableCell>
+                <TableCell>
+                <Box display="flex" alignItems="center"> 
+                  <Typography
+                          key={-1}
+                    sx={{
+                      ml: 1,
+                      cursor: 'pointer',
+                      borderBottom: '1px solid black', 
+                    }}
+                    variant="h6"
+                    fontWeight="600"
+                    onClick={() => {
+                      setShowCheckInfo(true);
+                      setSelectCheckItem(row);
+                    }}
+                  >
+                  {row.checklist_item}
+                </Typography> 
+                </Box>
+                 </TableCell>
                 <TableCell>{row.description}</TableCell>
               </TableRow>
             ))}
@@ -178,5 +203,10 @@ export default function ChecklistManagement() {
         </DialogActions>
       </Dialog>
     </Box>
+    : <CheckInfoTable initChecklistItems={checklistItems} selectedItem={selectCheckItem} onClose={()=>{
+      setShowCheckInfo(false);
+    }} />
+  }
+    </>
   );
 }

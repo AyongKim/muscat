@@ -129,18 +129,18 @@ export const AdminMenuitems: MenuitemsType[] = [
     title: '개인정보 항목 관리',
     icon: IconNotes,
     href: '/privacy',
-  },
-  {
-    id: uniqueId(),
-    title: '개인정보 상세설정',
-    icon: IconNotes,
-    href: '/privacy-info',
-  },
+  }, 
   {
     id: uniqueId(),
     title: '일정관리',
     icon: IconNotes,
     href: '/calendar',
+  },
+  {
+    id: uniqueId(),
+    title: '수탁사현황작성',
+    icon: IconNotes,
+    href: '/status',
   },
   {
     id: uniqueId(),

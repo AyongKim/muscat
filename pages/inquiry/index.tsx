@@ -19,11 +19,9 @@ import {
   InputAdornment,
   Paper, 
   Dialog, DialogTitle, DialogContent, DialogActions, Button, InputLabel
-} from '@mui/material'; 
-
+} from '@mui/material';  
 import { visuallyHidden } from '@mui/utils'; 
-import {   IconSearch,   } from '@tabler/icons-react';  
-import { useDispatch, useSelector } from '@src/store/Store';
+import {   IconSearch,   } from '@tabler/icons-react';
 import { InquiryType } from '@src/types/apps/inquiry';
 import BlankCard from '@src/components/shared/BlankCard';
 import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
@@ -41,24 +39,14 @@ const BCrumb = [
   },
 ];
 
-export default function EcomProductList() {
-
+export default function EcomProductList() { 
   return (
-    <PageContainer>
-      {/* breadcrumb */}
-      <Breadcrumb title="문의" items={BCrumb} />
-      
-        {/* ------------------------------------------- */}
-        {/* Left part */}
-        {/* ------------------------------------------- */}
+    <PageContainer> 
+      <Breadcrumb title="문의" items={BCrumb} /> 
        <InquiryList/>
     </PageContainer>
   );
-};
-
-
-
-
+}; 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -202,8 +190,10 @@ const InquiryList = () => {
     created_date:  ''});
   const [detailsDialogOpen, setDetailsDialogOpen] = React.useState(false);
   const [passwordInput, setPasswordInput] = React.useState('');
+  const [accountType, setAccountType] = React.useState<number>(0);
+  const [author, setAuthor] = React.useState<string>('');
   const handleInquirySelection = (row : any) => {
-    if (row.password) {
+    if (row.password && accountType==1) {
       setSelectedInquiry(row);
       setPasswordDialogOpen(true);
     } else { 
@@ -250,6 +240,15 @@ const InquiryList = () => {
   };
   React.useEffect(() => { 
     fetchData(); 
+    const str = sessionStorage.getItem('user')
+    const type = JSON.parse(str).type
+    setAuthor( JSON.parse(str).name);
+    if (type == 3 || type == 0) {
+      setAccountType(0)
+    }
+    else {
+      setAccountType(1)
+    }
   }, []);
   
   
@@ -302,6 +301,7 @@ const InquiryList = () => {
 
   // This is for the single row sleect
   const handleClick = (event: React.MouseEvent<unknown>, num: number) => {
+    
     const selectedIndex = selected.indexOf(num.toString());
     let newSelected: string[] = [];
 
@@ -449,6 +449,7 @@ const InquiryList = () => {
                           selected={isItemSelected}
                         >
                           <TableCell padding="checkbox">
+                          { (accountType==1 && row.author==author ) && (
                             <CustomCheckbox
                               color="primary"
                               checked={isItemSelected}
@@ -456,7 +457,8 @@ const InquiryList = () => {
                               inputProps={{
                                 'aria-labelledby': labelId,
                               }}
-                            />
+                            />)
+                          }
                           </TableCell>
 
                           <TableCell>

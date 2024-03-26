@@ -5,6 +5,7 @@ import { IconCheck, IconX } from '@tabler/icons-react';
 import { apiUrl } from '@src/utils/commonValues';
 import { alpha, useTheme } from '@mui/material/styles'; 
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
+import PrivacyInfoTable from '@pages/privacy-info';
 const API_URL = `http://${apiUrl}personal_category`;
 interface PrivacyItem {
   id: number;
@@ -17,6 +18,9 @@ export default function PrivacyItemManagement() {
   const [newItem, setNewItem] = useState<{ personal_category: string; description: string }>({ personal_category: '', description: '' });
   const [isAddingNewItem, setIsAddingNewItem] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const [showPrivacyInfo, setShowPrivacyInfo] = useState(false);
+  const [selectPrivacyItem, setSelectPrivacyItem] = useState<PrivacyItem>();
 
   const handleAddItemToggle = () => {
     setIsAddingNewItem(!isAddingNewItem);
@@ -119,6 +123,8 @@ export default function PrivacyItemManagement() {
   };
 
   return (
+    <>
+    {showPrivacyInfo==false ? 
     <Box sx={{ width: '100%' }}>
       <Breadcrumb title="개인정보 항목 관리" items={[{
             to: '/',
@@ -149,7 +155,7 @@ export default function PrivacyItemManagement() {
           </Typography>
         )} 
         
-        <Button variant="outlined" color="error" onClick={openDeleteDialog} sx={{ ml: 1 }}>
+        <Button variant="outlined" color="error" onClick={openDeleteDialog} sx={{ mr: 1 }}>
           삭제
         </Button>
         <Button variant="contained" onClick={handleAddItemToggle}>추가</Button>
@@ -207,19 +213,38 @@ export default function PrivacyItemManagement() {
                 <TableRow
                   key={row.id}
                   hover
-                  onClick={(event) => handleClick(event, row.id)}
+                  
                   role="checkbox"
                   aria-checked={isItemSelected}
                   tabIndex={-1}
                   selected={isItemSelected}
                 >
-                  <TableCell padding="checkbox">
+                  <TableCell padding="checkbox" onClick={(event) => handleClick(event, row.id)}>
                     <Checkbox checked={isItemSelected} />
                   </TableCell>
                   <TableCell component="th" scope="row">
                     {index+1}
                   </TableCell>
-                  <TableCell>{row.personal_category}</TableCell>
+                  <TableCell   >
+                    <Box display="flex" alignItems="center"> 
+                      <Typography
+                          key={-1}
+                          sx={{
+                            ml: 1,
+                            cursor: 'pointer',
+                            borderBottom: '1px solid black', 
+                          }}
+                          variant="h6"
+                          fontWeight="600"
+                          onClick={() => {
+                            setShowPrivacyInfo(true);
+                            setSelectPrivacyItem(row);
+                          }}
+                        >
+                        {row.personal_category}
+                      </Typography>  
+                      </Box>
+                   </TableCell>
                   <TableCell>{row.description}</TableCell>
                 </TableRow>
               );
@@ -237,6 +262,11 @@ export default function PrivacyItemManagement() {
           <Button onClick={handleDeleteSelectedItems} color="error">삭제</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+      </Box>
+      : <PrivacyInfoTable initPrivacyItems={privacyItems} selectedItem={selectPrivacyItem} onClose={()=>{
+        setShowPrivacyInfo(false);
+      }} />
+    }
+    </>
   );
 }

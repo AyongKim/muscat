@@ -1,60 +1,60 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer';
 import React, { useEffect, useState } from 'react';
-import { Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem } from '@mui/material';
+import { Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { apiUrl } from '@src/utils/commonValues';
-import axios from 'axios';
- 
+import axios from 'axios'; 
 
-
-
- 
-interface Row {
+interface CheckInfo{
   id: number;
   sequence: number;
-  standard_grade: string;
-  intermediate_grade: string;
+  area: string;
+  domain: string;
   item: string;
+  detail_item: string;
+  description: string;
+  attatchment: string;
   categoryId: number;
   merged1: number;
   merged2: number;
-} 
+}
 interface SelectedCell {
   rowIndex: number;
   colIndex: number;
 }
 
-const initialRows: Row[] = [
-  { id: 1, sequence: 1, standard_grade: '1등급', intermediate_grade: '고유식별정보', item: '주민등록번호', categoryId: 101, merged1: 1, merged2: 1 },
-  { id: 2, sequence: 2, standard_grade: '2등급', intermediate_grade: '고유식별정보', item: '주민등록번호', categoryId: 102, merged1: 1, merged2: 1 },
-  { id: 3, sequence: 3, standard_grade: '3등급', intermediate_grade: '고유식별정보', item: '주민등록번호', categoryId: 103, merged1: 1, merged2: 1 },
+const initialRows: CheckInfo[] = [
+  { id: 1, sequence: 1, area: '1등급', domain: '고유식별정보', item: '주민등록번호', detail_item: '주민등록번호', description: '주민등록번호', attatchment: '주민등록번호', categoryId: 101, merged1: 1, merged2: 1 },
+  { id: 2, sequence: 2, area: '2등급', domain: '고유식별정보', item: '주민등록번호',detail_item: '주민등록번호', description: '주민등록번호', attatchment: '주민등록번호',  categoryId: 102, merged1: 1, merged2: 1 },
+  { id: 3, sequence: 3, area: '3등급', domain: '고유식별정보', item: '주민등록번호', detail_item: '주민등록번호', description: '주민등록번호', attatchment: '주민등록번호', categoryId: 103, merged1: 1, merged2: 1 },
 ];
  
-interface PrivacyItem {
+interface ChecklistItem {
   id: number;
-  personal_category: string;
+  checklist_item: string;
   description: string;
-} 
-interface PrivacyProps {
-  selectedItem: PrivacyItem;
-  initPrivacyItems: PrivacyItem[];
+}
+
+interface CheckProps {
+  selectedItem: ChecklistItem;
+  initChecklistItems: ChecklistItem[];
   onClose?: () => void;
 }
 const API_URL = `http://${apiUrl}privacyInfo`;
-const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItems, onClose }) => {
-  const [privacyItems, setPrivacyItems] = useState<PrivacyItem[]>(initPrivacyItems);
-  const [privacyItem, setPrivacyItem] = useState<PrivacyItem>(selectedItem);
-  const [privacyInfos, setPrivacyInfos] = useState<Row[]>(initialRows);
+const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems, onClose }) => {
+  const [ChecklistItems, setChecklistItems] = useState<ChecklistItem[]>(initChecklistItems);
+  const [ChecklistItem, setChecklistItem] = useState<ChecklistItem>(selectedItem);
+  const [checkInfos, setCheckInfos] = useState<CheckInfo[]>(initialRows);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
   const [willSave, setWillSave] = useState<boolean>(false);
 
-  const fetchPrivacyInfo = async () => {
+  const fetchCheckInfo = async () => {
     try {
       const response = await axios.post(`${API_URL}/List`);
       if (response.status === 200) {
-        setPrivacyInfos(response.data);
+        setCheckInfos(response.data);
          
       } else {
         console.error('Failed to fetch items');
@@ -65,42 +65,45 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
   };
 
   useEffect(() => {
-    fetchPrivacyInfo();
+    fetchCheckInfo();
   }, []);
 
 
-  const handleCellUpdate = (rowIndex: number, field: keyof Row, value: string | number) => {
+  const handleCellUpdate = (rowIndex: number, field: keyof CheckInfo, value: string | number) => {
     setWillSave(true);
-    const updatedRows = privacyInfos.map((row, index) => {
+    const updatedRows = checkInfos.map((row, index) => {
       if (index === rowIndex) {
         return { ...row, [field]: value };
       }
       return row;
     });
-    setPrivacyInfos(updatedRows); 
+    setCheckInfos(updatedRows); 
   };
   
 
   const handleAddRow = () => {
     setWillSave(true);
     handleSplit();
-    const newRow: Row = {
-      id: privacyInfos.length + 1,
-      sequence: privacyInfos.length + 1,
-      standard_grade: '',
-      intermediate_grade: '',
+    const newRow: CheckInfo = {
+      id: checkInfos.length + 1,
+      sequence: checkInfos.length + 1,
+      area:'',
+      domain:'',
+      description:'',
+      detail_item:'',
+      attatchment: '', 
       item: '',
-      categoryId: privacyInfos.length + 101,
+      categoryId: checkInfos.length + 101,
       merged1: 1,
       merged2: 1,
     };
 
     if (selectedCell) {
-      const updatedRows = [...privacyInfos];
+      const updatedRows = [...checkInfos];
       let insertAtIndex = selectedCell.rowIndex + 1; 
       if( selectedCell.colIndex == 2 ){
-        for (let i = selectedCell.rowIndex+1 ; i < privacyInfos.length+1; i++) {
-          if( i == privacyInfos.length){
+        for (let i = selectedCell.rowIndex+1 ; i < checkInfos.length+1; i++) {
+          if( i == checkInfos.length){
             insertAtIndex = i ; 
             break;
           }
@@ -111,8 +114,8 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
           } 
         }
       }else if( selectedCell.colIndex == 3 ){
-        for (let i = selectedCell.rowIndex+1 ; i < privacyInfos.length+1; i++) {
-          if( i == privacyInfos.length){
+        for (let i = selectedCell.rowIndex+1 ; i < checkInfos.length+1; i++) {
+          if( i == checkInfos.length){
             insertAtIndex = i ; 
             break;
           }
@@ -127,7 +130,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       
       // 삽입위치 이후 행의 merged1 값을 수정
       for (let i = insertAtIndex ; i >= 0; i--) {
-        if( i == privacyInfos.length){
+        if( i == checkInfos.length){
           break;
         }
         if( updatedRows[insertAtIndex].merged1 == 0  ){
@@ -146,7 +149,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       }
 
       for (let i = insertAtIndex ; i >= 0; i--) {
-        if( i == privacyInfos.length){
+        if( i == checkInfos.length){
           break;
         }
         if( updatedRows[insertAtIndex].merged2 == 0  ){
@@ -168,9 +171,9 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       updatedRows.forEach((row, rowIndex) => {
         row.sequence = rowIndex + 1;  
       });
-      setPrivacyInfos(updatedRows); 
+      setCheckInfos(updatedRows); 
     } else {
-      setPrivacyInfos([...privacyInfos, newRow]);
+      setCheckInfos([...checkInfos, newRow]);
     }
     
   };
@@ -178,7 +181,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
   const handleDeleteRow = () => {
     if (selectedCell) { 
       setWillSave(true);
-      const updatedRows = [...privacyInfos];
+      const updatedRows = [...checkInfos];
       updatedRows.splice(selectedCell.rowIndex, 1); 
       handleSplit();
       // let updatedRows = [...rows]; 
@@ -202,7 +205,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       //   } 
       // } 
       updatedRows.forEach((row, index) => (row.sequence = index + 1));
-      setPrivacyInfos(updatedRows);
+      setCheckInfos(updatedRows);
       setSelectedCell(null);
     }
   };
@@ -215,7 +218,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
     
     // 병합할 셀의 수를 계산합니다.
     if( selectedCell.colIndex == 2 ){
-      privacyInfos.forEach((row, rowIndex) => {
+      checkInfos.forEach((row, rowIndex) => {
         if (rowIndex > selectedCell.rowIndex) {
           if (processing) {
             mergeCount++;
@@ -225,7 +228,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       });
     
       processing = true;
-      const updatedRows = privacyInfos.map((row, rowIndex) => {
+      const updatedRows = checkInfos.map((row, rowIndex) => {
         if (rowIndex === selectedCell.rowIndex) {
           return { ...row, merged1: mergeCount };
         } else if (rowIndex > selectedCell.rowIndex &&  processing) {
@@ -234,10 +237,10 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
         }
         return row;
       });
-      setPrivacyInfos(updatedRows);
+      setCheckInfos(updatedRows);
     }
     else if( selectedCell.colIndex == 3  ){ 
-      privacyInfos.forEach((row, rowIndex) => {
+      checkInfos.forEach((row, rowIndex) => {
         if (rowIndex > selectedCell.rowIndex) {
           if ( processing) {
             mergeCount++;
@@ -246,7 +249,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
         }
       }); 
       processing = true;
-      const updatedRows = privacyInfos.map((row, rowIndex) => {
+      const updatedRows = checkInfos.map((row, rowIndex) => {
         if (rowIndex === selectedCell.rowIndex) {
           return { ...row, merged2: mergeCount };
         } else if (rowIndex > selectedCell.rowIndex && processing) {
@@ -255,7 +258,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
         }
         return row;
       });
-      setPrivacyInfos(updatedRows);
+      setCheckInfos(updatedRows);
     }
     
   
@@ -268,7 +271,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
     if( selectedCell.colIndex == 2 ){
       setWillSave(true);
       let processing = true;
-      const updatedRows = privacyInfos.map((row, rowIndex) => {
+      const updatedRows = checkInfos.map((row, rowIndex) => {
         if (rowIndex === selectedCell.rowIndex) {
           return { ...row, merged1: 1 };
         } else if (rowIndex > selectedCell.rowIndex &&  processing) {
@@ -278,11 +281,11 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
         return row;
       }); 
     
-      setPrivacyInfos(updatedRows);
+      setCheckInfos(updatedRows);
     }else if( selectedCell.colIndex == 3 ){
       setWillSave(true);
       let processing = true;
-      const updatedRows = privacyInfos.map((row, rowIndex) => {
+      const updatedRows = checkInfos.map((row, rowIndex) => {
         if (rowIndex === selectedCell.rowIndex) {
           return { ...row, merged2: 1 };
         } else if (rowIndex > selectedCell.rowIndex &&  processing) {
@@ -291,7 +294,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
         }
         return row;
       }); 
-      setPrivacyInfos(updatedRows);
+      setCheckInfos(updatedRows);
     }
   };
   const handleImport = () => {
@@ -303,20 +306,20 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
 
   return (
     <> 
-      <Breadcrumb title="개인정보 상세설정"  />   
+      <Breadcrumb title="세부 점검 항목"  />   
       <Box sx={{ mb: 2, display: 'flex',justifyContent:'space-between'  }}>
         <Button sx={{  width: 100 }} variant="contained" onClick={onClose} >목록</Button>
         <Box sx={{ display: 'flex',justifyContent:'flex-end',  gap: 1 }}>
           <CustomSelect
             id="account-type-select"
             sx={{ mr: 4, width: 200 }}
-            value={privacyItem.id} 
+            value={ChecklistItem.id} 
             onChange={(event:any) => {
-              setPrivacyItem(event.target.value)}}
+              setChecklistItem(event.target.value)}}
           >
-            {privacyItems.map((x, i) => {
+            {ChecklistItems.map((x, i) => {
               return (
-                <MenuItem key={i} value={x.id}>{x.personal_category}</MenuItem>
+                <MenuItem key={i} value={x.id}>{x.checklist_item}</MenuItem>
               );
             })
             }
@@ -326,14 +329,23 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
           <Button variant="contained" onClick={handleMerge} disabled={!selectedCell}>셀 병합</Button>
           <Button variant="contained" onClick={handleSplit} disabled={!selectedCell}>셀 분할</Button>
           <Button variant="contained" onClick={handleAddRow}  >행 삽입</Button>
-          <Button variant="contained" onClick={handleDeleteRow} disabled={!selectedCell || (privacyInfos[selectedCell.rowIndex].merged1 !==1) || (privacyInfos[selectedCell.rowIndex].merged2  !==1)  }>행 삭제</Button>
+          <Button variant="contained" onClick={handleDeleteRow} disabled={!selectedCell || (checkInfos[selectedCell.rowIndex].merged1 !==1) || (checkInfos[selectedCell.rowIndex].merged2  !==1)  }>행 삭제</Button>
         </Box>
       </Box>
       <TableContainer component={Paper}>
         <Table>
+        <TableHead >
+          <TableRow sx={{backgroundColor:'success'}}> 
+            <TableCell style={{ textAlign: 'center'}}>영역</TableCell>
+            <TableCell style={{ textAlign: 'center'}}>분야</TableCell>
+            <TableCell style={{ textAlign: 'center'}}>항목</TableCell>
+            <TableCell style={{ textAlign: 'center'}}>세부 점검 항목</TableCell>
+            <TableCell style={{ textAlign: 'center'}}>설명</TableCell>
+            <TableCell style={{ textAlign: 'center'}}>첨부파일 양식</TableCell> 
+          </TableRow>
+        </TableHead>
           <TableBody>
-            {privacyInfos.map((row:Row, rowIndex) => (
-           
+            {checkInfos.map((row:CheckInfo, rowIndex) => ( 
               <TableRow key={row.id}>
                 {Object.keys(row).map((key, colIndex) => {
                   const isEditing = editingCell && editingCell.rowIndex === rowIndex && editingCell.colIndex === colIndex;
@@ -353,11 +365,11 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
                             e.target.blur(); 
                             setEditingCell(null);
                           } }}
-                          value={row[key as keyof Row]}
-                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof Row, e.target.value)}
+                          value={row[key as keyof CheckInfo]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
                         />
                       ) : (
-                        <InputLabel  >{row.sequence}-{row.merged1}</InputLabel>
+                        <InputLabel  >{row.area}</InputLabel>
                       )}
                     </TableCell>
                   )
@@ -373,15 +385,15 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
                     >
                       {isEditing ? (
                         <TextField 
-                          value={row[key as keyof Row]}
-                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof Row, e.target.value)}
+                          value={row[key as keyof CheckInfo]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
                           onKeyDown={(e: any) => { if (e.key === 'Enter') {
                             e.target.blur(); 
                             setEditingCell(null);
                           } }}
                         />
                       ) : (
-                        <InputLabel>{row.sequence}-{row.merged2}</InputLabel>
+                        <InputLabel>{row.domain}</InputLabel>
                       )}
                     </TableCell>
                   )
@@ -397,8 +409,8 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
                     >
                       {isEditing ? (
                         <TextField  
-                          value={row[key as keyof Row]}
-                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof Row, e.target.value)}
+                          value={row[key as keyof CheckInfo]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
                           onKeyDown={(e: any) => { if (e.key === 'Enter') {
                             e.target.blur(); 
                             setEditingCell(null);
@@ -408,7 +420,73 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
                         <InputLabel>{row.item}</InputLabel>
                       )}
                     </TableCell>
-                  ) : null;
+                  ): colIndex == 5  ?
+                    <TableCell
+                      key={colIndex}
+                      style={{ textAlign: 'center', cursor: 'pointer', backgroundColor: !isEditing && selectedCell && selectedCell.rowIndex === rowIndex && selectedCell.colIndex === colIndex ? '#bde0fe' : '' }}
+                      onClick={() => setSelectedCell({ rowIndex, colIndex })}
+                      onDoubleClick={() => setEditingCell({ rowIndex, colIndex })} 
+                      
+                      sx={{width:100}}
+                    >
+                      {isEditing ? (
+                        <TextField  
+                          value={row[key as keyof CheckInfo]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
+                          onKeyDown={(e: any) => { if (e.key === 'Enter') {
+                            e.target.blur(); 
+                            setEditingCell(null);
+                          } }}
+                        />
+                      ) : (
+                        <InputLabel>{row.detail_item}</InputLabel>
+                      )}
+                    </TableCell>
+                    : colIndex == 6  ?
+                    <TableCell
+                      key={colIndex}
+                      style={{ textAlign: 'center', cursor: 'pointer', backgroundColor: !isEditing && selectedCell && selectedCell.rowIndex === rowIndex && selectedCell.colIndex === colIndex ? '#bde0fe' : '' }}
+                      onClick={() => setSelectedCell({ rowIndex, colIndex })}
+                      onDoubleClick={() => setEditingCell({ rowIndex, colIndex })} 
+                      
+                      sx={{width:100}}
+                    >
+                      {isEditing ? (
+                        <TextField  
+                          value={row[key as keyof CheckInfo]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
+                          onKeyDown={(e: any) => { if (e.key === 'Enter') {
+                            e.target.blur(); 
+                            setEditingCell(null);
+                          } }}
+                        />
+                      ) : (
+                        <InputLabel>{row.description}</InputLabel>
+                      )}
+                    </TableCell>
+                    : colIndex == 7  ?
+                    <TableCell
+                      key={colIndex}
+                      style={{ textAlign: 'center', cursor: 'pointer', backgroundColor: !isEditing && selectedCell && selectedCell.rowIndex === rowIndex && selectedCell.colIndex === colIndex ? '#bde0fe' : '' }}
+                      onClick={() => setSelectedCell({ rowIndex, colIndex })}
+                      onDoubleClick={() => setEditingCell({ rowIndex, colIndex })} 
+                      
+                      sx={{width:100}}
+                    >
+                      {isEditing ? (
+                        <TextField  
+                          value={row[key as keyof CheckInfo]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
+                          onKeyDown={(e: any) => { if (e.key === 'Enter') {
+                            e.target.blur(); 
+                            setEditingCell(null);
+                          } }}
+                        />
+                      ) : (
+                        <InputLabel>{row.attatchment}</InputLabel>
+                      )}
+                    </TableCell>
+                   : null;
                 })}
               </TableRow>
             ))}
@@ -417,9 +495,8 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       </TableContainer>
       <Box display={'flex'} justifyContent={'flex-end'} marginTop={2}>
         <Button variant="contained" onClick={handleSave} disabled={!willSave}>저장</Button>
-      </Box>
-      
+      </Box> 
     </>
   );
 };
-export default PrivacyInfoTable;
+export default CheckInfoTable;
