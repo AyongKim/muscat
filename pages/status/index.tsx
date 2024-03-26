@@ -187,6 +187,7 @@ const StatusLayout = () => {
             onChange={(e:any) => setTotalEmployees(e.target.value)}
             startAdornment={<InputAdornment position="start">총</InputAdornment>}
             endAdornment={<InputAdornment position="end">명</InputAdornment>}
+            inputProps={{ style: { textAlign: 'end' } }} 
           />
         </Grid>
         <Grid item xs={12} sm={3} display="flex" alignItems="center">
@@ -201,6 +202,7 @@ const StatusLayout = () => {
             value={privacyHandlers}
             onChange={(e:any) => setPrivacyHandlers(e.target.value)}
             endAdornment={<InputAdornment position="end">명</InputAdornment>}
+            inputProps={{ style: { textAlign: 'end' } }} 
           />
         </Grid>
         <Grid item xs={12} sm={3} display="flex" alignItems="start">
