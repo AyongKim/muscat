@@ -25,11 +25,7 @@ interface SelectedCell {
   colIndex: number;
 }
 
-const initialRows: Row[] = [
-  { id: 1, sequence: 1, standard_grade: '1등급', intermediate_grade: '고유식별정보', item: '주민등록번호', categoryId: 101, merged1: 1, merged2: 1 },
-  { id: 2, sequence: 2, standard_grade: '2등급', intermediate_grade: '고유식별정보', item: '주민등록번호', categoryId: 102, merged1: 1, merged2: 1 },
-  { id: 3, sequence: 3, standard_grade: '3등급', intermediate_grade: '고유식별정보', item: '주민등록번호', categoryId: 103, merged1: 1, merged2: 1 },
-];
+ 
  
 interface PrivacyItem {
   id: number;
@@ -41,23 +37,26 @@ interface PrivacyProps {
   initPrivacyItems: PrivacyItem[];
   onClose?: () => void;
 }
-const API_URL = `http://${apiUrl}privacyInfo`;
+const API_URL = `http://${apiUrl}personal_info`;
 const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItems, onClose }) => {
   const [privacyItems, setPrivacyItems] = useState<PrivacyItem[]>(initPrivacyItems);
   const [privacyItem, setPrivacyItem] = useState<PrivacyItem>(selectedItem);
-  const [privacyInfos, setPrivacyInfos] = useState<Row[]>(initialRows);
+  const [privacyInfos, setPrivacyInfos] = useState<Row[]>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
   const [willSave, setWillSave] = useState<boolean>(false);
 
-  const fetchPrivacyInfo = async () => {
+  const fetchPrivacyInfo = async ( category_id :number ) => {
     try {
-      const response = await axios.post(`${API_URL}/List`);
-      if (response.status === 200) {
-        setPrivacyInfos(response.data);
-         
+      const response = await axios.post(`${API_URL}/List`,{
+        "category_id": category_id
+      })
+      if (response.data) {
+        console.log(response.data);
+        setPrivacyInfos(response.data); 
+
       } else {
-        console.error('Failed to fetch items');
+        console.error(response.data.message);
       }
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -65,7 +64,9 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
   };
 
   useEffect(() => {
-    fetchPrivacyInfo();
+    if(privacyItems.length>0){ 
+      fetchPrivacyInfo(selectedItem.id);
+    } 
   }, []);
 
 
@@ -90,7 +91,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       standard_grade: '',
       intermediate_grade: '',
       item: '',
-      categoryId: privacyInfos.length + 101,
+      categoryId: privacyItem.id,
       merged1: 1,
       merged2: 1,
     };
@@ -297,8 +298,21 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
   const handleImport = () => {
     
   };
-  const handleSave = () => {
+  const handleSave = async () => {
     setWillSave(false);
+    try {
+      const response = await axios.post(`${API_URL}/Register`,{
+        "id": privacyItem.id,
+        "data": privacyInfos
+      })
+      if (response.data) {
+        setPrivacyInfos(response.data); 
+      } else {
+        console.error(response.data.error_message);
+      }
+    } catch (error) {
+      console.error('Error fetching items:', error);
+    }
   }
 
   return (
@@ -310,19 +324,21 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
           <CustomSelect
             id="account-type-select"
             sx={{ mr: 4, width: 200 }}
-            value={privacyItem.id} 
-            onChange={(event:any) => {
-              setPrivacyItem(event.target.value)}}
+            value={privacyItem} 
+            onChange={(event:any) => {  
+              setPrivacyItem(event.target.value);
+              fetchPrivacyInfo(event.target.value.id);
+            }}
+            
           >
             {privacyItems.map((x, i) => {
               return (
-                <MenuItem key={i} value={x.id}>{x.personal_category}</MenuItem>
+                <MenuItem key={i} value={x}>{x.personal_category}</MenuItem>
               );
             })
             }
           </CustomSelect>
-          <Button variant="contained" color='secondary' sx={{ mr: 4, width: 200 }} onClick={handleImport}  >불러오기</Button>
-
+    
           <Button variant="contained" onClick={handleMerge} disabled={!selectedCell}>셀 병합</Button>
           <Button variant="contained" onClick={handleSplit} disabled={!selectedCell}>셀 분할</Button>
           <Button variant="contained" onClick={handleAddRow}  >행 삽입</Button>
@@ -357,7 +373,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
                           onChange={(e) => handleCellUpdate(rowIndex, key as keyof Row, e.target.value)}
                         />
                       ) : (
-                        <InputLabel  >{row.sequence}-{row.merged1}</InputLabel>
+                        <InputLabel  >{row.standard_grade}</InputLabel>
                       )}
                     </TableCell>
                   )
@@ -381,7 +397,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
                           } }}
                         />
                       ) : (
-                        <InputLabel>{row.sequence}-{row.merged2}</InputLabel>
+                        <InputLabel>{row.intermediate_grade}</InputLabel>
                       )}
                     </TableCell>
                   )
