@@ -177,10 +177,10 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
   const [orderBy, setOrderBy] = React.useState<any>('calories');
   const [selected, setSelected] = React.useState<string[]>([]);
   const [dense, setDense] = React.useState(false);
-  const [userList, setUserList] = React.useState([])
+  const [companyList, setCompanyList] = React.useState([])
   const [adminList, setAdminList] = React.useState([])
 
-  const [consignee, setConsignee] = React.useState(0)
+  const [company, setCompany] = React.useState(0)
   const [workName, setWorkName] = React.useState('')
   const [checker, setChecker] = React.useState(0)
   const [checkType, setCheckType] = React.useState(0)
@@ -189,7 +189,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
     if (editMode == 'register') {
       let response = await axios.post(`${API_URL}/project_detail/Register`, {
         project_id: data.id,
-        user_id: consignee,
+        company_id: company,
         work_name: workName,
         checker_id: checker,
         check_type: checkType
@@ -210,7 +210,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
       let response = await axios.post(`${API_URL}/project_detail/Update`, {
         id: editData.id,
         project_id: data.id,
-        user_id: consignee,
+        company_id: company,
         work_name: workName,
         checker_id: checker,
         check_type: checkType
@@ -233,15 +233,14 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
     let response = await axios.post(`${API_URL}/project_detail/List`, {
       project_id: data.id
     });
-    console.log(response.data)
     setRows(response.data)
     
     response = await axios.post(`${API_URL}/project/Users`);
     data = response.data
 
-    setUserList(data.consignee)
-    if (data.consignee.length > 0)
-      setConsignee(data.consignee[0].user_id)
+    setCompanyList(data.company)
+    if (data.company.length > 0)
+      setCompany(data.company[0].id)
 
     setAdminList(response.data.admin)
     if (data.admin.length > 0)
@@ -254,8 +253,6 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
   }, []);
 
   const [rows, setRows] = React.useState([]);
- 
- 
 
   // This is for the sorting
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: any) => {
@@ -353,7 +350,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
       let selectedData = rows.find((x) => x.id == selected[0])
       setEditData({...selectedData})
 
-      setConsignee(selectedData.user_id)
+      setCompany(selectedData.user_id)
       setWorkName(selectedData.work_name)
       setChecker(selectedData.checker_id)
       setCheckType(selectedData.check_type)
@@ -370,9 +367,36 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
   const handleButtonClick = () => {
     fileInputRef.current.click();
   }
-  const handleFileChange = (e:any) => {
+  const handleFileChange = async(e:any) => {
     const selectedFile = e.target.files[0];
     // 파일 선택이 완료된 후 추가 작업 수행
+    const formData = new FormData();
+    formData.append('file', e.target.files[0]);
+    formData.append('project_id', data.id);
+  
+    e.target.value = null;
+    fetch('http://localhost:5001/project_detail/RegisterExcel', {
+      method: 'POST',
+      body: formData
+    })
+    .then((response) => response.json())
+    .then(data => {
+      console.log(data)
+      console.log(data.result)
+      console.log(data.reason)
+      if (data.result == 'FAIL') {
+        setModalMsg(data.reason);
+        setShowModal(true)
+      }
+      else if (data.result == 'SUCCESS') {
+        setModalMsg('정확히 보관되었습니다.');
+        setShowModal(true)
+        fetchData()
+      }
+    })
+    .catch(error => {
+      console.error("Failed to register the notice:", error);
+    });
   };
 
   return (
@@ -480,13 +504,14 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                           labelId="month-dd"
                           id="month-dd"
                           size="small" 
-                          value={consignee}
-                          sx={{width:100, mr:1}}
-                          onChange={(e:any)=>setConsignee(e.target.value)}
+                          value={company}
+                          sx={{width:150, mr:1}}
+                          onChange={(e:any)=>setCompany(e.target.value)}
                         >
-                          {userList.map((x, i) => {
+                          {companyList.map((x, i) => {
+                            console.log(x)
                             return (
-                              <MenuItem value={x.user_id} key = {i}>{x.name}</MenuItem>
+                              <MenuItem value={x.id} key = {i}>{x.name}</MenuItem>
                             );
                           })}
                         </CustomSelect>
@@ -587,7 +612,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                                   }}
                                 >
                                   <Typography variant="h6" fontWeight="600">
-                                    {row.user_name}
+                                    {row.company_name}
                                   </Typography> 
                                 </Box>
                               </Box>
@@ -628,13 +653,13 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                                 labelId="month-dd"
                                 id="month-dd"
                                 size="small" 
-                                value={consignee}
+                                value={company}
                                 sx={{width:100, mr:1}}
-                                onChange={(e:any)=>setConsignee(e.target.value)}
+                                onChange={(e:any)=>setCompany(e.target.value)}
                               >
-                                {userList.map((x, i) => {
+                                {companyList.map((x, i) => {
                                   return (
-                                    <MenuItem value={x.user_id} key = {i}>{x.name}</MenuItem>
+                                    <MenuItem value={x.id} key = {i}>{x.company_name}</MenuItem>
                                   );
                                 })}
                               </CustomSelect>
@@ -713,8 +738,8 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
         </Dialog>
         <Dialog open={showModal} onClose={onClose}>
           <DialogTitle></DialogTitle>
-          <DialogContent sx={{width:300}} >
-            <DialogContentText>{modalMsg}</DialogContentText>
+          <DialogContent sx={{width:400}} >
+            <DialogContentText sx={{wordWrap:'break-word', whiteSpace:'break-spaces'}}>{modalMsg}</DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => { onClose(); }}>OK</Button>

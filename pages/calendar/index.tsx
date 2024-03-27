@@ -358,14 +358,14 @@ export default function BigCalendar() {
     else if (userData.type == 2) {
       response = await axios.post(`${API_URL}/project/Detail`, {
         project_id: project,
-        consignee_id: consignee
+        company_id: consignee
       }); 
     }
     else {
       response = await axios.post(`${API_URL}/project/Detail`, {
         project_id: project,
         admin_id: admin,
-        consignee_id: consignee
+        company_id: consignee
       }); 
     }
 
@@ -447,7 +447,7 @@ export default function BigCalendar() {
       }
 
       let data = response.data
-      let newData: { id:any; user_id: any; project_id: any; checker_id: any; user_name: any; admin_name:any; data: { time: any; address: any; manager: any; phone: any; }; }[] = []
+      let newData: { id:any; company_id: any; project_id: any; checker_id: any; user_name: any; admin_name:any; data: { time: any; address: any; manager: any; phone: any; }; }[] = []
       
       data.map((x:any) => {
         if (x.check_schedule) {
@@ -456,7 +456,7 @@ export default function BigCalendar() {
           checks.map((ch:any) => {
             newData.push({
               id: x.id,
-              user_id: x.user_id,
+              company_id: x.company_id,
               project_id: x.project_id,
               checker_id: x.checker_id,
               user_name: x.user_name,
@@ -495,7 +495,6 @@ export default function BigCalendar() {
       }
 
       setConsignees(response.data)
-      
     }
     else {
       setConsignees([])
@@ -604,9 +603,9 @@ export default function BigCalendar() {
   };
 
   const addNewEventAlert = (slotInfo: EvType) => {
-    if (checkAll && project && consignee) {
+    if (checkAll && project && consignee && (userData.type == 0 || userData.type == 3)) {
 
-      let cc = consignees.find((x) => x.user_id == consignee)
+      let cc = consignees.find((x) => x.company_id == consignee)
       let aa = admins.find((x) => x.user_id == admin)
 
       setCheckMode('register');
@@ -749,10 +748,15 @@ export default function BigCalendar() {
         manager: checkManager,
         phone: checkManagerPhone
       }
+
+      console.log(checkSchedule)
+      console.log(consignee)
+      console.log(project)
+      console.log(admin)
   
       let res = [];
       for (let i = 0; i < checkSchedule.length; i++) {
-        if (checkSchedule[i].user_id == consignee && checkSchedule[i].project_id == project && checkSchedule[i].checker_id == admin) {
+        if (checkSchedule[i].company_id == consignee && checkSchedule[i].project_id == project && checkSchedule[i].checker_id == admin) {
           res.push(checkSchedule[i].data)
         }
       }
@@ -768,10 +772,12 @@ export default function BigCalendar() {
         setCheckOpen(false)
   
         let newSchedule = checkSchedule.map((x:any) => x);
-        let cc = consignees.find((x) => x.user_id == consignee)
+        let cc = consignees.find((x) => x.company_id == consignee)
+        let aa = admins.find((x) => x.user_id == admin)
         newSchedule.push({
           id: projectDetail.id,
-          user_id: consignee,
+          admin_name: aa.name,
+          company_id: consignee,
           project_id: project,
           checker_id: admin,
           user_name: cc.name,
@@ -785,7 +791,7 @@ export default function BigCalendar() {
       else {
         setModalMsg(response.data.error_message)
         setShowModal(true)
-      }  
+      }
     }
     else {
       let newSchedule = checkSchedule.map((x:any) => x);
@@ -795,7 +801,7 @@ export default function BigCalendar() {
         manager: checkManager,
         phone: checkManagerPhone
       }
-  
+
       let res = [];
       for (let i = 0; i < newSchedule.length; i++) {
         if (newSchedule[i].user_id == newSchedule[editIndex].user_id && newSchedule[i].project_id == newSchedule[editIndex].project_id && newSchedule[i].checker_id == newSchedule[editIndex].checker_id) {
@@ -904,7 +910,7 @@ export default function BigCalendar() {
             >
               {consignees.map((x, i) => {
                 return (
-                  <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+                  <MenuItem key={i} value={x.company_id}>{x.name}</MenuItem>
                 );
               })}
             </CustomSelect>

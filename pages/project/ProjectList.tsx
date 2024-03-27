@@ -226,10 +226,10 @@ const ProductTableList = () => {
   const [year, setYear] = React.useState(0);
   const [years, setYears] = React.useState([]);
   const [projectNames, setProjectNames] = React.useState([]);
-  const [consignorName, setConsignorName] = React.useState('');
+  const [companyName, setCompanyName] = React.useState('');
   const [checklist, setChecklist] = React.useState([]);
   const [personalCategory, setPersonalCategory] = React.useState([]);
-  const [consignorList, setConsignorList] = React.useState([]);
+  const [companyList, setCompanyList] = React.useState([]);
 
   let registerYears: number[] = [];
   const today = new Date();
@@ -242,9 +242,8 @@ const ProductTableList = () => {
       const response = await axios.post(`${API_URL}/project/List`, {
         year: searchYear,
         project_name: searchName,
-        consignor_name: consignorName
+        company_name: companyName
       });
-      console.log(response.data)
       setRows(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -273,10 +272,10 @@ const ProductTableList = () => {
     }
   }
 
-  const fetchConsignor = async() => {
+  const fetchCompany = async() => {
     try {
-      const response = await axios.post(`${API_URL}/project/Consignor`);
-      setConsignorList(response.data)
+      const response = await axios.post(`${API_URL}/company/List`)
+      setCompanyList(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -291,12 +290,11 @@ const ProductTableList = () => {
     }
   }
 
-  //Fetch Products
   React.useEffect(() => {
     fetchYears()
     fetchData()
     fetchChecklist()
-    fetchConsignor()
+    fetchCompany()
     fetchPersonalCategory()
   }, []);
 
@@ -333,17 +331,17 @@ const ProductTableList = () => {
   const [projectName, setProjectName] = React.useState('');
   const [searchYear, setSearchYear] = React.useState(0);
   const [searchName, setSearchName] = React.useState('');
-  const [userId, setUserId] = React.useState<any>(0);
+  const [companyId, setCompanyId] = React.useState<any>(0);
   const [checkListId, setCheckListId] = React.useState(0);
   const [privacyPolicy, setPrivacyPolicy] = React.useState(0);
   const [editMode, setEditMode] = React.useState(false);
 
   const onRegister = async() => {
-    if (projectName != '' && year != 0 && userId != 0 && checkListId != 0 && privacyPolicy != 0) {
+    if (projectName != '' && year != 0 && companyId != 0 && checkListId != 0 && privacyPolicy != 0) {
       let data = {
         'year': year,
         'name': projectName,
-        'user_id': userId,
+        'company_id': companyId,
         'checklist_id': checkListId,
         'privacy_type': privacyPolicy
       }
@@ -362,9 +360,9 @@ const ProductTableList = () => {
   React.useEffect(() => {
     setProjectName('');
     setYear(registerYears[0]);
-    if (consignorList.length > 0)
-      setUserId(consignorList[0].user_id);
-    else setUserId(0);
+    if (companyList.length > 0)
+      setCompanyId(companyList[0].user_id);
+    else setCompanyId(0);
 
     if (checklist.length > 0)
       setCheckListId(checklist[0].id); 
@@ -537,9 +535,9 @@ const ProductTableList = () => {
             placeholder="검색"
             size="small"
             onChange={(e) => {
-              setConsignorName(e.target.value)
+              setCompanyName(e.target.value)
             }}
-            value={consignorName}
+            value={companyName}
         />
         <Button
           variant={"contained"}
@@ -613,13 +611,13 @@ const ProductTableList = () => {
                           labelId="month-dd"
                           id="month-dd"
                           size="small" 
-                          value={userId}
+                          value={companyId}
                           sx={{width:150, mr:1}}
-                          onChange={(e:any) => setUserId(e.target.value)}
+                          onChange={(e:any) => setCompanyId(e.target.value)}
                         >
-                          {consignorList.map((x, i) => {
+                          {companyList.map((x, i) => {
                             return (
-                              <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+                              <MenuItem key={i} value={x.id}>{x.company_name}</MenuItem>
                             );
                           })}
                         </CustomSelect>
@@ -714,7 +712,7 @@ const ProductTableList = () => {
 
                           <CustomTableCell>
                             <Typography align='center'>
-                              {row.user_id}
+                              {row.company_name}
                             </Typography>
                           </CustomTableCell>
 
@@ -733,7 +731,6 @@ const ProductTableList = () => {
                           <CustomTableCell>
                             <Box display={"flex"} justifyContent={"center"}>
                               <Button variant="contained" onClick={() => {
-                                console.log(row)
                                 setCurrentProject(row)
                                 setMode('Detail')
                               }}>
