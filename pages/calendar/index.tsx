@@ -940,7 +940,7 @@ export default function BigCalendar() {
         <Calendar
           selectable
           events={calevents}
-          views={['month']}
+          views={['month', 'week']}
           defaultView="month"
           scrollToTime={new Date(1970, 1, 1, 6)}
           defaultDate={new Date()}

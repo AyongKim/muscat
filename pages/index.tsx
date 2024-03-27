@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'; 
+import { useRouter } from 'next/router';
 import React from "react";
 import {
   Typography,
@@ -134,10 +135,16 @@ const StatusCard: React.FC = () => {
 
  
 export default function Modern() {
-
+  const router = useRouter();
 
   const [isLoading, setLoading] = useState(true);
   useEffect(() => {
+    const str = sessionStorage.getItem('user')
+    const type = JSON.parse(str).type
+
+    if (type == 1) {
+      router.replace('/consignee_main')
+    }
     setLoading(false);
   }, []);
 

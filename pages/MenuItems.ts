@@ -138,12 +138,6 @@ export const AdminMenuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: '수탁사현황작성',
-    icon: IconNotes,
-    href: '/status',
-  },
-  {
-    id: uniqueId(),
     title: '문의',
     icon: IconNotes,
     href: '/inquiry',

@@ -93,12 +93,15 @@ export default function Login() {
         }
         else {
           sessionStorage.setItem('user', JSON.stringify(response.userData))
+          sessionStorage.setItem('consignee_status', '')
 
           router.push('/');  
         }
        } else if (response.loginResult === 'success') { 
             // 로그인 성공 로직
             sessionStorage.setItem('user', JSON.stringify(response.userData))
+            sessionStorage.setItem('consignee_status', '')
+
             router.push('/');
        } else if (response.loginResult == 'wrong password') {
         setErrorMessage(`입력하신 정보가 맞지 않습니다.(남은 횟수: ${response.remainCnt}번)`);
