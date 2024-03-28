@@ -419,7 +419,7 @@ const AccountList = ({ register_num }: { register_num: string }) => {
                               <Typography
                                 color="textSecondary"   
                               >
-                                {row.id}
+                                {(row.user_type == 0 || row.user_type == 3) ? row.admin_name : row.manager_name}
                               </Typography>
                             </Box>
                           </TableCell>
