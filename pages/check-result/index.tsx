@@ -6,9 +6,10 @@ import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { apiUrl } from '@src/utils/commonValues';
 import axios from 'axios'; 
 import {  Row } from 'antd';
-import { CloudUpload, CloudUploadOutlined } from '@mui/icons-material';
+import {  CloudUploadOutlined } from '@mui/icons-material';
 
-interface CheckInfo{
+
+interface ChecklistResultItem {
   id: number;
   sequence: number;
   area: string;
@@ -21,17 +22,8 @@ interface CheckInfo{
   merged1: number;
   merged2: number;
   filename: string;
-}
 
-interface ChecklistResultItem {
-  id: number;
-  sequence: number;
-  area: string;
-  domain: string;
-  item: string;
-  detail_item: string;
-  description: string;
-  
+
   inspection_result: string;
   evidence_attachment: string;
   inspection_approval: string;
@@ -41,8 +33,7 @@ interface ChecklistResultItem {
   status: string;
   corrective_request: string;
   inspection_opinion: string;
-  evidence_attachment_1: string;
-  evidence_attachment_2: string;
+  evidence_attachment_file: string;
   lock: string;
   item_id: number;
   project_detail_id: number;
@@ -70,7 +61,7 @@ const API_URL = `http://${apiUrl}checkinfo`;
 const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems, onClose }) => {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(initChecklistItems);
   const [checklistItem, setChecklistItem] = useState<ChecklistItem>(selectedItem);
-  const [checkInfos, setCheckInfos] = useState<CheckInfo[]>([]);
+  const [checkInfos, setCheckInfos] = useState<ChecklistResultItem[]>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
   const [willSave, setWillSave] = useState<boolean>(false);
@@ -98,7 +89,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
   }, []);
 
 
-  const handleCellUpdate = (rowIndex: number, field: keyof CheckInfo, value: string | number) => {
+  const handleCellUpdate = (rowIndex: number, field: keyof ChecklistResultItem, value: string | number) => {
     setWillSave(true);
     const updatedRows = checkInfos.map((row, index) => {
       if (index === rowIndex) {
@@ -109,191 +100,6 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
     setCheckInfos(updatedRows); 
   };
  
-
-  
-
-  const handleAddRow = () => {
-    setWillSave(true);
-    handleSplit();
-    const newRow: CheckInfo = {
-      id: checkInfos.length + 1,
-      sequence: checkInfos.length + 1,
-      area:'',
-      domain:'',
-      description:'',
-      detail_item:'',
-      attachment: 0, 
-      item: '',
-      categoryId: checkInfos.length + 101,
-      merged1: 1,
-      merged2: 1,
-      filename: '',
-    };
-
-    if (selectedCell) {
-      const updatedRows = [...checkInfos];
-      let insertAtIndex = selectedCell.rowIndex + 1; 
-      if( selectedCell.colIndex == 2 ){
-        for (let i = selectedCell.rowIndex+1 ; i < checkInfos.length+1; i++) {
-          if( i == checkInfos.length){
-            insertAtIndex = i ; 
-            break;
-          }
-          const row = updatedRows[i];
-          if (row.merged1 >= 1 ){
-            insertAtIndex = i ; 
-            break;
-          } 
-        }
-      }else if( selectedCell.colIndex == 3 ){
-        for (let i = selectedCell.rowIndex+1 ; i < checkInfos.length+1; i++) {
-          if( i == checkInfos.length){
-            insertAtIndex = i ; 
-            break;
-          }
-          const row = updatedRows[i];
-          if (row.merged2 >= 1 ){
-            insertAtIndex = i ; 
-            break;
-          } 
-        }
-      }
-      console.log(insertAtIndex)
-      
-      // 삽입위치 이후 행의 merged1 값을 수정
-      for (let i = insertAtIndex ; i >= 0; i--) {
-        if( i == checkInfos.length){
-          break;
-        }
-        if( updatedRows[insertAtIndex].merged1 == 0  ){
-          const row = updatedRows[i];
-          if (row.merged1 === 1 ){
-            newRow.merged1 = 1 ;
-            break;
-          } 
-          if (row.merged1 > 1 ) {
-            updatedRows[i].merged1++;  
-            newRow.merged1 = 0;
-            break;
-          }  
-        }
-       
-      }
-
-      for (let i = insertAtIndex ; i >= 0; i--) {
-        if( i == checkInfos.length){
-          break;
-        }
-        if( updatedRows[insertAtIndex].merged2 == 0  ){
-          const row = updatedRows[i];
-        if (row.merged2 === 1 ){
-          newRow.merged2 = 1 ;
-          break;
-        }
-        if (row.merged2 > 1 ) {
-          updatedRows[i].merged2++;  
-          newRow.merged2 = 0 ;
-          break;
-        }  
-        }
-        
-      }
-      // 새로운 행 추가
-      updatedRows.splice(insertAtIndex, 0, newRow);
-      updatedRows.forEach((row, rowIndex) => {
-        row.sequence = rowIndex + 1;  
-      });
-      setCheckInfos(updatedRows); 
-    } else {
-      setCheckInfos([...checkInfos, newRow]);
-    }
-    []
-  };
-
-  const handleDeleteRow = () => {
-    if (selectedCell) { 
-      setWillSave(true);
-      const updatedRows = [...checkInfos];
-      updatedRows.splice(selectedCell.rowIndex, 1); 
-      handleSplit();
-      // let updatedRows = [...rows]; 
-      // // 선택된 셀 아래에 있는 행 중 merged1 값이 0인 행을 모두 제거
-      // for (let i = selectedCell.rowIndex ; i < updatedRows.length; i++) {
-      //   if (updatedRows[i].merged1 === 0) {
-      //     updatedRows.splice(i, 1); // merged1 값이 0이면 행을 제거
-      //     i--; // 행이 제거되었으므로 index를 조정
-      //   } else {
-      //     break; // merged1 값이 0이 아니면 반복문 종료
-      //   }
-      // }
-    
-      // // 선택된 셀 아래에 있는 행 중 merged2 값이 0인 행을 모두 제거
-      // for (let i = selectedCell.rowIndex ; i < updatedRows.length; i++) {
-      //   if (updatedRows[i].merged2 === 0) {
-      //     updatedRows.splice(i, 1); // merged1 값이 0이면 행을 제거
-      //     i--; // 행이 제거되었으므로 index를 조정
-      //   } else {
-      //     break; // merged1 값이 0이 아니면 반복문 종료
-      //   } 
-      // } 
-      updatedRows.forEach((row, index) => (row.sequence = index + 1));
-      setCheckInfos(updatedRows);
-      setSelectedCell(null);
-    }
-  };
-
-  const handleMerge = () => {
-    if (!selectedCell ) return;
-    setWillSave(true);
-    let mergeCount = 1; // 병합할 셀의 수를 추적합니다.
-    let processing = true;
-    
-    // 병합할 셀의 수를 계산합니다.
-    if( selectedCell.colIndex == 2 ){
-      checkInfos.forEach((row, rowIndex) => {
-        if (rowIndex > selectedCell.rowIndex) {
-          if (processing) {
-            mergeCount++;
-            if (row.merged1 === 1) processing = false;
-          }
-        }
-      });
-    
-      processing = true;
-      const updatedRows = checkInfos.map((row, rowIndex) => {
-        if (rowIndex === selectedCell.rowIndex) {
-          return { ...row, merged1: mergeCount };
-        } else if (rowIndex > selectedCell.rowIndex &&  processing) {
-          if (row.merged1 === 1) processing = false;
-          return { ...row, merged1: 0 };
-        }
-        return row;
-      });
-      setCheckInfos(updatedRows);
-    }
-    else if( selectedCell.colIndex == 3  ){ 
-      checkInfos.forEach((row, rowIndex) => {
-        if (rowIndex > selectedCell.rowIndex) {
-          if ( processing) {
-            mergeCount++;
-            if (row.merged2 === 1) processing = false;
-          }
-        }
-      }); 
-      processing = true;
-      const updatedRows = checkInfos.map((row, rowIndex) => {
-        if (rowIndex === selectedCell.rowIndex) {
-          return { ...row, merged2: mergeCount };
-        } else if (rowIndex > selectedCell.rowIndex && processing) {
-          if (row.merged2 === 1) processing = false;
-          return { ...row, merged2: 0 };
-        }
-        return row;
-      });
-      setCheckInfos(updatedRows);
-    } 
-  };
-
 
   interface SelectedFile {
     file: File;
@@ -331,38 +137,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
     setSelectedFiles(prevFiles => prevFiles.filter(file => file.id !== id));
   };
   
-  const handleSplit = () => {
-    if (!selectedCell) return;
-    
-    if( selectedCell.colIndex == 2 ){
-      setWillSave(true);
-      let processing = true;
-      const updatedRows = checkInfos.map((row, rowIndex) => {
-        if (rowIndex === selectedCell.rowIndex) {
-          return { ...row, merged1: 1 };
-        } else if (rowIndex > selectedCell.rowIndex &&  processing) {
-          if (row.merged1 >= 1) processing = false;
-          return { ...row, merged1: 1 };
-        }
-        return row;
-      }); 
-    
-      setCheckInfos(updatedRows);
-    }else if( selectedCell.colIndex == 3 ){
-      setWillSave(true);
-      let processing = true;
-      const updatedRows = checkInfos.map((row, rowIndex) => {
-        if (rowIndex === selectedCell.rowIndex) {
-          return { ...row, merged2: 1 };
-        } else if (rowIndex > selectedCell.rowIndex &&  processing) {
-          if (row.merged2 >= 1) processing = false;
-          return { ...row, merged2: 1 };
-        }
-        return row;
-      }); 
-      setCheckInfos(updatedRows);
-    }
-  }; 
+  
   const handleSave = async () => {
     setWillSave(false);
     const sortedFiles = selectedFiles.sort((a:any, b:any) => a.id - b.id);
@@ -426,10 +201,11 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
             }
           </CustomSelect>
            
-          <Button variant="contained" onClick={handleMerge} disabled={!selectedCell}>셀 병합</Button>
-          <Button variant="contained" onClick={handleSplit} disabled={!selectedCell}>셀 분할</Button>
-          <Button variant="contained" onClick={handleAddRow}  >행 삽입</Button>
-          <Button variant="contained" onClick={handleDeleteRow} disabled={(selectedCell && checkInfos.length> selectedCell.rowIndex) ? (checkInfos[selectedCell.rowIndex].merged1 !==1) || (checkInfos[selectedCell.rowIndex].merged2  !==1) : true  }>행 삭제</Button>
+          <Button variant="contained"  >수탁사 입력 활성화</Button>
+          <Button variant="contained"  >다운로드</Button>
+          <Button variant="contained"  >임시 저장</Button>
+          <Button variant="contained"  >보완 요청</Button>
+          <Button variant="contained" >검수 완료</Button>
         </Box>
       </Box>
       <TableContainer component={Paper}>
@@ -445,7 +221,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
           </TableRow>
         </TableHead>
           <TableBody>
-            {checkInfos.map((row:CheckInfo, rowIndex) => ( 
+            {checkInfos.map((row:ChecklistResultItem, rowIndex) => ( 
               <TableRow key={row.id}>
                 {Object.keys(row).map((key, colIndex) => {
                   const isEditing = editingCell && editingCell.rowIndex === rowIndex && editingCell.colIndex === colIndex;
@@ -468,8 +244,8 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
                             e.target.blur(); 
                             setEditingCell(null);
                           } }}
-                          value={row[key as keyof CheckInfo]}
-                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
+                          value={row[key as keyof ChecklistResultItem]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof ChecklistResultItem, e.target.value)}
                         />
                       ) : (
                         <TextareaAutosize 
@@ -501,8 +277,8 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
                     >
                       {isEditing ? (
                         <TextField 
-                          value={row[key as keyof CheckInfo]}
-                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
+                          value={row[key as keyof ChecklistResultItem]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof ChecklistResultItem, e.target.value)}
                           onKeyDown={(e: any) => { if (e.key === 'Enter') {
                             e.target.blur(); 
                             setEditingCell(null);
@@ -573,8 +349,8 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
                       {isEditing ? (
                         <TextField   
                           multiline={true}
-                          value={row[key as keyof CheckInfo]}
-                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof CheckInfo, e.target.value)}
+                          value={row[key as keyof ChecklistResultItem]}
+                          onChange={(e) => handleCellUpdate(rowIndex, key as keyof ChecklistResultItem, e.target.value)}
                            
                         />
                       ) : (

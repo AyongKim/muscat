@@ -72,12 +72,15 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
 
   const handleCellUpdate = (rowIndex: number, field: keyof Row, value: string | number) => {
     setWillSave(true);
+    console.log(privacyInfos);
+    console.log('-------------');
     const updatedRows = privacyInfos.map((row, index) => {
       if (index === rowIndex) {
         return { ...row, [field]: value };
       }
       return row;
     });
+    console.log(updatedRows);
     setPrivacyInfos(updatedRows); 
   };
   
@@ -203,8 +206,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       //   } 
       // } 
       updatedRows.forEach((row, index) => (row.sequence = index + 1));
-      setPrivacyInfos(updatedRows);
-      setSelectedCell(null);
+      setPrivacyInfos(updatedRows);  
     }
   };
 
@@ -294,10 +296,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       }); 
       setPrivacyInfos(updatedRows);
     }
-  };
-  const handleImport = () => {
-    
-  };
+  }; 
   const handleSave = async () => {
     setWillSave(false);
     try {
@@ -305,8 +304,8 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
         "id": privacyItem.id,
         "data": privacyInfos
       })
-      if (response.data) {
-        setPrivacyInfos(response.data); 
+      if (response.data.result=='success') {
+        fetchPrivacyInfo(selectedItem.id)
       } else {
         console.error(response.data.error_message);
       }
@@ -342,7 +341,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
           <Button variant="contained" onClick={handleMerge} disabled={!selectedCell}>셀 병합</Button>
           <Button variant="contained" onClick={handleSplit} disabled={!selectedCell}>셀 분할</Button>
           <Button variant="contained" onClick={handleAddRow}  >행 삽입</Button>
-          <Button variant="contained" onClick={handleDeleteRow} disabled={!selectedCell || (privacyInfos[selectedCell.rowIndex].merged1 !==1) || (privacyInfos[selectedCell.rowIndex].merged2  !==1)  }>행 삭제</Button>
+          <Button variant="contained" onClick={handleDeleteRow} disabled={(selectedCell && privacyInfos.length> selectedCell.rowIndex) ?  ( privacyInfos[selectedCell.rowIndex].merged1 !==1) || (privacyInfos[selectedCell.rowIndex].merged2  !==1) :true  }>행 삭제</Button>
         </Box>
       </Box>
       <TableContainer component={Paper}>

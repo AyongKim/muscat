@@ -3,10 +3,8 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from '@mui/material/styles';
 import { Stack, Typography, Avatar, Fab } from '@mui/material';
 import { IconArrowDownRight, IconCurrencyDollar } from '@tabler/icons-react';
-
 import DashboardCard from '../../shared/DashboardCard';
 import SkeletonMonthlyEarningsTwoCard from "../skeleton/MonthlyEarningsTwoCard";
-
 interface MonthlyearningsCardProps {
   isLoading: boolean;
 }
@@ -17,7 +15,6 @@ const MonthlyEarnings = ({ isLoading }: MonthlyearningsCardProps) => {
   const secondary = theme.palette.secondary.main;
   const secondarylight = theme.palette.secondary.light;
   const errorlight = theme.palette.error.light;
-
   // chart
   const optionscolumnchart: any = {
     chart: {
@@ -95,5 +92,4 @@ const MonthlyEarnings = ({ isLoading }: MonthlyearningsCardProps) => {
     </>
   );
 };
-
 export default MonthlyEarnings;

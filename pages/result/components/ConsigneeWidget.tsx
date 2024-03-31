@@ -2,8 +2,8 @@ import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from '@mui/material/styles';
 
-import DashboardWidgetCard from '../../shared/DashboardWidgetCard';
-import SkeletonEmployeeSalaryCard from "../skeleton/EmployeeSalaryCard";
+import DashboardWidgetCard from '../../../src/components/shared/DashboardWidgetCard';
+import SkeletonEmployeeSalaryCard from "../../../src/components/dashboards/skeleton/EmployeeSalaryCard";
 import { Box } from "@mui/material";
 
 
@@ -12,7 +12,7 @@ interface EmployeeSalaryCardProps {
 }
 
 
-const EmployeeSalary = ({ isLoading }: EmployeeSalaryCardProps) => {
+const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
@@ -52,7 +52,7 @@ const EmployeeSalary = ({ isLoading }: EmployeeSalaryCardProps) => {
       },
     },
     xaxis: {
-      categories: [['Apr'], ['May'], ['June'], ['July'], ['Aug'], ['Sept']],
+      categories: [['첫번째 수탁사'], ['May'], ['June'], ['July'], ['Aug'], ['Sept']],
       axisBorder: {
         show: false,
       },
@@ -80,12 +80,12 @@ const EmployeeSalary = ({ isLoading }: EmployeeSalaryCardProps) => {
           <SkeletonEmployeeSalaryCard />
         ) : (
           <DashboardWidgetCard
-            title="Employee Salary"
+            title="평균 대비 우수/취약 수탁사 "
             subtitle="Every month"
-            dataLabel1="Salary"
-            dataItem1="$36,358"
-            dataLabel2="Profit"
-            dataItem2="$5,296"
+            dataLabel1="점수"
+            dataItem1="36,358"
+            dataLabel2="평균점수"
+            dataItem2="5,296"
           >
             <>
               <Box height="295px">
@@ -99,4 +99,4 @@ const EmployeeSalary = ({ isLoading }: EmployeeSalaryCardProps) => {
   );
 };
 
-export default EmployeeSalary;
+export default ConsigneeWidget;

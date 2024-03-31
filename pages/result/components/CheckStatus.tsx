@@ -2,16 +2,17 @@ import React from 'react';
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from '@mui/material/styles';
-import { Stack, Typography, Box } from '@mui/material';
-import { IconGridDots } from '@tabler/icons-react';
-import DashboardCard from '../../shared/DashboardCard';
-import SkeletonSalesOverviewCard from '../skeleton/SalesOverviewCard';
+import { Stack, Typography, Box, Button } from '@mui/material';
+import { IconChevronsRight, IconGridDots } from '@tabler/icons-react';
+import DashboardCard from '../../../src/components/shared/DashboardCard';
+import SkeletonSalesOverviewCard from '../../../src/components/dashboards/skeleton/SalesOverviewCard';
+import { Row } from 'antd';
 
 interface SalesOverviewCardProps {
   isLoading: boolean;
 }
 
-const SalesOverview = ({ isLoading }: SalesOverviewCardProps) => {
+const CheckStatus = ({ isLoading }: SalesOverviewCardProps) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
@@ -81,19 +82,38 @@ const SalesOverview = ({ isLoading }: SalesOverviewCardProps) => {
         isLoading ? (
           <SkeletonSalesOverviewCard />
         ) : (
-          <DashboardCard title="Sales Overview" subtitle="Every month">
+          <DashboardCard title="점검상태" >
             <>
-              <Box mt={3} height="255px">
+            <Box display={'flex'} alignItems={'center'}  >
+              <Box mt={3} height="155px" width={155}>
                 <Chart
                   options={optionscolumnchart}
                   series={seriescolumnchart}
                   type="donut"
-                  height="275px"
+                  height="175px"
                   width={"100%"}
                 />
               </Box>
-
-              <Stack direction="row" spacing={2} justifyContent="space-between" mt={7}>
+              <Button
+                sx={{ my: 0.5, width:"25px", height:1 }}
+                variant="outlined"
+                size="small" 
+                aria-label="move all right"
+              >
+                <IconChevronsRight width={20} height={20} />
+              </Button>
+              <Box mt={3} height="155px" width={155}>
+                <Chart
+                  options={optionscolumnchart}
+                  series={seriescolumnchart}
+                  type="donut"
+                  height="175px"
+                  width={"100%"}
+                />
+              </Box>
+              
+            </Box>
+            <Stack direction="row" spacing={2} justifyContent="space-between" mt={7}>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Box
                     width={38}
@@ -148,7 +168,7 @@ const SalesOverview = ({ isLoading }: SalesOverviewCardProps) => {
                     </Typography>
                   </Box>
                 </Stack>
-              </Stack>
+            </Stack>
             </>
           </DashboardCard>
         )}
@@ -157,4 +177,4 @@ const SalesOverview = ({ isLoading }: SalesOverviewCardProps) => {
   );
 };
 
-export default SalesOverview;
+export default CheckStatus;

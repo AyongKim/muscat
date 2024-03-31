@@ -26,42 +26,7 @@ import Link from 'next/link';
 import DeleteUser from './DeleteUser';
 import axios from 'axios';
 import { API_URL } from '@pages/constant';
-
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-
-  return 0;
-}
-
-type Order = 'asc' | 'desc';
-
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key,
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-
-    return a[1] - b[1];
-  });
-
-  return stabilizedThis.map((el) => el[0]);
-}
+ 
 
 interface HeadCell {
   disablePadding: boolean;
@@ -83,6 +48,13 @@ const headCells:  HeadCell[] = [
     disablePadding: false,
     label: '계정 유형',
   },
+  {
+    id: 'company_name',
+    numeric: false,
+    disablePadding: false,
+    label: '업체명',
+  },
+  
   {
     id: 'pname',
     numeric: false,
@@ -111,69 +83,53 @@ const headCells:  HeadCell[] = [
 ];
 
 interface EnhancedTableProps {
-  numSelected: number;
-  onRequestSort: (event: React.MouseEvent<unknown>, property: any) => void;
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  order: Order;
-  orderBy: string;
+  numSelected: number; 
+  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void; 
   rowCount: number;
 } 
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = (property: any) => (event: React.MouseEvent<unknown>) => {
-    onRequestSort(event, property);
-  };
 
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
-          <CustomCheckbox
-            color="primary"
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              'aria-label': 'select all desserts',
-            }}
-          />
-        </TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
  
 
 
 const AccountList = ({ register_num }: { register_num: string }) => {  
-  const [isMaster, setIsMaster] = React.useState(false);
-  const [order, setOrder] = React.useState<Order>('asc');
-  const [orderBy, setOrderBy] = React.useState<any>('calories');
+  const [isMaster, setIsMaster] = React.useState(false);  
   const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
+  function EnhancedTableHead(props: EnhancedTableProps) {
+    const { onSelectAllClick,   numSelected, rowCount } = props; 
+    return (
+      <TableHead>
+        <TableRow>
+          <TableCell padding="checkbox">
+            <CustomCheckbox
+              color="primary"
+              checked={rowCount > 0 && numSelected === rowCount}
+              onChange={onSelectAllClick}
+              inputProps={{
+                'aria-label': 'select all desserts',
+              }}
+            />
+          </TableCell>
+          {headCells.map((headCell) => (
+            (!search && headCell.id=="company_name") ? null :
+            <TableCell
+              key={headCell.id}
+              align={headCell.numeric ? 'right' : 'left'}
+              padding={headCell.disablePadding ? 'none' : 'normal'} 
+            >
+              <TableSortLabel 
+                 
+              >
+                {headCell.label} 
+              </TableSortLabel>
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+    );
+  }
  
   const fetchUsers = async() => {
     const str = sessionStorage.getItem('user')
@@ -200,6 +156,7 @@ const AccountList = ({ register_num }: { register_num: string }) => {
       console.log(accounts)
       const data = accounts.filter((x:any) => x.register_num === register_num); 
       setRows(data)
+      setSearch('');
     } 
   }, [register_num]);
 
@@ -219,12 +176,7 @@ const AccountList = ({ register_num }: { register_num: string }) => {
     setRows(filteredAccounts);
   };
 
-  // This is for the sorting
-  const handleRequestSort = (event: React.MouseEvent<unknown>, property: any) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
+  
 
   // This is for select all the row
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -340,15 +292,12 @@ const AccountList = ({ register_num }: { register_num: string }) => {
                 size={dense ? 'small' : 'medium'}
               >
                 <EnhancedTableHead
-                  numSelected={selected.length}
-                  order={order}
-                  orderBy={orderBy}
-                  onSelectAllClick={handleSelectAllClick}
-                  onRequestSort={handleRequestSort}
+                  numSelected={selected.length} 
+                  onSelectAllClick={handleSelectAllClick} 
                   rowCount={rows.length}
                 />
                 <TableBody>
-                  {stableSort(rows, getComparator(order, orderBy))
+                  {rows
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row: any, index) => {
                       const isItemSelected = isSelected(row.user_id); 
@@ -401,6 +350,11 @@ const AccountList = ({ register_num }: { register_num: string }) => {
                               </Box>
                             </Box>
                           </TableCell>
+                          {search && <TableCell>
+                            <Typography fontWeight={600} variant="h6">
+                              {row.company_name}  
+                            </Typography> 
+                          </TableCell>}
                           <TableCell>
                             <Box display="flex" alignItems="center"> 
                               <Typography
@@ -411,9 +365,7 @@ const AccountList = ({ register_num }: { register_num: string }) => {
                                 {row.user_email}
                               </Typography> 
                               </Box>
-                            
                           </TableCell>
-
                           <TableCell>
                             <Box display="flex" alignItems="center"> 
                               <Typography
@@ -429,10 +381,11 @@ const AccountList = ({ register_num }: { register_num: string }) => {
                           {row.approval==0?'미사용':'사용'  }
                           </TableCell>
                           <TableCell>
-                          <Typography fontWeight={600} variant="h6">
-                              {row.access_time}  
+                            <Typography fontWeight={600} variant="h6">
+                                {row.access_time}  
                             </Typography>
                           </TableCell>
+                          
                         </TableRow>
                       );
                     })}
