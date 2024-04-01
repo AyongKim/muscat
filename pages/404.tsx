@@ -7,6 +7,5 @@ export default function Custom404() {
   useEffect(() => {
     router.replace("/auth/error");
   });
-
-  return null;
+ 
 }

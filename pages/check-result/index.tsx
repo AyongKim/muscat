@@ -195,7 +195,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
           >
             {checklistItems.map((x, i) => {
               return (
-                <MenuItem key={i} value={x}>{x.checklist_item}</MenuItem>
+                <MenuItem key={i}>{x.checklist_item}</MenuItem>
               );
             })
             }

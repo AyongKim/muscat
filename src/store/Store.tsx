@@ -1,11 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
 import CustomizerReducer from './customizer/CustomizerSlice';
-import EcommerceReducer from './apps/eCommerce/ECommerceSlice'; 
 import CompanyReducer from './apps/CompanySlice'; 
 import NoticeReducer from './apps/NoticeSlice'; 
-import ProjectReducer from './apps/ProjectSlice'; 
-import NotesReducer from './apps/notes/NotesSlice'; 
-import TicketReducer from './apps/tickets/TicketSlice';  
+import ProjectReducer from './apps/ProjectSlice';  
 import { combineReducers } from 'redux';
 import {
   useDispatch as useAppDispatch,
@@ -20,10 +17,7 @@ import userReducer from './apps/UserSlice';
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    customizer: CustomizerReducer,
-    ecommerceReducer: EcommerceReducer,  
-    notesReducer: NotesReducer, 
-    ticketReducer: TicketReducer, 
+    customizer: CustomizerReducer, 
     companyReducer: CompanyReducer, 
     noticeReducer:NoticeReducer,
     projectReducer:ProjectReducer,
@@ -33,10 +27,7 @@ export const store = configureStore({
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  customizer: CustomizerReducer,
-  ecommerceReducer: EcommerceReducer,  
-  notesReducer: NotesReducer, 
-  ticketReducer: TicketReducer, 
+  customizer: CustomizerReducer, 
   companyReducer: CompanyReducer, 
   noticeReducer:NoticeReducer,
   projectReducer:ProjectReducer,

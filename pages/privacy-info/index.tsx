@@ -332,7 +332,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
           >
             {privacyItems.map((x, i) => {
               return (
-                <MenuItem key={i} value={x}>{x.personal_category}</MenuItem>
+                <MenuItem key={i}>{x.personal_category}</MenuItem>
               );
             })
             }
