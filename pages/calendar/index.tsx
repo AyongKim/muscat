@@ -177,6 +177,8 @@ export default function BigCalendar() {
               start: eventStart,
               end: eventEnd,
               color: 'create',
+              delayType: 'create',
+              delayIndex: i
             })
           }
         }
@@ -204,6 +206,8 @@ export default function BigCalendar() {
               start: eventStart,
               end: eventEnd,
               color: 'self-check',
+              delayType: 'self_check',
+              delayIndex: i
             })
           }
         }
@@ -231,6 +235,8 @@ export default function BigCalendar() {
               start: eventStart,
               end: eventEnd,
               color: 'imp-check',
+              delayType: 'imp_check',
+              delayIndex: i
             })
           }
         }
@@ -268,66 +274,7 @@ export default function BigCalendar() {
         
       }
 
-      newEvents.push({
-        title: '계정 생성 기간',
-        allDay: true,
-        start: new Date(schedule.create_from),
-        end: new Date(schedule.create_from),
-        color: 'transparent',
-      })
       
-      newEvents.push({
-        title: '계정 생성 마감',
-        allDay: true,
-        start: new Date(schedule.create_to),
-        end: new Date(schedule.create_to),
-        color: 'transparent',
-      })
-
-      newEvents.push({
-        title: '자가점검 제출 기간',
-        allDay: true,
-        start: new Date(schedule.self_check_from),
-        end: new Date(schedule.self_check_from),
-        color: 'transparent',
-      })
-
-      newEvents.push({
-        title: '자가점검 마감',
-        allDay: true,
-        start: new Date(schedule.self_check_to),
-        end: new Date(schedule.self_check_to),
-        color: 'transparent',
-      })
-
-      let first_check = new Date(schedule.self_check_to);
-      first_check.setDate(first_check.getDate() + 1)
-
-      if (getDateStr(first_check) > schedule.self_check_to && getDateStr(first_check) < schedule.imp_check_from) {
-        newEvents.push({
-          title: '1차 검수 기간',
-          allDay: true,
-          start: first_check,
-          end: first_check,
-          color: 'transparent',
-        })
-      }
-
-      newEvents.push({
-        title: '이행점검 보완제출 기간',
-        allDay: true,
-        start: new Date(schedule.imp_check_from),
-        end: new Date(schedule.imp_check_from),
-        color: 'transparent',
-      })
-
-      newEvents.push({
-        title: '이행점검 보완제출 마감',
-        allDay: true,
-        start: new Date(schedule.imp_check_to),
-        end: new Date(schedule.imp_check_to),
-        color: 'transparent',
-      })
     }
     if ((checkAll || userData.type == 1) && project) {
       console.log(checkSchedule)
@@ -342,6 +289,67 @@ export default function BigCalendar() {
         })
       })
     }
+
+    newEvents.push({
+      title: '계정 생성 기간',
+      allDay: true,
+      start: new Date(schedule.create_from),
+      end: new Date(schedule.create_from),
+      color: 'transparent',
+    })
+    
+    newEvents.push({
+      title: '계정 생성 마감',
+      allDay: true,
+      start: new Date(schedule.create_to),
+      end: new Date(schedule.create_to),
+      color: 'transparent',
+    })
+
+    newEvents.push({
+      title: '자가점검 제출 기간',
+      allDay: true,
+      start: new Date(schedule.self_check_from),
+      end: new Date(schedule.self_check_from),
+      color: 'transparent',
+    })
+
+    newEvents.push({
+      title: '자가점검 마감',
+      allDay: true,
+      start: new Date(schedule.self_check_to),
+      end: new Date(schedule.self_check_to),
+      color: 'transparent',
+    })
+
+    let first_check = new Date(schedule.self_check_to);
+    first_check.setDate(first_check.getDate() + 1)
+
+    if (getDateStr(first_check) > schedule.self_check_to && getDateStr(first_check) < schedule.imp_check_from) {
+      newEvents.push({
+        title: '1차 검수 기간',
+        allDay: true,
+        start: first_check,
+        end: first_check,
+        color: 'transparent',
+      })
+    }
+
+    newEvents.push({
+      title: '이행점검 보완제출 기간',
+      allDay: true,
+      start: new Date(schedule.imp_check_from),
+      end: new Date(schedule.imp_check_from),
+      color: 'transparent',
+    })
+
+    newEvents.push({
+      title: '이행점검 보완제출 마감',
+      allDay: true,
+      start: new Date(schedule.imp_check_to),
+      end: new Date(schedule.imp_check_to),
+      color: 'transparent',
+    })
 
     setCalEvents(newEvents)
     setToggle(!toggle)
@@ -586,20 +594,30 @@ export default function BigCalendar() {
     setUserData(data)
   }, []);
 
+  const [delDelayType, setDelDelayType] = React.useState('');
+  const [delDelayIndex, setDelDelayIndex] = React.useState(-1);
+
   const editEvent = (event: any) => {
     console.log(event)
-    if (event.index == undefined)
-      return;
-    let data = checkSchedule[event.index]
+    if (event.index) {
+      let data = checkSchedule[event.index]
 
-    setCheckOpen(true)
-    setCheckMode('view')
-    setCheckTitle(data.user_name + " - " + data.admin_name)
-    setCheckDate(data.data.time)
-    setCheckAddress(data.data.address)
-    setCheckManager(data.data.manager)
-    setCheckManagerPhone(data.data.phone)
-    setEditIndex(event.index)
+      console.log(data)
+  
+      setCheckOpen(true)
+      setCheckMode('view')
+      setCheckTitle(data.user_name + " - " + data.admin_name)
+      setCheckDate(data.data.time)
+      setCheckAddress(data.data.address)
+      setCheckManager(data.data.manager)
+      setCheckManagerPhone(data.data.phone)
+      setEditIndex(event.index)  
+    }
+    else if (event.delayType) {
+      setDelDelayType(event.delayType)
+      setDelDelayIndex(event.delayIndex)
+      setDeleteModal(true)
+    }
   };
 
   const addNewEventAlert = (slotInfo: EvType) => {
@@ -607,6 +625,8 @@ export default function BigCalendar() {
 
       let cc = consignees.find((x) => x.company_id == consignee)
       let aa = admins.find((x) => x.user_id == admin)
+
+      console.log(consignees)
 
       setCheckMode('register');
       setCheckTitle(cc.name + " - " + aa.name)
@@ -725,7 +745,7 @@ export default function BigCalendar() {
 
     const response = await axios.post(`${API_URL}/project_detail/Update`, {
       id: projectDetail.id,
-      delay: JSON.stringify(projectDetail.delay)
+      delay: JSON.stringify(newDelay)
     });
 
     if (response.data.result == 'SUCCESS') {
@@ -843,6 +863,46 @@ export default function BigCalendar() {
     const day_names=['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
 
     return `${year}년 ${month}월 ${day}일(${day_names[d]}) ${hour}시 ${minute}분`;
+  }
+
+  const [deleteModal, setDeleteModal] = React.useState(false)
+
+  const onDelete = () => {
+    setDeleteModal(true)
+  }
+
+  const onCloseDeleteModal = () => {
+    setDeleteModal(false)
+  }
+
+  const handleDelete = async() => {
+    let newDelay = projectDetail.delay;
+    if (delayType == 'create') {
+      newDelay.create.splice(delDelayIndex, 1);
+    }
+    if (delayType == 'self_check') {
+      newDelay.self_check.splice(delDelayIndex, 1);
+    }
+    if (delayType == 'imp_check') {
+      newDelay.imp_check.splice(delDelayIndex, 1);
+    }
+
+    const response = await axios.post(`${API_URL}/project_detail/Update`, {
+      id: projectDetail.id,
+      delay: JSON.stringify(newDelay)
+    });
+
+    if (response.data.result == 'SUCCESS') {
+      setDeleteModal(false)
+      setProjectDetail({...projectDetail, delay: newDelay});
+      setModalMsg('정확히 보관되었습니다.')
+      setShowModal(true)
+    }
+    else {
+      setDeleteModal(false)
+      setModalMsg(response.data.error_message)
+      setShowModal(true)
+    }
   }
 
   return (
@@ -1198,6 +1258,19 @@ export default function BigCalendar() {
           }
         </form>
       </Dialog>
+
+      <Dialog open={deleteModal} onClose={onCloseDeleteModal}>
+          <DialogTitle>삭제</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              선택한 일정연기부분을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onCloseDeleteModal}>취소</Button>
+            <Button onClick={handleDelete} color="error">삭제</Button>
+          </DialogActions>
+        </Dialog>
     </PageContainer>
   );
 };

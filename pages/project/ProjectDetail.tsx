@@ -350,7 +350,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
       let selectedData = rows.find((x) => x.id == selected[0])
       setEditData({...selectedData})
 
-      setCompany(selectedData.user_id)
+      setCompany(selectedData.company_id)
       setWorkName(selectedData.work_name)
       setChecker(selectedData.checker_id)
       setCheckType(selectedData.check_type)
@@ -358,9 +358,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
   }
 
   React.useEffect(() => {
-    console.log('---Row Data---')
     console.log(rows)
-    console.log('--------------')
   }, [rows])
   
   const fileInputRef = React.useRef(null);
@@ -381,9 +379,6 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
     })
     .then((response) => response.json())
     .then(data => {
-      console.log(data)
-      console.log(data.result)
-      console.log(data.reason)
       if (data.result == 'FAIL') {
         setModalMsg(data.reason);
         setShowModal(true)
@@ -403,11 +398,32 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
     <Box> 
           {/* <Button type="submit" color="success" variant="contained" sx={{width:150}}>조회</Button>  */}
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginY: 1, mr: 2 }}>
-          <Button variant="contained" onClick={() => setMode('List')}>
-            목록
-          </Button>
-        </Box>       
+          <Box
+            sx={{mb: 2, display: 'flex', alignItems: 'center'}}
+          > 
+            <Typography align='center' sx={{mr: 1, fontSize: 16}}>
+              연도:
+            </Typography> 
+            <Typography align='center' sx={{mr: 3, fontSize: 18, fontWieght: 'bold'}}>
+              {data.year}
+            </Typography> 
+          <Typography align='center' sx={{mr: 1, fontSize: 16}}>
+            프로젝트 명:
+          </Typography> 
+          <Typography align='center' sx={{mr: 3, fontSize: 18}}>
+              {data.name}
+            </Typography> 
+          <Typography align='center' sx={{mr: 1, fontSize: 16}}>
+            위탁사 명:
+          </Typography> 
+          <Typography align='center' sx={{mr: 3, fontSize: 18}}>
+            {data.company_name}
+          </Typography> 
+
+          <Button variant="contained" sx={{ml: 'auto'}}onClick={() => setMode('List')}>
+              목록
+            </Button>
+        </Box>
         <BlankCard> 
           <Toolbar
             sx={{
@@ -565,10 +581,6 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                       const isItemSelected = isSelected(row.id);
                       const labelId = `enhanced-table-checkbox-${index}`;
 
-                      console.log('-----------------------')
-                      console.log(row)
-                      console.log(editData)
-
                       if (editMode != 'edit' || row.id != editData?.id)
                         return (
                           <TableRow
@@ -654,12 +666,14 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
                                 id="month-dd"
                                 size="small" 
                                 value={company}
-                                sx={{width:100, mr:1}}
+                                sx={{width:150, mr:1}}
                                 onChange={(e:any)=>setCompany(e.target.value)}
                               >
                                 {companyList.map((x, i) => {
+                                  console.log('-----------')
+                                  console.log(x)
                                   return (
-                                    <MenuItem value={x.id} key = {i}>{x.company_name}</MenuItem>
+                                    <MenuItem value={x.id} key = {i}>{x.name}</MenuItem>
                                   );
                                 })}
                               </CustomSelect>
