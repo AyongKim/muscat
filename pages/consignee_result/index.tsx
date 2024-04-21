@@ -29,8 +29,9 @@ import {
   Dialog, DialogActions, DialogContent, DialogContentText,  DialogTitle
 } from '@mui/material';
 
+import StatusIndividual from '@pages/result/StatusIndividual'
 import PageContainer from "@src/components/container/PageContainer";
-import Status from "./component/Status"
+import Status from "@pages/consignee_main/component/Status"
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 const axios = require('axios');
 import { API_URL } from '@pages/constant';
@@ -38,7 +39,7 @@ import { API_URL } from '@pages/constant';
 export default function Modern() {
   const [projectList, setProjectList] = useState([])
   const [project, setProject] = useState(0)
-  const [noStatus, setNoStatus] = useState(false)
+  const [noStatus, setNoStatus] = useState(true)
   const [userData, setUserData] = useState({
     type: 0,
     user_id: 0,
@@ -61,7 +62,7 @@ export default function Modern() {
     fetchProject()
   }, []);
 
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState(null)
 
   const fetchDetail = async () => {
     let response = await axios.post(`${API_URL}/project_detail/Status`, {
@@ -87,6 +88,14 @@ export default function Modern() {
     else
       setNoStatus(false)
   }, [project])
+
+  useEffect(() => {
+    if (project)
+      fetchDetail()
+    else
+      setNoStatus(false)
+  }, [noStatus])
+
 
   const [showModal, setShowModal] = React.useState(false)
   const [modalMsg, setModalMsg] = React.useState('')
@@ -122,6 +131,11 @@ export default function Modern() {
 
 
         {noStatus && <Status project={project} setNoStatus={setNoStatus}/>}
+        {(status && !noStatus) && (
+            <Box sx={{mt: 2}}>
+                <StatusIndividual consigneeData={status}/>
+            </Box>
+        )}
         <Dialog open={showModal} onClose={onClose}>
           <DialogTitle></DialogTitle>
           <DialogContent sx={{width:370}} >

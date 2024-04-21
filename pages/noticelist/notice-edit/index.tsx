@@ -78,7 +78,6 @@ export default function QuillEditor() {
   const [projectName, setProjectName] = useState('');
 
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isMaster, setIsMaster] = useState(false) ;
 
   const handleClosePopup = () => {
     // Close both success and error popups
@@ -86,7 +85,6 @@ export default function QuillEditor() {
   };
 
   const fetchDetail = async () => {
-
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get('id') || ''; 
@@ -117,12 +115,6 @@ export default function QuillEditor() {
     setProjects(response.data)
   }
   useEffect(() => {
-    const str = sessionStorage.getItem('user')
-    let data = JSON.parse(str); 
-    if (data.type == 1 || data.type == 2 ) { 
-    } else{
-      setIsMaster(true)
-    }
     fetchProjects()
     fetchDetail();
   }, []); // 페이지 로드시 한번만 실행 
@@ -202,13 +194,13 @@ export default function QuillEditor() {
       <DashboardCard
         title="글 작성"
         action={
-          isMaster && <Box>
+          <Box>
             {isEditing ? (
               <Button variant="contained" onClick={handleSave} sx={{ mr: 1 }}>
                 저장
               </Button>
-            ) :  (
-               <Button variant="contained" onClick={handleEdit} sx={{ mr: 1 }}>
+            ) : (
+              <Button variant="contained" onClick={handleEdit} sx={{ mr: 1 }}>
                 수정
               </Button>
             )}

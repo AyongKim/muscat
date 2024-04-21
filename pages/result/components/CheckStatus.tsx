@@ -20,79 +20,46 @@ const CheckStatus = ({ isLoading }: SalesOverviewCardProps) => {
   const primarylight = theme.palette.primary.light;
   const textColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : '#2A3547';
 
-  // chart
-  const optionscolumnchart: any = {
-    chart: {
-      type: 'donut',
-      fontFamily: "'Plus Jakarta Sans', sans-serif;",
-
-      toolbar: {
-        show: false,
-      },
-      height: 275,
-    },
-    labels: ["Profit", "Revenue", "Expance"],
-    colors: [primary, primarylight, secondary],
-    plotOptions: {
-      pie: {
-
-        donut: {
-          size: '89%',
-          background: 'transparent',
-
-          labels: {
-            show: true,
-            name: {
-              show: true,
-              offsetY: 7,
-            },
-            value: {
-              show: false,
-            },
-            total: {
-              show: true,
-              color: textColor,
-              fontSize: '20px',
-              fontWeight: '600',
-              label: '500,458',
-            },
-          },
-        },
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      show: false,
-    },
-    legend: {
-      show: false,
-    },
-    tooltip: {
-      theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
-      fillSeriesColor: false,
-    },
-  };
-  const seriescolumnchart = [55, 55, 55];
-
   return (
     <>
       {
         isLoading ? (
           <SkeletonSalesOverviewCard />
         ) : (
-          <DashboardCard title="점검상태" >
+          <DashboardCard>
             <>
             <Box display={'flex'} alignItems={'center'}  >
-              <Box mt={3} height="155px" width={155}>
-                <Chart
-                  options={optionscolumnchart}
-                  series={seriescolumnchart}
-                  type="donut"
-                  height="175px"
-                  width={"100%"}
-                />
+              <Typography mt={3} width={140} textAlign={'center'} fontSize={20}>
+                최초 점검
+              </Typography>
+              <Box
+                sx={{ my: 0.5, width:"82px", height:1 }}
+              >
+              </Box>
+              <Typography mt={3} width={140} textAlign={'center'} fontSize={20}>
+                이행 점검
+              </Typography>
+              
+            </Box>
+            <Box display={'flex'} alignItems={'center'}  >
+              <Box mt={0} width={140} sx={{mr: '10px'}}>
+                <Box sx={{border:'4px solid #ffc000', borderRadius: 70, width: 140, height: 140, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <Box>
+                    <Typography sx={{fontSize: 16}}>
+                      미흡
+                    </Typography>
+                    <Typography sx={{fontSize: 16}}>
+                      <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ffc000'}}>
+                        82
+                      </Typography>
+                      건
+                    </Typography>
+                    <Typography sx={{fontSize:16}}>
+                      1개사 당 <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ffc000'}}>2.5</Typography>건
+                    </Typography>
+                    
+                  </Box>
+                </Box>
               </Box>
               <Button
                 sx={{ my: 0.5, width:"25px", height:1 }}
@@ -103,72 +70,27 @@ const CheckStatus = ({ isLoading }: SalesOverviewCardProps) => {
                 <IconChevronsRight width={20} height={20} />
               </Button>
               <Box mt={3} height="155px" width={155}>
-                <Chart
-                  options={optionscolumnchart}
-                  series={seriescolumnchart}
-                  type="donut"
-                  height="175px"
-                  width={"100%"}
-                />
+                <Box sx={{border:'4px solid #ed7d31', ml: '10px', borderRadius: 70, width: 140, height: 140, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <Box>
+                    <Typography sx={{fontSize: 16}}>
+                      미흡
+                    </Typography>
+                    <Typography sx={{fontSize: 16}}>
+                      <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ed7d31'}}>
+                        82
+                      </Typography>
+                      건
+                    </Typography>
+                    <Typography sx={{fontSize:16}}>
+                      1개사 당 <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ed7d31'}}>2.5</Typography>건
+                    </Typography>
+                    
+                  </Box>
+                </Box>
               </Box>
               
             </Box>
-            <Stack direction="row" spacing={2} justifyContent="space-between" mt={7}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Box
-                    width={38}
-                    height={38}
-                    bgcolor="primary.light"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Typography
-                      color="primary.main"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <IconGridDots width={22} />
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" fontWeight="600">
-                      23,450
-                    </Typography>
-                    <Typography variant="subtitle2" color="textSecondary">
-                      Profit
-                    </Typography>
-                  </Box>
-                </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Box
-                    width={38}
-                    height={38}
-                    bgcolor="secondary.light"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Typography
-                      color="secondary.main"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <IconGridDots width={22} />
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" fontWeight="600">
-                      23,450
-                    </Typography>
-                    <Typography variant="subtitle2" color="textSecondary">
-                      Expance
-                    </Typography>
-                  </Box>
-                </Stack>
-            </Stack>
+            
             </>
           </DashboardCard>
         )}

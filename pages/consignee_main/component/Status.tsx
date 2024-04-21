@@ -183,7 +183,7 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
     console.log(annualPersonalInformation)
     if (
       contractContent &&
-      representativeIndustry &&
+      contractStartDate && contractEndDate && representativeIndustry &&
       totalEmployees && annualPersonalInformation
     ) {
       let data = {
@@ -214,10 +214,37 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
         status: JSON.stringify(data)
       });
 
+      let dd = response.data.data;
+      let ii = response.data.id;
       if (response.data.result == 'SUCCESS') {
+        
         sessionStorage.setItem('consignee_status', '')
         setModalMsg1('정확히 보관되었습니다.')
         setShowModal1(true)
+
+        let aa: { id: any; self_check_result: string; attachment: string; attachment_name: string; check_result: string; additional: string; modify_time: string; result: string; lock: string; current_status: string; modify_request: string; check_suggestion: string; }[] = [];
+
+        dd.map((x: any) => {
+          aa.push({
+            id: x.id,
+            self_check_result: 'N',
+            attachment: 'N',
+            attachment_name: '',
+            check_result: 'N',
+            additional: 'N',
+            modify_time: "",
+            result: 'N',
+            lock: 'X',
+            current_status: '',
+            modify_request: '',
+            check_suggestion: ''
+          })
+        });
+
+        const response = await axios.post(`${API_URL}/project_detail/Update`, {
+          id: ii,
+          first_check_consignee_temp_data: JSON.stringify(aa)
+        });
       }
       else {
         setModalMsg1('보관이 실패하였습니다.\n' + response.data.error_message)

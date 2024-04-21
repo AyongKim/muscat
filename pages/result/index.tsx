@@ -13,6 +13,9 @@ import RetrustStatus from './components/RetrustStatus';
 import ConsigneeWidget from './components/ConsigneeWidget';
 import VerticalBarWidget from './components/VerticalBarWidget';
 import HorizontalBarWidget from './components/HorizontalBarWidget';
+import StatusAll from './StatusAll'
+import Image from "next/image";
+import StatusIndividual from './StatusIndividual';
 const BCrumb = [
   {
     to: '/',
@@ -26,30 +29,22 @@ const BCrumb = [
 export default function EcomProductList() {
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [year, setYear] = React.useState(0);
-  
-  const [checklist, setChecklist] = React.useState([]);
-  const [personalCategory, setPersonalCategory] = React.useState([]);
-  const [companyList, setCompanyList] = React.useState([]);
-
-  const [projectNames, setProjectNames] = React.useState([]);
-  const [companyName, setCompanyName] = React.useState('');
-  let registerYears: number[] = [];
   const [years, setYears] = React.useState([]);
-  const [searchYear, setSearchYear] = React.useState(0);
-  const [searchName, setSearchName] = React.useState('');
-  const today = new Date();
-  let y = [];
-  for (let i = 0; i < 3; i++)
-    registerYears.push(today.getFullYear() - i);
+  const [projectNames, setProjectNames] = React.useState([]);
+  const [project, setProject] = React.useState(0);
+  const [projectList, setProjectList] = React.useState([]);
+  const [consignor, setConsignor] = React.useState(0);
+  const [consignorList, setConsignorList] = React.useState([]);
+  const [consignee, setConsignee] = React.useState(0);
+  const [consigneeList, setConsigneeList] = React.useState([]);
 
   async function fetchData() {
     try {
       const response = await axios.post(`${API_URL}/project/List`, {
-        year: searchYear,
-        project_name: searchName,
-        company_name: companyName
+        year: year,
       });
       // setRows(response.data)
+      setProjectList(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -60,27 +55,64 @@ export default function EcomProductList() {
       setYears(response.data.years)
       setProjectNames(response.data.names)
 
-      setSearchYear(0)
-      setSearchName('!@#')
+      if (response.data.years.length)
+        setYear(response.data.years[0])
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   }
-  const fetchCompany = async() => {
+
+  async function fetchConsignees() {
     try {
-      const response = await axios.post(`${API_URL}/company/List`)
-      setCompanyList(response.data)
+      const response = await axios.post(`${API_URL}/project_detail/List`, {
+        project_id: project
+      });
+
+      setConsigneeList(response.data)
+      setConsignee(-1);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   }
+
   React.useEffect(() => {
     fetchYears()
-    fetchData() 
-    fetchCompany() 
+    
   }, []);
+
+  React.useEffect(() => {
+    fetchData();
+  }, [year])
+
+  React.useEffect(() => {
+    fetchConsignees();
+
+    const project_data = projectList.find((x) => x.id == project);
+    if (project_data) {
+      setConsignorList([{
+        id: project_data.company_id,
+        name: project_data.company_name,
+      }])  
+
+      setConsignor(project_data.company_id)
+    }
+  }, [project])
+
+  const [consigneeData, setConsigneeData] = React.useState(null);
+  const [type, setType] = React.useState('none')
   const handleSearch = (event: any) => {
-    fetchData()
+    if (year != 0 && project != 0 && consignor != 0) {
+      if (consignee == -1) {
+        setType('all');
+      }
+      else {
+        setType('individual');
+        let aa = consigneeList.find((x) => x.company_id == consignee)
+
+        console.log(aa)
+        setConsigneeData(consigneeList.find((x) => x.company_id == consignee))
+      }
+    }
   };
   return (
     <PageContainer>
@@ -96,13 +128,12 @@ export default function EcomProductList() {
           labelId="month-dd"
           id="month-dd"
           size="small" 
-          value={searchYear}
+          value={year}
           sx={{width:100, mr:2}}
           onChange = {(e:any) => {
-            setSearchYear(e.target.value);
+            setYear(e.target.value);
           }}
         >
-          <MenuItem value={0} key = {1000000}>전체</MenuItem>
           {years.map((x, index) => {
             return (
               <MenuItem value={x} key = {index}>{x}</MenuItem>
@@ -112,78 +143,86 @@ export default function EcomProductList() {
           }
         </CustomSelect>
         <Typography align='center' sx={{mr: 1}}>
-          프로젝트 명:
+          프로젝트:
         </Typography> 
         <CustomSelect
           labelId="month-dd"
           id="month-dd"
           size="small" 
-          value={searchName}
+          value={project}
           sx={{width:200, mr:2}}
           onChange = {(e:any) => {
-            setSearchName(e.target.value);
+            setProject(e.target.value);
           }}
         >
-          <MenuItem value={'!@#'} key = {1000000}>전체</MenuItem>
-          {projectNames.map((x:any, index: number) => {
+          {projectList.map((x:any, index: number) => {
             return (
-              <MenuItem value={x} key = {index}>{x}</MenuItem>
+              <MenuItem value={x.id} key = {index}>{x.name}</MenuItem>
             );
           })
 
           }
         </CustomSelect>
         <Typography align='center' sx={{mr: 1}}>
-          위탁사 명:
+          위탁사:
         </Typography> 
-        <TextField
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <IconSearch size="1.1rem" />
-                </InputAdornment>
-              ),
-            }}
-            placeholder="검색"
-            size="small"
-            onChange={(e) => {
-              setCompanyName(e.target.value)
-            }}
-            value={companyName}
-        />
+        <CustomSelect
+          labelId="month-dd"
+          id="month-dd"
+          size="small" 
+          value={consignor}
+          sx={{width:200, mr:2}}
+          onChange = {(e:any) => {
+            setConsignor(e.target.value);
+          }}
+        >
+          {consignorList.map((x:any, index: number) => {
+            return (
+              <MenuItem value={x.id} key = {index}>{x.name}</MenuItem>
+            );
+          })
+
+          }
+        </CustomSelect>
+        <Typography align='center' sx={{mr: 1}}>
+          수탁사:
+        </Typography> 
+        <CustomSelect
+          labelId="month-dd"
+          id="month-dd"
+          size="small" 
+          value={consignee}
+          sx={{width:200, mr:2}}
+          onChange = {(e:any) => {
+            setConsignee(e.target.value);
+          }}
+        >
+          <MenuItem value={-1} key = {1000000}>전체</MenuItem>
+          {consigneeList.map((x:any, index: number) => {
+            return (
+              <MenuItem value={x.company_id} key = {index}>{x.company_name}</MenuItem>
+            );
+          })
+
+          }
+        </CustomSelect>
         <Button
           variant={"contained"}
           color={"primary"}
-          sx={{width:60, ml:1}}
+          sx={{width:90, ml:1}}
           onClick = {handleSearch}
         >
-              조회
+          <IconSearch size="1.3rem" />
+          조회
         </Button> 
       </Box>
 
-      <Grid container alignItems="center"  >
-        <Grid item xs={7} style={{padding:8}} width={16}> 
-          <CheckStatus isLoading={false}></CheckStatus>
-        </Grid>
-        
-        <Grid item xs={5} style={{padding:8}}>
-          <ConsigneeWidget isLoading={false}></ConsigneeWidget>
-        </Grid>
-        <Grid item xs={5} style={{padding:8}}>
-          <InnerSystemEnable isLoading={false}></InnerSystemEnable>
-        </Grid>
-        <Grid item xs={5} style={{padding:8}}>
-          <RadialbarChart ></RadialbarChart>
-        </Grid>
-        <Grid item xs={5} style={{padding:8}}>
-          <RetrustStatus isLoading={false}></RetrustStatus>
-        </Grid>
-        <VerticalBarWidget/>
-        <HorizontalBarWidget/>
-      </Grid>
-        {/* ------------------------------------------- */}
-        {/* Left part */}
-        {/* ------------------------------------------- */}
+      {
+        type == 'individual' && <StatusIndividual consigneeData={consigneeData}/>
+      }
+      {
+        type == 'all' && <StatusAll consigneeList={consigneeList}/>
+      }
        
     </PageContainer>
   );

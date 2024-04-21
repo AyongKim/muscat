@@ -108,12 +108,6 @@ export const AdminMenuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: '점검 체크리스트',
-    icon: IconNotes,
-    href: '/check-result',
-  },
-  {
-    id: uniqueId(),
     title: '등록업체 및 계정관리',
     icon: IconNotes,
     href: '/account/account-manager',

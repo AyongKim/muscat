@@ -718,7 +718,7 @@ const ProductTableList = () => {
 
                           <CustomTableCell>
                           <Typography align='center'>
-                              {row.checklist_name}
+                              {row.checklist_id}
                             </Typography>
                           </CustomTableCell>
 

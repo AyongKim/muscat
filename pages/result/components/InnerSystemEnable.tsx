@@ -15,7 +15,7 @@ interface YearlyBreakupCardProps {
 const InnerSystemEnable = ({ isLoading }: YearlyBreakupCardProps) => {
   // chart color
   const theme = useTheme();
-  const primary = theme.palette.primary.main;
+  const primary = theme.palette.error.main;
   const primarylight = theme.palette.primary.light;
   const successlight = theme.palette.success.light;
 
@@ -65,7 +65,7 @@ const InnerSystemEnable = ({ isLoading }: YearlyBreakupCardProps) => {
       },
     ],
   };
-  const seriescolumnchart = [38, 40, 25];
+  const seriescolumnchart = [38, 62];
 
   return (
     <>

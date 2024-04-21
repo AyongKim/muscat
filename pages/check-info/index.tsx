@@ -1,7 +1,7 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer';
 import React, { useEffect, useState } from 'react';
-import { Button, Table, Input,TableBody, TableCell,Typography, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead, Chip, TextareaAutosize } from '@mui/material';
+import { Button, Table, Input,TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead, Chip, TextareaAutosize } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { apiUrl } from '@src/utils/commonValues';
 import axios from 'axios'; 
@@ -69,7 +69,7 @@ interface CheckProps {
 const API_URL = `http://${apiUrl}checkinfo`;
 const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems, onClose }) => {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(initChecklistItems);
-  const [checklistImport, setChecklistImport] = useState<ChecklistItem>(selectedItem);
+  const [checklistItem, setChecklistItem] = useState<ChecklistItem>(selectedItem);
   const [checkInfos, setCheckInfos] = useState<CheckInfo[]>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
@@ -124,7 +124,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
       detail_item:'',
       attachment: 0, 
       item: '',
-      categoryId: selectedItem.id,
+      categoryId: checkInfos.length + 101,
       merged1: 1,
       merged2: 1,
       filename: '',
@@ -379,7 +379,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
     });
     try {
       const formData = new FormData();
-      formData.append('id', selectedItem.id.toString());
+      formData.append('id', checklistItem.id.toString());
       formData.append('data', JSON.stringify(checkInfos));
       sortedFiles.forEach((file, index) => {
         formData.append(`file${index+1}`, file.file);
@@ -404,63 +404,28 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
   
   return (
     <> 
-    <Box 
-      sx={{
-        backgroundColor: "primary.light",
-        borderRadius: "12px",
-        p: "30px 25px 20px",
-        marginBottom: "30px",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <Typography variant="h4">세부 점검 항목</Typography>
-      <Row>
-        <Typography
-          color="textSecondary"
-          variant="h6"
-          fontWeight={400}
-          mt={0.8}
-          mb={0}
-        >
-          체크리스트명:
-        </Typography>
-        <Typography
-          color="primary"
-          variant="h6"
-          fontWeight={700}
-          mt={0.8}
-          ml={1}
-          mb={0}
-        >
-          {selectedItem.checklist_item}
-        </Typography>
-      </Row> 
-    </Box>
-         
+      <Breadcrumb title="세부 점검 항목"  />   
       <Box sx={{ mb: 2, display: 'flex',justifyContent:'space-between'  }}>
         <Button sx={{  width: 100 }} variant="contained" onClick={onClose} >목록</Button>
         <Box sx={{ display: 'flex',justifyContent:'flex-end',  gap: 1 }}>
           <CustomSelect
             id="account-type-select"
-            sx={{ mr: 1, width: 200 }}
-            value={checklistImport.id} 
-            onChange={(event:any) => { 
-              const item = checklistItems.find((e)=>e.id ==event.target.value ); 
-              setChecklistImport(item); 
+            sx={{ mr: 4, width: 200 }}
+            value={checklistItem} 
+            onChange={(event:any) => {
+              setChecklistItem(event.target.value);
+              setCheckInfos([]);
+              fetchCheckInfo(event.target.value.id);
             }} 
           >
             {checklistItems.map((x, i) => {
               return (
-                <MenuItem key={i} value={x.id}>{x.checklist_item}</MenuItem>
+                <MenuItem key={i}>{x.checklist_item}</MenuItem>
               );
             })
             }
           </CustomSelect>
-          <Button sx={{   mr: 4, width: 100 }} variant="contained" onClick={()=>{
-            setCheckInfos([]);
-            fetchCheckInfo(checklistImport.id);
-          }} >불러오기</Button>
+           
           <Button variant="contained" onClick={handleMerge} disabled={!selectedCell}>셀 병합</Button>
           <Button variant="contained" onClick={handleSplit} disabled={!selectedCell}>셀 분할</Button>
           <Button variant="contained" onClick={handleAddRow}  >행 삽입</Button>

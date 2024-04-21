@@ -86,7 +86,7 @@ export default function RadialbarChart() {
   return (
     
       <Grid container spacing={3}>
-        <Grid item lg={6} md={12} xs={12}>
+        <Grid item lg={12} md={12} xs={12}>
           <ParentCard title="Radar Charts">
             <Chart
               options={optionsradarchart}

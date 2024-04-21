@@ -16,7 +16,7 @@ const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
-  const primarylight = theme.palette.grey[100];
+  const primarylight = theme.palette.error.main;
 
   // chart
   const optionscolumnchart: any = {
@@ -47,7 +47,7 @@ const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
     grid: {
       yaxis: {
         lines: {
-          show: false,
+          show: true,
         },
       },
     },
@@ -59,7 +59,7 @@ const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
     },
     yaxis: {
       labels: {
-        show: false,
+        show: true,
       },
     },
     tooltip: {
@@ -81,7 +81,7 @@ const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
         ) : (
           <DashboardWidgetCard
             title="평균 대비 우수/취약 수탁사 "
-            subtitle="Every month"
+            subtitle=""
             dataLabel1="점수"
             dataItem1="36,358"
             dataLabel2="평균점수"

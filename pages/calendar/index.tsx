@@ -935,12 +935,9 @@ export default function BigCalendar() {
           sx={{mr:2, width: 200}}
           value={project} 
           onChange={(event:any) => {
-            console.log('hi')
-            setProject(event.target.value)
-          }}
+            setProject(event.target.value)}}
         >
           {projects.map((x, i) => {
-            console.log(x)
             return (
               <MenuItem key={i} value={x.project_id}>{x.name}</MenuItem>
             );

@@ -18,7 +18,7 @@ import {
   TextField,
   InputAdornment,
   Paper, 
-  Dialog, DialogTitle, DialogContent, DialogActions, Button, InputLabel, List, ListItem, ListItemText, IconButton
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, InputLabel
 } from '@mui/material';  
 import { visuallyHidden } from '@mui/utils'; 
 import {   IconSearch,   } from '@tabler/icons-react';
@@ -29,7 +29,6 @@ import { apiUrl } from '@src/utils/commonValues';
 import axios from 'axios';
 import DeleteInquiry from './components/DeleteInquiry';
 import AddInquiry from './components/AddInquiry';
-import { Send } from '@mui/icons-material';
 const BCrumb = [
   {
     to: '/',
@@ -48,7 +47,41 @@ export default function EcomProductList() {
     </PageContainer>
   );
 }; 
-   
+function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
+  if (b[orderBy] < a[orderBy]) {
+    return -1;
+  }
+  if (b[orderBy] > a[orderBy]) {
+    return 1;
+  }
+
+  return 0;
+}
+
+type Order = 'asc' | 'desc';
+
+function getComparator<Key extends keyof any>(
+  order: Order,
+  orderBy: Key,
+): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
+  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) {
+      return order;
+    }
+
+    return a[1] - b[1];
+  });
+
+  return stabilizedThis.map((el) => el[0]);
+}
 
 interface HeadCell {
   disablePadding: boolean;
@@ -86,21 +119,65 @@ const headCells: readonly HeadCell[] = [
 
 
 interface InquiryTableProps {
-  numSelected: number; 
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void; 
+  numSelected: number;
+  onRequestSort: (event: React.MouseEvent<unknown>, property: any) => void;
+  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  order: Order;
+  orderBy: string;
   rowCount: number;
 }
-interface Comment { 
-  author: string;
-  date: string;  
-  text: string;
+
+function InquiryTableHead(props: InquiryTableProps) {
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const createSortHandler = (property: any) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, property);
+  };
+
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell padding="checkbox">
+          <CustomCheckbox
+            color="primary"
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{
+              'aria-label': 'select all desserts',
+            }}
+          />
+        </TableCell>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
 }
-
-
  
-const InquiryList = () => {  
+const InquiryList = () => {
+  const [order, setOrder] = React.useState<Order>('asc');
+  const [orderBy, setOrderBy] = React.useState<any>('calories');
   const [selected, setSelected] = React.useState<string[]>([]);
-  const [page, setPage] = React.useState(0); 
+  const [page, setPage] = React.useState(0);
+  const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(12); 
   const [rows, setRows] = React.useState<any>([]);
   const [accounts, setAccounts] = React.useState([]);
@@ -115,14 +192,13 @@ const InquiryList = () => {
   const [passwordInput, setPasswordInput] = React.useState('');
   const [accountType, setAccountType] = React.useState<number>(0);
   const [author, setAuthor] = React.useState<string>('');
-  const [comments, setComments] = React.useState<Comment[]>([]); 
-  const handleInquirySelection = (row : InquiryType) => {
+  const handleInquirySelection = (row : any) => {
     if (row.password && accountType==1) {
       setSelectedInquiry(row);
       setPasswordDialogOpen(true);
     } else { 
       setSelectedInquiry(row);
-      fetchComments(row.id);
+      setDetailsDialogOpen(true);
     }
   };
   const verifyPassword = async (password:any) => { 
@@ -130,7 +206,7 @@ const InquiryList = () => {
     hashingPassword(password)
     .then(hashedPassword => {
       if (selectedInquiry.password == hashedPassword) {
-        fetchComments(selectedInquiry.id);
+        setDetailsDialogOpen(true); // Show the details dialog
         setPasswordDialogOpen(false); // Close the password dialog
       } else {
         // Handle incorrect password case
@@ -162,31 +238,6 @@ const InquiryList = () => {
       console.error('Error fetching data from API:', error.message);
     }
   };
-
-  const fetchComments = async (id : any) => {
-    const API_URL = `http://${apiUrl}comments`;
-    try {
-      const response = await axios.post(`${API_URL}/List`, {inquiry_id : id});
-      if (response.status === 200) {
-        // Handle successful response (status code 200)
-        const { data } = response ;
-        // Assuming the data structure matches the Model for success
-        // You can access individual fields like data.id, data.title, etc.
-
-        setComments(data);
-        setDetailsDialogOpen(true);
-      } else if (response.status === 400) {
-        // Handle failed response (status code 400)
-        const { result, reason, error_message } = response.data;
-        // You can use the error information to display an appropriate message
-        console.error(`API request failed: ${reason} - ${error_message}`);
-      }
-    } catch (error:any) {
-      // Handle any other errors (e.g., network issues, invalid URL, etc.)
-      console.error('Error fetching data from API:', error.message);
-    }
-  };
-
   React.useEffect(() => { 
     fetchData(); 
     const str = sessionStorage.getItem('user')
@@ -224,7 +275,17 @@ const InquiryList = () => {
     });
     setAuthorSearch(event.target.value);
     setRows(filteredRows);
-  };  
+  };
+
+ 
+
+  // This is for the sorting
+  const handleRequestSort = (event: React.MouseEvent<unknown>, property: any) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
   // This is for select all the row
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -234,7 +295,10 @@ const InquiryList = () => {
       return;
     }
     setSelected([]);
-  }; 
+  };
+
+
+
   // This is for the single row sleect
   const handleClick = (event: React.MouseEvent<unknown>, num: number) => {
     
@@ -264,7 +328,12 @@ const InquiryList = () => {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  }; 
+  };
+
+  const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDense(event.target.checked);
+  };
+
   const isSelected = (name: number) => selected.indexOf(name.toString()) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
@@ -284,52 +353,8 @@ const InquiryList = () => {
         return hexString;
       });
   };
-  const [newComment, setNewComment] = React.useState('');
-
-    // 댓글을 전송하는 함수
-    const sendComment = async () => {
-      const API_URL = `http://${apiUrl}comments`;
-      try {
-        const response = await axios.post(`${API_URL}/Register`, { inquiry_id: selectedInquiry.id, author: author, text:newComment });
-        
-        if (response.data.result === 'success') {
-          fetchComments(selectedInquiry.id)
-          setNewComment('');
-        }  
-      } catch (error) {
-      }
-      
-    }
-  function InquiryTableHead(props: InquiryTableProps) {
-    const { onSelectAllClick,  numSelected, rowCount  } = props;  
-    return (
-      <TableHead>
-        <TableRow>
-          <TableCell padding="checkbox">
-          { (accountType==0)  &&
-            <CustomCheckbox
-              color="primary"
-              checked={rowCount > 0 && numSelected === rowCount}
-              onChange={onSelectAllClick}
-              inputProps={{
-                'aria-label': 'select all desserts',
-              }}
-            />
-          }
-          </TableCell>
-          {headCells.map((headCell) => (
-            <TableCell
-              key={headCell.id}
-              align={headCell.numeric ? 'right' : 'left'}
-              padding={headCell.disablePadding ? 'none' : 'normal'}
-               >
-                {headCell.label} 
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-    );
-  }
+  
+  
   return (
     <Box> 
           {/* <Button type="submit" color="success" variant="contained" sx={{width:150}}>조회</Button>  */}
@@ -396,17 +421,21 @@ const InquiryList = () => {
             <TableContainer>
               <Table
                 sx={{ minWidth: 750 }}
-                aria-labelledby="tableTitle" 
+                aria-labelledby="tableTitle"
+                size={dense ? 'small' : 'medium'}
               >
                 <InquiryTableHead
-                  numSelected={selected.length} 
-                  onSelectAllClick={handleSelectAllClick} 
+                  numSelected={selected.length}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={handleRequestSort}
                   rowCount={rows.length}
                 />
                 <TableBody>
-                  { 
-                    rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row: any, index:any) => {
+                  {stableSort(rows, getComparator(order, orderBy))
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row: any, index) => {
                       const isItemSelected = isSelected(row.id);
                       const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -420,7 +449,7 @@ const InquiryList = () => {
                           selected={isItemSelected}
                         >
                           <TableCell padding="checkbox">
-                          { (accountType==0 || (accountType!=0 && row.author==author )) && (
+                          { (accountType==1 && row.author==author ) && (
                             <CustomCheckbox
                               color="primary"
                               checked={isItemSelected}
@@ -429,9 +458,9 @@ const InquiryList = () => {
                                 'aria-labelledby': labelId,
                               }}
                             />)
-                          } 
+                          }
                           </TableCell>
-                          
+
                           <TableCell>
                             <Box display="flex" alignItems="center"> 
                               <Box
@@ -473,7 +502,7 @@ const InquiryList = () => {
                   {emptyRows > 0 && (
                     <TableRow
                       style={{
-                        height: (  53) * emptyRows,
+                        height: (dense ? 33 : 53) * emptyRows,
                       }}
                     >
                       <TableCell colSpan={6} />
@@ -513,66 +542,25 @@ const InquiryList = () => {
             </Dialog>
             <Dialog  open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="sm" fullWidth>
               <DialogTitle  sx={{ textAlign: 'center',   }} >{selectedInquiry.title}</DialogTitle>
-              <DialogContent>
+              <DialogContent >
                 <TextField
-                  value={selectedInquiry.content}
-                  margin="normal"
-                  contentEditable={false}
+                  value={selectedInquiry.content} 
+                  margin="normal"  
+                  contentEditable={false} 
                   type="text"
                   fullWidth
                   multiline
                   rows={4}
-                  size="small"
+                  size="small" 
                   variant="filled"
                   InputProps={{
                     readOnly: true,
-                    disableUnderline: true,
-                    sx: {
+                    disableUnderline: true,  
+                    sx: { 
                       paddingTop: '10px', // 원하는 스타일 수정
                     },
                   }}
-                />
-                {/* 새로운 댓글 입력 필드 */}
-                <TextField
-                  label="댓글 작성"
-                  variant="outlined"
-                  fullWidth
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  margin="normal"
-                  InputProps={{
-                    endAdornment: (
-                      <IconButton onClick={sendComment} color="primary">
-                        <Send />
-                      </IconButton>
-                    )
-                  }}
                 /> 
-                {/* 댓글 목록 */}
-                <List style={{ display: 'block' }}>
-                  {comments.map((comment: Comment, index) => (
-                    <ListItem key={index}>
-                      <ListItemText
-                        primary={
-                          <>
-                            <Typography variant="subtitle1" component="span" color="textPrimary" sx={{ textDecoration: 'underline' }}>
-                              {comment.author}
-                            </Typography>
-                            <Typography variant="body2" component="span" color="textSecondary" style={{ textDecoration: 'underline' , marginLeft: 8 }}>
-                              {comment.date}
-                            </Typography>
-                          </>
-                        }
-                        secondary={<Typography variant="body1" component="span" color="textSecondary" style={{ marginLeft: 8 }}>
-                        {comment.text}
-                      </Typography>}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-
-
-
               </DialogContent>
               <DialogActions>
                 <Button onClick={() => setDetailsDialogOpen(false)}>Close</Button>

@@ -202,7 +202,6 @@ const AccountTab: React.FC = () => {
  
   // Dialog close handler
   const handleDialog2Close = () => {
-    setIdChecked(true); 
     if (dialogContent.includes('사용 가능한 아이디입니다.')) {
       setIdChecked(true); 
     }else if(dialogContent.includes('업체 명')) {
