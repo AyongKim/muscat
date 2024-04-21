@@ -1,10 +1,11 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer';
 import React, { useEffect, useState } from 'react';
-import { Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem } from '@mui/material';
+import { Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, Typography } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { apiUrl } from '@src/utils/commonValues';
 import axios from 'axios';
+import { Row } from 'antd';
  
 
 
@@ -40,7 +41,7 @@ interface PrivacyProps {
 const API_URL = `http://${apiUrl}personal_info`;
 const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItems, onClose }) => {
   const [privacyItems, setPrivacyItems] = useState<PrivacyItem[]>(initPrivacyItems);
-  const [privacyItem, setPrivacyItem] = useState<PrivacyItem>(selectedItem);
+  const [privacyImport, setPrivacyImport] = useState<PrivacyItem>(selectedItem);
   const [privacyInfos, setPrivacyInfos] = useState<Row[]>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
@@ -94,7 +95,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
       standard_grade: '',
       intermediate_grade: '',
       item: '',
-      categoryId: privacyItem.id,
+      categoryId: selectedItem.id,
       merged1: 1,
       merged2: 1,
     };
@@ -301,7 +302,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
     setWillSave(false);
     try {
       const response = await axios.post(`${API_URL}/Register`,{
-        "id": privacyItem.id,
+        "id": selectedItem.id,
         "data": privacyInfos
       })
       if (response.data.result=='success') {
@@ -316,28 +317,64 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
 
   return (
     <> 
-      <Breadcrumb title="개인정보 상세설정"  />   
+    <Box 
+      sx={{
+        backgroundColor: "primary.light",
+        borderRadius: "12px",
+        p: "30px 25px 20px",
+        marginBottom: "30px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <Typography variant="h4">개인정보 상세설정</Typography>
+      <Row>
+        <Typography
+          color="textSecondary"
+          variant="h6"
+          fontWeight={400}
+          mt={0.8}
+          mb={0}
+        >
+          개인정보 취급 분류: 
+        </Typography>
+        <Typography
+          color="primary"
+          variant="h6"
+          fontWeight={700}
+          mt={0.8}
+          ml={1}
+          mb={0}
+        >
+          {selectedItem.personal_category}
+        </Typography>
+      </Row> 
+    </Box>
+      
       <Box sx={{ mb: 2, display: 'flex',justifyContent:'space-between'  }}>
         <Button sx={{  width: 100 }} variant="contained" onClick={onClose} >목록</Button>
         <Box sx={{ display: 'flex',justifyContent:'flex-end',  gap: 1 }}>
           <CustomSelect
             id="account-type-select"
-            sx={{ mr: 4, width: 200 }}
-            value={privacyItem} 
-            onChange={(event:any) => {  
-              setPrivacyItem(event.target.value);
-              fetchPrivacyInfo(event.target.value.id);
+            sx={{ mr: 1, width: 200 }}
+            value={privacyImport.id} 
+            onChange={(event:any) => {   
+              const item = privacyItems.find((e)=>e.id ==event.target.value ); 
+              setPrivacyImport(item); 
             }}
             
           >
             {privacyItems.map((x, i) => {
               return (
-                <MenuItem key={i}>{x.personal_category}</MenuItem>
+                <MenuItem key={i} value={x.id}>{x.personal_category}</MenuItem>
               );
             })
             }
           </CustomSelect>
-    
+          <Button sx={{   mr: 4, width: 100 }} variant="contained" onClick={()=>{
+            setPrivacyInfos([]);
+            fetchPrivacyInfo(privacyImport.id);
+          }} >불러오기</Button>
           <Button variant="contained" onClick={handleMerge} disabled={!selectedCell}>셀 병합</Button>
           <Button variant="contained" onClick={handleSplit} disabled={!selectedCell}>셀 분할</Button>
           <Button variant="contained" onClick={handleAddRow}  >행 삽입</Button>

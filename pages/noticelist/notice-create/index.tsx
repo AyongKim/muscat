@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  TableContainer,
-  Table,
-  TableRow,
-  TableCell,
-  TableBody,
+import { TableContainer, Table, TableRow,TableCell,TableBody,
   Typography,
   TableHead,
   Box,
@@ -23,12 +18,10 @@ import DashboardCard from '@src/components/shared/DashboardCard';
 import dynamic from "next/dynamic";
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import Link from 'next/link';
-import { AppDispatch, useDispatch, useSelector } from '@src/store/Store';
-import { fetchNotices, registerNotice } from '@src/store/apps/NoticeSlice';
-import { Delete as DeleteIcon } from '@mui/icons-material'; // 삭제 아이콘 추가
-import { ProjectType } from '@src/types/apps/project';
+import { AppDispatch, useDispatch } from '@src/store/Store';
+import { fetchNotices } from '@src/store/apps/NoticeSlice';
 import { Row } from 'antd';
-import { Router, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 const axios = require('axios');
 import { API_URL } from '@pages/constant';
 
@@ -47,7 +40,6 @@ const ReactQuill: any = dynamic(
     ssr: false,
   }
 );
-
 const BCrumb = [
   {
     to: '/noticelist',
@@ -72,7 +64,7 @@ export default function QuillEditor() {
   const [projects, setProjects] = useState([])
 
   const fetchData = async() => {
-    const response = await axios.post(`${API_URL}/project/List`);
+    const response = await axios.post(`${API_URL}/project/List`,{});
     console.log(response.data)
     setProjects(response.data)
   }

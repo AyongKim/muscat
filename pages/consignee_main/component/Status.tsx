@@ -183,7 +183,7 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
     console.log(annualPersonalInformation)
     if (
       contractContent &&
-      contractStartDate && contractEndDate && representativeIndustry &&
+      representativeIndustry &&
       totalEmployees && annualPersonalInformation
     ) {
       let data = {

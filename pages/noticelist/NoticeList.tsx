@@ -180,7 +180,36 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 const NoticeList = () => { 
   const [open, setOpen] = React.useState<boolean>(false);
+  const [projects, setProjects] = React.useState([]) 
+  const [notice, setNotice] = React.useState([]);
+  const [search, setSearch] = React.useState('');
 
+  const fetchProjectsByConsignee = async (id:any, notices:any) => {
+    const response = await axios.post(`${API_URL}/project/List`, {
+      consignee_id: id, 
+    }); 
+    const projects = response.data;  
+    setProjects(projects);  
+    const noticeFilter = notices.filter((x:any) => projects.some((project:any) => project.project_id === x.project_id || '전체' === x.project_name));
+    console.log(noticeFilter) 
+    setNotice(noticeFilter);
+  };
+  const fetchProjectsByConsignor = async (id:any, notices:any) => { 
+    const response = await axios.post(`${API_URL}/project/List`, { 
+      consignor_id: id
+    }); 
+    const projects = response.data;  
+    setProjects(projects);  
+    const noticeFilter = notices.filter((x:any) => projects.some((project:any) => project.project_id === x.project_id || '전체' === x.project_name));
+    console.log(noticeFilter) 
+    setNotice(noticeFilter);
+  };
+
+    //Fetch Products
+    React.useEffect(() => {
+      
+      fetchNotices()
+    }, []); 
   const handleClickOpen = (): void => {
     setOpen(true);
   };
@@ -214,22 +243,26 @@ const NoticeList = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [searchType, setSearchType] = React.useState(1);
   const [keyword, setKeyword] = React.useState('');
+  const [isMaster, setIsMaster] = React.useState(false) ;
  
   const fetchNotices = async() => {
     const response = await axios.post(`${API_URL}/notice/List`, {
       search_type: searchType,
       keyword: keyword
     });
-    setNotice(response.data)
+    
+    const str = sessionStorage.getItem('user')
+    let data = JSON.parse(str); 
+    if (data.type == 1) {
+      fetchProjectsByConsignee(data.user_id, response.data)
+    } else if (data.type == 2 ) {
+      fetchProjectsByConsignor(data.user_id, response.data)
+    } else{
+      setIsMaster(true)
+      setNotice(response.data)
+    }
   }
 
-  //Fetch Products
-  React.useEffect(() => {
-    fetchNotices()
-  }, []);
-
-  const [notice, setNotice] = React.useState([]);
-  const [search, setSearch] = React.useState('');
 
   const handleSearch = () => {
     fetchNotices()
@@ -355,9 +388,10 @@ const NoticeList = () => {
           </Typography>
         )}  
         
-        <Button variant="contained" color="error"  sx={{width:100, mr:1}} onClick={handleClickOpen} disabled={selected.length === 0}>
+        {isMaster &&<Button variant="contained" color="error"  sx={{width:100, mr:1}} onClick={handleClickOpen} disabled={selected.length === 0}>
           삭제
         </Button>
+        }
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>업체 삭제</DialogTitle>
           <DialogContent>
@@ -371,7 +405,7 @@ const NoticeList = () => {
           </DialogActions>
         </Dialog>
 
-        <Button
+        {isMaster &&  <Button
               component={Link}
               href="/noticelist/notice-create"
               variant="contained"
@@ -379,7 +413,7 @@ const NoticeList = () => {
               sx={{width:100}}
             >
               글 작성
-        </Button> 
+        </Button> }
     
       </Toolbar>
           <Paper variant="outlined" sx={{ mx: 2, mt: 1, border: `1px solid ${borderColor}` }}>

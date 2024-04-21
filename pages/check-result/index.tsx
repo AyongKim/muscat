@@ -1,12 +1,13 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer';
 import React, { useEffect, useState } from 'react';
-import { Button, Table, Input,TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead, Chip, TextareaAutosize } from '@mui/material';
+import { Button, Table, Input,TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead, Chip, TextareaAutosize, InputAdornment, Typography } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { apiUrl } from '@src/utils/commonValues';
 import axios from 'axios'; 
 import {  Row } from 'antd';
 import {  CloudUploadOutlined } from '@mui/icons-material';
+import { IconSearch } from '@tabler/icons-react';
 
 
 interface ChecklistResultItem {
@@ -54,17 +55,75 @@ interface ChecklistItem {
 
 interface CheckProps {
   selectedItem: ChecklistItem;
-  initChecklistItems: ChecklistItem[];
   onClose?: () => void;
 }
 const API_URL = `http://${apiUrl}checkinfo`;
-const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems, onClose }) => {
-  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(initChecklistItems);
+const CheckInfoTable: React.FC<CheckProps> = ({selectedItem,  onClose }) => { 
   const [checklistItem, setChecklistItem] = useState<ChecklistItem>(selectedItem);
   const [checkInfos, setCheckInfos] = useState<ChecklistResultItem[]>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
   const [willSave, setWillSave] = useState<boolean>(false);
+
+  const [companyList, setCompanyList] = React.useState([]);
+  const [projectNames, setProjectNames] = React.useState([]);
+  const [companyName, setCompanyName] = React.useState('');
+  let registerYears: number[] = [];
+  const [years, setYears] = React.useState([]);
+  const [searchYear, setSearchYear] = React.useState(0);
+  const [searchName, setSearchName] = React.useState('');
+  const today = new Date();
+  let y = [];
+  for (let i = 0; i < 3; i++)
+    registerYears.push(today.getFullYear() - i);
+
+  async function fetchData() {
+    try {
+      const response = await axios.post(`${API_URL}/project/List`, {
+        year: searchYear,
+        project_name: searchName,
+        company_name: companyName
+      });
+      // setRows(response.data)
+      // fetchCheckInfo(event.target.value.id);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  } 
+  async function fetchYears() {
+    try {
+      const response = await axios.post(`${API_URL}/project/SearchItem`);
+      setYears(response.data.years)
+      setProjectNames(response.data.names)
+
+      setSearchYear(0)
+      setSearchName('!@#')
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+  const fetchCompany = async() => {
+    try {
+      const response = await axios.post(`${API_URL}/company/List`)
+      setCompanyList(response.data)
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+  React.useEffect(() => {
+    fetchYears()
+    fetchData() 
+    fetchCompany() 
+  }, []);
+  const handleSearch = (event: any) => {
+    fetchData()
+  };
+
+
+
+
+
+
 
   const fetchCheckInfo = async ( category_id :number) => {
     try {
@@ -81,12 +140,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
       console.error('Error fetching items:', error);
     }
   };
-
-  useEffect(() => {
-    if(checklistItems.length>0){ 
-      fetchCheckInfo(selectedItem.id);
-    }  
-  }, []);
+ 
 
 
   const handleCellUpdate = (rowIndex: number, field: keyof ChecklistResultItem, value: string | number) => {
@@ -180,26 +234,84 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
   return (
     <> 
       <Breadcrumb title="세부 점검 항목"  />   
+      <Box
+          sx={{mb: 2, display: 'flex', alignItems: 'center'}}
+        > 
+          <Typography align='center' sx={{mr: 1}}>
+            연도:
+          </Typography> 
+         <CustomSelect
+          labelId="month-dd"
+          id="month-dd"
+          size="small" 
+          value={searchYear}
+          sx={{width:100, mr:2}}
+          onChange = {(e:any) => {
+            setSearchYear(e.target.value);
+          }}
+        >
+          <MenuItem value={0} key = {1000000}>전체</MenuItem>
+          {years.map((x, index) => {
+            return (
+              <MenuItem value={x} key = {index}>{x}</MenuItem>
+            );
+          })
+
+          }
+        </CustomSelect>
+        <Typography align='center' sx={{mr: 1}}>
+          프로젝트 명:
+        </Typography> 
+        <CustomSelect
+          labelId="month-dd"
+          id="month-dd"
+          size="small" 
+          value={searchName}
+          sx={{width:200, mr:2}}
+          onChange = {(e:any) => {
+            setSearchName(e.target.value);
+          }}
+        >
+          <MenuItem value={'!@#'} key = {1000000}>전체</MenuItem>
+          {projectNames.map((x:any, index: number) => {
+            return (
+              <MenuItem value={x} key = {index}>{x}</MenuItem>
+            );
+          })
+
+          }
+        </CustomSelect>
+        <Typography align='center' sx={{mr: 1}}>
+          위탁사 명:
+        </Typography> 
+        <TextField
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IconSearch size="1.1rem" />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="검색"
+            size="small"
+            onChange={(e) => {
+              setCompanyName(e.target.value)
+            }}
+            value={companyName}
+        />
+        <Button
+          variant={"contained"}
+          color={"primary"}
+          sx={{width:60, ml:1}}
+          onClick = {handleSearch}
+        >
+              조회
+        </Button> 
+      </Box>
       <Box sx={{ mb: 2, display: 'flex',justifyContent:'space-between'  }}>
         <Button sx={{  width: 100 }} variant="contained" onClick={onClose} >목록</Button>
         <Box sx={{ display: 'flex',justifyContent:'flex-end',  gap: 1 }}>
-          <CustomSelect
-            id="account-type-select"
-            sx={{ mr: 4, width: 200 }}
-            value={checklistItem} 
-            onChange={(event:any) => {
-              setChecklistItem(event.target.value);
-              setCheckInfos([]);
-              fetchCheckInfo(event.target.value.id);
-            }} 
-          >
-            {checklistItems.map((x, i) => {
-              return (
-                <MenuItem key={i}>{x.checklist_item}</MenuItem>
-              );
-            })
-            }
-          </CustomSelect>
+          
            
           <Button variant="contained"  >수탁사 입력 활성화</Button>
           <Button variant="contained"  >다운로드</Button>

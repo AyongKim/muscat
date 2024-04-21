@@ -18,7 +18,6 @@
     "@mui/lab": "^5.0.0-alpha.117",
     "@mui/material": "5.11.10",
     "@mui/x-date-pickers": "^5.0.15",
-    "@next/font": "latest",
     "@reduxjs/toolkit": "^1.9.1",
     "@tabler/icons": "^2.1.2",
     "@tabler/icons-react": "^2.1.1",

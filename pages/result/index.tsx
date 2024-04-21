@@ -26,13 +26,15 @@ const BCrumb = [
 export default function EcomProductList() {
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [year, setYear] = React.useState(0);
-  const [years, setYears] = React.useState([]);
-  const [projectNames, setProjectNames] = React.useState([]);
-  const [companyName, setCompanyName] = React.useState('');
+  
   const [checklist, setChecklist] = React.useState([]);
   const [personalCategory, setPersonalCategory] = React.useState([]);
   const [companyList, setCompanyList] = React.useState([]);
+
+  const [projectNames, setProjectNames] = React.useState([]);
+  const [companyName, setCompanyName] = React.useState('');
   let registerYears: number[] = [];
+  const [years, setYears] = React.useState([]);
   const [searchYear, setSearchYear] = React.useState(0);
   const [searchName, setSearchName] = React.useState('');
   const today = new Date();

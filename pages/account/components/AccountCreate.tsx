@@ -168,6 +168,7 @@ const AccountTab: React.FC = () => {
       user_email: email, 
       user_password: password,
       register_num: businessNumber,
+      company_name: companyName,
       company_address: address,
       manager_name: accountType > 0 ? name : '',
       manager_phone: accountType > 0 ? phone : '',
