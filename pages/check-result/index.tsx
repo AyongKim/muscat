@@ -117,14 +117,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem,  onClose }) => {
   }, []);
   const handleSearch = (event: any) => {
     fetchData()
-  };
-
-
-
-
-
-
-
+  };  
   const fetchCheckInfo = async ( category_id :number) => {
     try {
       const response = await axios.post(`${API_URL}/List`,{
@@ -255,8 +248,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem,  onClose }) => {
             return (
               <MenuItem value={x} key = {index}>{x}</MenuItem>
             );
-          })
-
+          }) 
           }
         </CustomSelect>
         <Typography align='center' sx={{mr: 1}}>
