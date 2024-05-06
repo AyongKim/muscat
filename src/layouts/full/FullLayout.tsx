@@ -73,8 +73,7 @@ const FullLayout: React.FC<Props> = ({ children }) => {
           {/* ------------------------------------------- */}
           {/* End Page */}
           {/* ------------------------------------------- */}
-        </Container>
-        <Customizer />
+        </Container> 
       </PageWrapper>
     </MainWrapper>
   );

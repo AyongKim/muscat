@@ -8,7 +8,7 @@ import {
   DialogContentText,
   Typography,
 } from '@mui/material';
-import axios from 'axios';
+import axiosPost from '@pages/axiosWrapper';
 import { apiUrl } from '@src/utils/commonValues';
 interface AddCompaniesProps {
   onClose?: () => void;
@@ -90,10 +90,9 @@ const AddCompany : React.FC<AddCompaniesProps> = ({  onClose }) => {
           <Button
             disabled={!registerNum || !companyName || !isValidRegisterNum(registerNum)}
             onClick={ async () => {
-              const API_URL = `http://${apiUrl}company`;
+              const API_URL = `http://${apiUrl}company`; 
               try {
-                const response = await axios.post(`${API_URL}/Register`, { register_num: registerNum, company_name: companyName });
-                
+                const response = await axiosPost(`${API_URL}/Register`, { register_num: registerNum, company_name: companyName });
                 if (response.data.result === 'success') {
                   setOpen(false);
                   setRegisterNum('');

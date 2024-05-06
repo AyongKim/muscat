@@ -12,7 +12,7 @@ interface YearlyBreakupCardProps {
   isLoading: boolean;
 }
 
-const InnerSystemEnable = ({ isLoading }: YearlyBreakupCardProps) => {
+const InnerSystemEnable =  ({ systemUsageStatusCount1, systemUsageStatusCount2 }: {systemUsageStatusCount1:number, systemUsageStatusCount2:number}) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.error.main;
@@ -65,14 +65,12 @@ const InnerSystemEnable = ({ isLoading }: YearlyBreakupCardProps) => {
       },
     ],
   };
-  const seriescolumnchart = [38, 62];
+  const seriescolumnchart = [systemUsageStatusCount1, systemUsageStatusCount2];
 
   return (
     <>
       {
-        isLoading ? (
-          <SkeletonYearlyBreakupCard />
-        ) : (
+          (
           <DashboardCard title="자체처리시스템 사용 여부
           ">
             <Grid container spacing={3}>
@@ -84,7 +82,7 @@ const InnerSystemEnable = ({ isLoading }: YearlyBreakupCardProps) => {
                       sx={{ width: 9, height: 9, bgcolor: primary, svg: { display: 'none' } }}
                     ></Avatar>
                     <Typography variant="subtitle2" color="textSecondary">
-                      사용함
+                      사용함 {systemUsageStatusCount1}
                     </Typography>
                   </Stack>
                   <Stack direction="row" spacing={1} alignItems="center">
@@ -92,7 +90,7 @@ const InnerSystemEnable = ({ isLoading }: YearlyBreakupCardProps) => {
                       sx={{ width: 9, height: 9, bgcolor: primarylight, svg: { display: 'none' } }}
                     ></Avatar>
                     <Typography variant="subtitle2" color="textSecondary">
-                      사용안함
+                      사용안함 {systemUsageStatusCount2}
                     </Typography>
                   </Stack>
                 </Stack>

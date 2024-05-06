@@ -1,42 +1,6 @@
-import axios from 'axios';
+import axiosPost from '@pages/axiosWrapper';
 import { notification } from 'antd';
-
-export const actionFormat = (
-  actionType?: any,
-  params?: any,
-  httpMethod?: any,
-  httpUrl?: string,
-  extraOption?: any,
-) => (dispatch: any) => {
-  if (httpMethod) {
-    const dataType = httpMethod === 'post' || httpMethod === 'put' ? 'data' : 'params';
-    console.log(httpMethod)
-    return axios({
-      method: httpMethod,
-      url: httpUrl,
-      [dataType]: params || {},
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        "Content-Type": 'application/json'
-      },
-      ...extraOption,
-    })
-      .then((response) => {
-        if (actionType) {
-          dispatch({ type: actionType, payload: response });
-        }
-        return response;
-      })
-      .catch((error) => {
-        if (actionType) {
-          dispatch({ type: actionType, payload: null });
-        }
-        throw error;
-      });
-  }
-  return dispatch({ type: actionType, payload: params });
-};
-
+ 
 /**
  * 시간(time) 관련
  */

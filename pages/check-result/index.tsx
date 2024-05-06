@@ -1,12 +1,13 @@
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@src/components/container/PageContainer';
 import React, { useEffect, useState } from 'react';
-import { Button, Table, Input,TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead, Chip, TextareaAutosize } from '@mui/material';
+import { Button, Table, Input,TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead, Chip, TextareaAutosize, InputAdornment, Typography } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { apiUrl } from '@src/utils/commonValues';
-import axios from 'axios'; 
+import axiosPost, { axiosPost2 } from '@pages/axiosWrapper'; 
 import {  Row } from 'antd';
 import {  CloudUploadOutlined } from '@mui/icons-material';
+import { IconSearch } from '@tabler/icons-react';
 
 
 interface ChecklistResultItem {
@@ -54,21 +55,20 @@ interface ChecklistItem {
 
 interface CheckProps {
   selectedItem: ChecklistItem;
-  initChecklistItems: ChecklistItem[];
   onClose?: () => void;
 }
 const API_URL = `http://${apiUrl}checkinfo`;
-const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems, onClose }) => {
-  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(initChecklistItems);
+const CheckInfoTable: React.FC<CheckProps> = ({selectedItem,  onClose }) => { 
   const [checklistItem, setChecklistItem] = useState<ChecklistItem>(selectedItem);
   const [checkInfos, setCheckInfos] = useState<ChecklistResultItem[]>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [editingCell, setEditingCell] = useState<SelectedCell | null>(null);
   const [willSave, setWillSave] = useState<boolean>(false);
-
+   
+ 
   const fetchCheckInfo = async ( category_id :number) => {
     try {
-      const response = await axios.post(`${API_URL}/List`,{
+      const response = await axiosPost(`${API_URL}/List`,{
         "category_id": category_id
       });
       if (response.status === 200) {
@@ -81,14 +81,11 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
       console.error('Error fetching items:', error);
     }
   };
+ 
 
-  useEffect(() => {
-    if(checklistItems.length>0){ 
-      fetchCheckInfo(selectedItem.id);
-    }  
-  }, []);
-
-
+  React.useEffect(() => {
+    fetchCheckInfo(3) 
+  }, []); 
   const handleCellUpdate = (rowIndex: number, field: keyof ChecklistResultItem, value: string | number) => {
     setWillSave(true);
     const updatedRows = checkInfos.map((row, index) => {
@@ -159,7 +156,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
       sortedFiles.forEach((file, index) => {
         formData.append(`file${index+1}`, file.file);
       }); 
-      const response = await axios.post(`${API_URL}/Register`, formData, {
+      const response = await axiosPost2(`${API_URL}/Register`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -180,26 +177,11 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
   return (
     <> 
       <Breadcrumb title="세부 점검 항목"  />   
+      
       <Box sx={{ mb: 2, display: 'flex',justifyContent:'space-between'  }}>
         <Button sx={{  width: 100 }} variant="contained" onClick={onClose} >목록</Button>
         <Box sx={{ display: 'flex',justifyContent:'flex-end',  gap: 1 }}>
-          <CustomSelect
-            id="account-type-select"
-            sx={{ mr: 4, width: 200 }}
-            value={checklistItem} 
-            onChange={(event:any) => {
-              setChecklistItem(event.target.value);
-              setCheckInfos([]);
-              fetchCheckInfo(event.target.value.id);
-            }} 
-          >
-            {checklistItems.map((x, i) => {
-              return (
-                <MenuItem key={i}>{x.checklist_item}</MenuItem>
-              );
-            })
-            }
-          </CustomSelect>
+          
            
           <Button variant="contained"  >수탁사 입력 활성화</Button>
           <Button variant="contained"  >다운로드</Button>

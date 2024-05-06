@@ -1,18 +1,13 @@
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from '@mui/material/styles';
-import { Grid, Stack, Typography, Avatar } from '@mui/material';
-import { IconArrowUpLeft } from '@tabler/icons-react';
+import { Grid, Stack, Typography, Avatar } from '@mui/material'; 
 
-import DashboardCard from '../../../src/components/shared/DashboardCard';
-import SkeletonYearlyBreakupCard from "../../../src/components/dashboards/skeleton/YearlyBreakupCard";
+import DashboardCard from '../../../src/components/shared/DashboardCard'; 
 
+ 
 
-interface YearlyBreakupCardProps {
-  isLoading: boolean;
-}
-
-const RetrustStatus = ({ isLoading }: YearlyBreakupCardProps) => {
+const RetrustStatus = ({ retrustCount1,retrustCount2 }: {retrustCount1:number, retrustCount2:number}) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
@@ -65,14 +60,12 @@ const RetrustStatus = ({ isLoading }: YearlyBreakupCardProps) => {
       },
     ],
   };
-  const seriescolumnchart = [38, 40, 25];
+  const seriescolumnchart = [retrustCount1, retrustCount2];
 
   return (
     <>
       {
-        isLoading ? (
-          <SkeletonYearlyBreakupCard />
-        ) : (
+          (
           <DashboardCard title="재위탁 여부">
             <Grid container spacing={3}>
               {/* column */}
@@ -83,7 +76,7 @@ const RetrustStatus = ({ isLoading }: YearlyBreakupCardProps) => {
                       sx={{ width: 9, height: 9, bgcolor: primary, svg: { display: 'none' } }}
                     ></Avatar>
                     <Typography variant="subtitle2" color="textSecondary">
-                      재위탁 있음
+                      재위탁 있음 {retrustCount1}
                     </Typography>
                   </Stack>
                   <Stack direction="row" spacing={1} alignItems="center">
@@ -91,7 +84,7 @@ const RetrustStatus = ({ isLoading }: YearlyBreakupCardProps) => {
                       sx={{ width: 9, height: 9, bgcolor: primarylight, svg: { display: 'none' } }}
                     ></Avatar>
                     <Typography variant="subtitle2" color="textSecondary">
-                    재위탁 없음
+                    재위탁 없음 {retrustCount2}
                     </Typography>
                   </Stack>
                 </Stack>

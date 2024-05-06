@@ -105,7 +105,7 @@ export const AdminMenuitems: MenuitemsType[] = [
     title: '점검 및 결과',
     icon: IconNotes,
     href: '/result',
-  },
+  }, 
   {
     id: uniqueId(),
     title: '등록업체 및 계정관리',

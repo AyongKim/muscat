@@ -36,6 +36,7 @@ import DeleteUser from './components/DeleteUser';
 import DashboardCard from '@src/components/shared/DashboardCard';
 import axios from "axios";
 import {API_URL} from '@pages/constant';
+import axiosPost from '@pages/axiosWrapper';
 
 const BCrumb = [
   {
@@ -179,12 +180,12 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function EnhanceTable() {
   const fetchUsers = async() => {
-    const response = await axios.post(`${API_URL}/user/ApprovalList`);
+    const response = await axiosPost(`${API_URL}/user/ApprovalList`,{});
     setAccounts(response.data)
   }
 
   const updateUser = async(userData:any) => {
-    const response = await axios.post(`${API_URL}/user/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
+    const response = await axiosPost(`${API_URL}/user/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
 
     if (response.data.result == 'success') {
       setModalMsg('정확히 설정되었습니다.');

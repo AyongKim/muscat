@@ -9,7 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';  
-import axios from 'axios';
+import axiosPost,{axiosDelete} from '@pages/axiosWrapper';
 import { apiUrl } from '@src/utils/commonValues';
 
 interface DeleteInquiryProps {
@@ -31,7 +31,7 @@ const DeleteInquiry: React.FC<DeleteInquiryProps> = ({ selectedInquiryIds, onClo
     if (selectedInquiryIds.length > 0) {
       try {
         const API_URL = `http://${apiUrl}inquiry`;
-        const deleteResponse = await axios.delete(`${API_URL}/Delete`, {
+        const deleteResponse = await axiosDelete(`${API_URL}/Delete`, {
           data: { str_ids: selectedInquiryIds }
         });
   
@@ -41,7 +41,7 @@ const DeleteInquiry: React.FC<DeleteInquiryProps> = ({ selectedInquiryIds, onClo
           if (result === "SUCCESS") {
             handleClose();
             // Fetch updated list after successful deletion
-            const listResponse = await axios.post(`${API_URL}/List`);
+            const listResponse = await axiosPost(`${API_URL}/List`,{});
 
             // Handle the list response as needed
             console.log("List of companies:", listResponse.data);

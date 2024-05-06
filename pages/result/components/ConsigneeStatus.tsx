@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from '@mui/material/styles';
@@ -7,30 +7,65 @@ import { IconChevronsRight, IconGridDots } from '@tabler/icons-react';
 import DashboardCard from '../../../src/components/shared/DashboardCard';
 import SkeletonSalesOverviewCard from '../../../src/components/dashboards/skeleton/SalesOverviewCard';
 import { Row } from 'antd';
+ 
 
-interface SalesOverviewCardProps {
-  isLoading: boolean;
-}
-
-const ConsigneeStatus = ({ isLoading }: SalesOverviewCardProps) => {
+const ConsigneeStatus = ({  consigneeData}:  {   consigneeData: any;}) => {
   // chart color
   const theme = useTheme();
-  const primary = theme.palette.primary.main;
-  const secondary = theme.palette.secondary.main;
-  const primarylight = theme.palette.primary.light;
-  const textColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : '#2A3547';
+  const [companyName, setCompanyName] = useState('');
+  const [managerName, setManagerName] = useState('');
+  const [address, setAddress] = useState('');
+  const [contractContent, setContractContent] = useState<string>('');
+  const [managerPhoen, setManagerPhoen] = useState<string>('');
+  const [contractEndDate, setContractEndDate] = useState<string>('');
+  const [representativeIndustry, setRepresentativeIndustry] = useState<string>('');
+  const [totalEmployees, setTotalEmployees] = useState<string>('');
+  const [privacyHandlers, setPrivacyHandlers] = useState<string>('');
+  const [yearlyPrivacyHandle, setYearlyPrivacyHandle] = useState<string>('');
+  const [annualPersonalInformation, setAnnualPersonalInformation] = useState<string>('<1000');
+  const [systemUsageStatus, setSystemUsageStatus] = useState<string>('no');
+  const [systemUsageStatusText, setSystemUsageStatusText] = useState<string>('');
+  const [retrustStatus, setRetrustStatus] = useState<string>('no');
+  const [retrustStatusText, setRetrustStatusText] = useState<string>('');
+  const [thirdPartyStatus, setThirdPartyStatus] = useState<string>('no');
+  const [thirdPartyStatusText, setThirdPartyStatusText] = useState<string>('');
+  const [personInChargeName, setPersonInChargeName] = useState<string>('');
+  const [personInChargeContact, setPersonInChargeContact] = useState<string>('');
 
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const [privacyItems, setPrivacyItems] = useState([]);
+  React.useEffect(() => {
+      
+      let data = JSON.parse(consigneeData.status); 
+
+      setCompanyName(data.companyName)
+      setManagerName(data.managerName)
+      setManagerPhoen(data.managerPhoen)
+      setAddress(data.address)
+      setContractContent(data.contractContent) 
+      setContractEndDate(data.contractEndDate)
+      setRepresentativeIndustry(data.representativeIndustry)
+      setTotalEmployees(data.totalEmployees)
+      setAnnualPersonalInformation(data.annualPersonalInformation)
+      setYearlyPrivacyHandle(data.yearlyPrivacyHandle)
+      setSystemUsageStatus(data.systemUsageStatus)
+      setRetrustStatus(data.retrustStatus)
+      setThirdPartyStatus(data.thirdPartyStatus)
+      setSystemUsageStatusText(data.systemUsageStatusText)
+      setRetrustStatusText(data.retrustStatusText)
+      setThirdPartyStatusText(data.thirdPartyStatusText)
+  
+  }, []);
+  
   return (
     <>
       <DashboardCard>
         <>
           <Box sx={{textAlign: 'center', borderBottom: 1, borderRadius:0, display: 'flex', justifyContent: 'center'}}>
             <Typography sx={{fontWeight: 'bold', fontSize: 18}}>
-              바다원(주)-
-            </Typography>
-            <Typography>
-              대표 업종
-            </Typography>
+              {companyName}-대표 업종
+            </Typography> 
           </Box>
           <Box sx={{borderBottom: 1, borderRadius:0, pb: 1}}>
             <Typography sx={{fontSize:15, fontWeight: 'bold', ml:1, mt:1}}>
@@ -43,16 +78,16 @@ const ConsigneeStatus = ({ isLoading }: SalesOverviewCardProps) => {
                   위탁 업무
                 </Typography>
                 <Typography>
-                  위탁 업무 내용
+                  {contractContent}
                 </Typography>
               </Box>
 
               <Box sx={{display: 'flex', mt: '4px'}}>
                 <Typography sx={{width: 150}}>
-                  주소
+                 주소
                 </Typography>
                 <Typography>
-                  서울시 관악구 승방길7 201호
+                {address}
                 </Typography>
               </Box>
 
@@ -61,7 +96,7 @@ const ConsigneeStatus = ({ isLoading }: SalesOverviewCardProps) => {
                   보안 담당자
                 </Typography>
                 <Typography>
-                  홍길동
+                {managerName}
                 </Typography>
               </Box>
 
@@ -70,7 +105,7 @@ const ConsigneeStatus = ({ isLoading }: SalesOverviewCardProps) => {
                   연락처
                 </Typography>
                 <Typography>
-                  010-1234-5678
+                  {managerPhoen}
                 </Typography>
               </Box>
 
@@ -88,7 +123,7 @@ const ConsigneeStatus = ({ isLoading }: SalesOverviewCardProps) => {
                   개인정보취급자수
                 </Typography>
                 <Typography>
-                  2명
+                  {privacyHandlers}명
                 </Typography>
               </Box>
 
@@ -97,7 +132,7 @@ const ConsigneeStatus = ({ isLoading }: SalesOverviewCardProps) => {
                   개인정보처리량
                 </Typography>
                 <Typography>
-                  연간 80만건
+                  연간 {yearlyPrivacyHandle}만건
                 </Typography>
               </Box>
 
@@ -155,7 +190,7 @@ const ConsigneeStatus = ({ isLoading }: SalesOverviewCardProps) => {
                   보안 담당자
                 </Typography>
                 <Typography>
-                  김철수
+                  {totalEmployees}
                 </Typography>
               </Box>
 

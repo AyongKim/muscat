@@ -29,6 +29,7 @@ import { CompanyType } from '@src/types/apps/company';
 import BlankCard from '@src/components/shared/BlankCard';
 const axios = require('axios');
 import { API_URL } from '@pages/constant';
+import axiosPost,{axiosDelete} from '@pages/axiosWrapper';
 
 const CustomTableCell = (props: any) => {
   return (
@@ -187,27 +188,27 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
 
   const onRegister = async() => {
     if (editMode == 'register') {
-      let response = await axios.post(`${API_URL}/project_detail/Register`, {
+      let response = await axiosPost(`${API_URL}/project_detail/Register`, {
         project_id: data.id,
         company_id: company,
         work_name: workName,
         checker_id: checker,
-        check_type: checkType
+        check_type: checkType,
       });
   
       if (response.data.result == 'SUCCESS') {
-        setModalMsg('정확히 보관되었습니다.')
+        setModalMsg('정확히 저장되었습니다.')
         setShowModal(true)
         setEditMode('list')
         fetchData()
       }
       else {
-        setModalMsg('보관이 실패하였습니다.' + response.data.error_message)
+        setModalMsg('저장이 실패하였습니다.' + response.data.error_message)
         setShowModal(true)
       }  
     }
     else if (editMode == 'edit') {
-      let response = await axios.post(`${API_URL}/project_detail/Update`, {
+      let response = await axiosPost(`${API_URL}/project_detail/Update`, {
         id: editData.id,
         project_id: data.id,
         company_id: company,
@@ -217,25 +218,25 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
       });
   
       if (response.data.result == 'SUCCESS') {
-        setModalMsg('정확히 보관되었습니다.')
+        setModalMsg('정확히 저장되었습니다.')
         setShowModal(true)
         setEditMode('list')
         fetchData()
       }
       else {
-        setModalMsg('보관이 실패하였습니다.' + response.data.error_message)
+        setModalMsg('저장이 실패하였습니다.' + response.data.error_message)
         setShowModal(true)
       }  
     }
   }
 
   const fetchData = async() => {
-    let response = await axios.post(`${API_URL}/project_detail/List`, {
+    let response = await axiosPost(`${API_URL}/project_detail/List`, {
       project_id: data.id
     });
     setRows(response.data)
     
-    response = await axios.post(`${API_URL}/project/Users`);
+    response = await axiosPost(`${API_URL}/project/Users`,{});
     data = response.data
 
     setCompanyList(data.company)
@@ -317,7 +318,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
   }
 
   const handleDelete = async() => {
-    const response = await axios.delete(`${API_URL}/project_detail/Delete`, {
+    const response = await axiosDelete(`${API_URL}/project_detail/Delete`, {
       data: { str_ids: selected.join(",") }
     });
 
@@ -384,7 +385,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
         setShowModal(true)
       }
       else if (data.result == 'SUCCESS') {
-        setModalMsg('정확히 보관되었습니다.');
+        setModalMsg('정확히 저장되었습니다.');
         setShowModal(true)
         fetchData()
       }

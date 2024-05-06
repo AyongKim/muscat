@@ -36,6 +36,7 @@ import DatePicker from 'react-datepicker'
 import { registerLocale, setDefaultLocale } from  "react-datepicker";
 import CloseIcon from '@mui/icons-material/Close';
 import ko from 'date-fns/locale/ko';
+import axiosPost from '@pages/axiosWrapper';
 registerLocale('ko', ko)
 
 const CustomTableCell = (props: any) => {
@@ -239,7 +240,7 @@ const ProductTableList = () => {
 
   async function fetchData() {
     try {
-      const response = await axios.post(`${API_URL}/project/List`, {
+      const response = await axiosPost(`${API_URL}/project/List`, {
         year: searchYear,
         project_name: searchName,
         company_name: companyName
@@ -252,7 +253,7 @@ const ProductTableList = () => {
 
   async function fetchYears() {
     try {
-      const response = await axios.post(`${API_URL}/project/SearchItem`);
+      const response = await axiosPost(`${API_URL}/project/SearchItem`,{});
       setYears(response.data.years)
       setProjectNames(response.data.names)
 
@@ -265,7 +266,7 @@ const ProductTableList = () => {
 
   const fetchChecklist = async() => {
     try {
-      const response = await axios.post(`${API_URL}/checklist/List`);
+      const response = await axiosPost(`${API_URL}/checklist/List`,{});
       setChecklist(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -274,7 +275,7 @@ const ProductTableList = () => {
 
   const fetchCompany = async() => {
     try {
-      const response = await axios.post(`${API_URL}/company/List`)
+      const response = await axiosPost(`${API_URL}/company/List`,{})
       setCompanyList(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -283,7 +284,7 @@ const ProductTableList = () => {
 
   const fetchPersonalCategory = async() => {
     try {
-      const response = await axios.post(`${API_URL}/personal_category/List`);
+      const response = await axiosPost(`${API_URL}/personal_category/List`,{});
       setPersonalCategory(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -346,7 +347,7 @@ const ProductTableList = () => {
         'privacy_type': privacyPolicy
       }
 
-      const response = await axios.post('http://localhost:5001/project/Register', data);
+      const response = await axiosPost('http://localhost:5001/project/Register', data);
       fetchData()
       setEditMode(false)
     }
@@ -392,7 +393,7 @@ const ProductTableList = () => {
 
   const showSchedule = async(id:any) => {
     setEditId(id)
-    const response = await axios.post('http://localhost:5001/project/Schedule', {
+    const response = await axiosPost('http://localhost:5001/project/Schedule', {
       id: id
     });
     
@@ -458,12 +459,12 @@ const ProductTableList = () => {
     });
 
     if (response.data.result == 'SUCCESS') {
-      setModalMsg('일정보관이 성공하였습니다.')
+      setModalMsg('일정저장이 성공하였습니다.')
       setShowModal(true)
       setShowScheduleModal(false)
     }
     else {
-      setModalMsg('일정보관이 실패하였습니다.')
+      setModalMsg('일정저장이 실패하였습니다.')
       setShowModal(true)
     }
   }
@@ -718,7 +719,7 @@ const ProductTableList = () => {
 
                           <CustomTableCell>
                           <Typography align='center'>
-                              {row.checklist_id}
+                              {row.checklist_name}
                             </Typography>
                           </CustomTableCell>
 

@@ -7,17 +7,22 @@ import SkeletonEmployeeSalaryCard from "../../../src/components/dashboards/skele
 import { Box } from "@mui/material";
 
 
-interface EmployeeSalaryCardProps {
-  isLoading: boolean;
-}
+ 
 
-
-const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
+const ConsigneeWidget = ({ scoresPercentage, title  }: {scoresPercentage: [string, number][] , title: string}) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const primarylight = theme.palette.error.main;
 
+  const labels: string[][] = [];
+  const data: number[] = [];
+
+  scoresPercentage.forEach(([label, value]) => { 
+    labels.push([label]);
+    data.push(value);
+  });
+  
   // chart
   const optionscolumnchart: any = {
     chart: {
@@ -29,7 +34,7 @@ const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
       },
       height: 280,
     },
-    colors: [primarylight, primarylight, primary, primarylight, primarylight, primarylight],
+    colors: [primarylight, primarylight,  primarylight, primarylight, primarylight,primary,primary,primary,primary,primary],
     plotOptions: {
       bar: {
         borderRadius: 4,
@@ -52,7 +57,7 @@ const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
       },
     },
     xaxis: {
-      categories: [['첫번째 수탁사'], ['May'], ['June'], ['July'], ['Aug'], ['Sept']],
+      categories: labels,
       axisBorder: {
         show: false,
       },
@@ -69,18 +74,16 @@ const ConsigneeWidget = ({ isLoading }: EmployeeSalaryCardProps) => {
   const seriescolumnchart = [
     {
       name: '',
-      data: [20, 15, 30, 25, 10, 15],
+      data: data,
     },
   ];
 
   return (
     <>
       {
-        isLoading ? (
-          <SkeletonEmployeeSalaryCard />
-        ) : (
+        (
           <DashboardWidgetCard
-            title="평균 대비 우수/취약 수탁사 "
+            title={title}
             subtitle=""
             dataLabel1="점수"
             dataItem1="36,358"

@@ -12,20 +12,13 @@ interface SalesOverviewCardProps {
   isLoading: boolean;
 }
 
-const CheckStatus = ({ isLoading }: SalesOverviewCardProps) => {
+const CheckStatus = ({ numberOfFailedCheck1, numberOfFailedCheck2, companyCount }: {numberOfFailedCheck1:number, numberOfFailedCheck2:number, companyCount:number}) => {
   // chart color
-  const theme = useTheme();
-  const primary = theme.palette.primary.main;
-  const secondary = theme.palette.secondary.main;
-  const primarylight = theme.palette.primary.light;
-  const textColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : '#2A3547';
-
+  const theme = useTheme(); 
   return (
     <>
       {
-        isLoading ? (
-          <SkeletonSalesOverviewCard />
-        ) : (
+          (
           <DashboardCard>
             <>
             <Box display={'flex'} alignItems={'center'}  >
@@ -50,12 +43,12 @@ const CheckStatus = ({ isLoading }: SalesOverviewCardProps) => {
                     </Typography>
                     <Typography sx={{fontSize: 16}}>
                       <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ffc000'}}>
-                        82
+                        {numberOfFailedCheck1}
                       </Typography>
                       건
                     </Typography>
                     <Typography sx={{fontSize:16}}>
-                      1개사 당 <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ffc000'}}>2.5</Typography>건
+                      1개사 당 <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ffc000'}}>{numberOfFailedCheck1/companyCount}</Typography>건
                     </Typography>
                     
                   </Box>
@@ -77,12 +70,12 @@ const CheckStatus = ({ isLoading }: SalesOverviewCardProps) => {
                     </Typography>
                     <Typography sx={{fontSize: 16}}>
                       <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ed7d31'}}>
-                        82
+                        {numberOfFailedCheck2}
                       </Typography>
                       건
                     </Typography>
                     <Typography sx={{fontSize:16}}>
-                      1개사 당 <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ed7d31'}}>2.5</Typography>건
+                      1개사 당 <Typography sx={{fontWeight: 'bold', fontSize: 24, display: 'inline', color: '#ed7d31'}}>{numberOfFailedCheck2/companyCount}</Typography>건
                     </Typography>
                     
                   </Box>

@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  CardContent,
+import { 
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  DialogContentText,
-  Fab,
+  DialogContentText, 
   TextField,
-  Typography,
-  Select,
-  InputLabel,
+  Typography, 
   Box,
   FormControlLabel,
 } from '@mui/material';
@@ -35,6 +31,7 @@ import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
 const axios = require('axios');
 import { API_URL } from '@pages/constant';
+import axiosPost from '@pages/axiosWrapper';
 
 moment.locale('ko'); // 한국어로 설정
 const localizer = momentLocalizer(moment);
@@ -358,19 +355,19 @@ export default function BigCalendar() {
   const fetchDetail = async() => {
     let response;
     if (userData.type == 1) {
-      response = await axios.post(`${API_URL}/project/Detail`, {
+      response = await axiosPost(`${API_URL}/project/Detail`, {
         project_id: project,
         consignee_id: userData.user_id
       }); 
     }
     else if (userData.type == 2) {
-      response = await axios.post(`${API_URL}/project/Detail`, {
+      response = await axiosPost(`${API_URL}/project/Detail`, {
         project_id: project,
         company_id: consignee
       }); 
     }
     else {
-      response = await axios.post(`${API_URL}/project/Detail`, {
+      response = await axiosPost(`${API_URL}/project/Detail`, {
         project_id: project,
         admin_id: admin,
         company_id: consignee
@@ -437,18 +434,18 @@ export default function BigCalendar() {
     if (project) {
       let response;
       if (userData.type == 1) {
-        response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
+        response = await axiosPost(`${API_URL}/project_detail/CheckSchedule`, {
           project_id: project,
           consignee_id: userData.user_id
         });  
       }
       else if (userData.type == 2) {
-        response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
+        response = await axiosPost(`${API_URL}/project_detail/CheckSchedule`, {
           project_id: project
         });  
       }
       else {
-        response = await axios.post(`${API_URL}/project_detail/CheckSchedule`, {
+        response = await axiosPost(`${API_URL}/project_detail/CheckSchedule`, {
           project_id: project,
           admin_id: admin
         });  
@@ -491,13 +488,13 @@ export default function BigCalendar() {
     if (project) {
       let response;
       if (admin) {
-        response = await axios.post(`${API_URL}/project/ConsigneeByAdmin`, {
+        response = await axiosPost(`${API_URL}/project/ConsigneeByAdmin`, {
           project_id: project,
           admin_id: admin
         });  
       }
       else {
-        response = await axios.post(`${API_URL}/project/ConsigneeByAdmin`, {
+        response = await axiosPost(`${API_URL}/project/ConsigneeByAdmin`, {
           project_id: project,
         });
       }
@@ -511,28 +508,28 @@ export default function BigCalendar() {
   }
 
   const fetchProjects = async() => {
-    const response = await axios.post(`${API_URL}/project/List`, {
+    const response = await axiosPost(`${API_URL}/project/List`, {
       admin_id: admin
     });
     setProjects(response.data)
   }
 
   const fetchProjectsByConsignee = async(id:any) => {
-    const response = await axios.post(`${API_URL}/project/List`, {
+    const response = await axiosPost(`${API_URL}/project/List`, {
       consignee_id: id
     });
     setProjects(response.data)
   }
 
   const fetchProjectsByConsignor = async(id:any) => {
-    const response = await axios.post(`${API_URL}/project/List`, {
+    const response = await axiosPost(`${API_URL}/project/List`, {
       consignor_id: id
     });
     setProjects(response.data)
   }
 
   const fetchAdmins = async() => {
-    const response = await axios.post(`${API_URL}/project/Users`);
+    const response = await axiosPost(`${API_URL}/project/Users`,{});
     let data = response.data
 
     setAdmins(data.admin)
@@ -743,7 +740,7 @@ export default function BigCalendar() {
       newDelay.imp_check.push(end);
     }
 
-    const response = await axios.post(`${API_URL}/project_detail/Update`, {
+    const response = await axiosPost(`${API_URL}/project_detail/Update`, {
       id: projectDetail.id,
       delay: JSON.stringify(newDelay)
     });
@@ -751,7 +748,7 @@ export default function BigCalendar() {
     if (response.data.result == 'SUCCESS') {
       setOpen(false)
       setProjectDetail({...projectDetail, delay: newDelay});
-      setModalMsg('정확히 보관되었습니다.')
+      setModalMsg('정확히 저장되었습니다.')
       setShowModal(true)
     }
     else {
@@ -783,7 +780,7 @@ export default function BigCalendar() {
   
       res.push(newData)
   
-      const response = await axios.post(`${API_URL}/project_detail/Update`, {
+      const response = await axiosPost(`${API_URL}/project_detail/Update`, {
         id: projectDetail.id,
         check_schedule: JSON.stringify(res)
       });
@@ -805,7 +802,7 @@ export default function BigCalendar() {
         })
         setCheckSchedule(newSchedule)
         setToggle(!toggle)
-        setModalMsg('정확히 보관되었습니다.')
+        setModalMsg('정확히 저장되었습니다.')
         setShowModal(true)
       }
       else {
@@ -829,7 +826,7 @@ export default function BigCalendar() {
         }
       }
   
-      const response = await axios.post(`${API_URL}/project_detail/Update`, {
+      const response = await axiosPost(`${API_URL}/project_detail/Update`, {
         id: newSchedule[editIndex].id,
         check_schedule: JSON.stringify(res)
       });
@@ -838,7 +835,7 @@ export default function BigCalendar() {
         setCheckOpen(false)
   
         setCheckSchedule(newSchedule)
-        setModalMsg('정확히 보관되었습니다.')
+        setModalMsg('정확히 저장되었습니다.')
         setShowModal(true)
       }
       else {
@@ -887,7 +884,7 @@ export default function BigCalendar() {
       newDelay.imp_check.splice(delDelayIndex, 1);
     }
 
-    const response = await axios.post(`${API_URL}/project_detail/Update`, {
+    const response = await axiosPost(`${API_URL}/project_detail/Update`, {
       id: projectDetail.id,
       delay: JSON.stringify(newDelay)
     });
@@ -895,7 +892,7 @@ export default function BigCalendar() {
     if (response.data.result == 'SUCCESS') {
       setDeleteModal(false)
       setProjectDetail({...projectDetail, delay: newDelay});
-      setModalMsg('정확히 보관되었습니다.')
+      setModalMsg('정확히 저장되었습니다.')
       setShowModal(true)
     }
     else {

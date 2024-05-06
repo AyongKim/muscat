@@ -34,6 +34,7 @@ import Status from "./component/Status"
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 const axios = require('axios');
 import { API_URL } from '@pages/constant';
+import axiosPost from '@pages/axiosWrapper';
 
 export default function Modern() {
   const [projectList, setProjectList] = useState([])
@@ -51,7 +52,7 @@ export default function Modern() {
     let data = JSON.parse(str);
     setUserData(data)
 
-    const response = await axios.post(`${API_URL}/project/List`, {
+    const response = await axiosPost(`${API_URL}/project/List`, {
       consignee_id: data.user_id
     });
     setProjectList(response.data)
@@ -64,7 +65,7 @@ export default function Modern() {
   const [status, setStatus] = useState('')
 
   const fetchDetail = async () => {
-    let response = await axios.post(`${API_URL}/project_detail/Status`, {
+    let response = await axiosPost(`${API_URL}/project_detail/Status`, {
       project_id: project,
       consignee_id: userData.user_id
     });

@@ -12,7 +12,7 @@ import PlusOneIcon from '@mui/icons-material/PlusOne';
 import AddIcon from '@mui/icons-material/Add';
 import { Select,  InputLabel, FormControl, Chip,  Box } from '@mui/material';
 import { apiUrl } from '@src/utils/commonValues';
-import axios from 'axios';
+import axiosPost from '@pages/axiosWrapper';
 import { API_URL } from '@pages/constant';
 
 interface PrivacyItem {
@@ -52,7 +52,7 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
   const [privacyItems, setPrivacyItems] = useState([]);
   const fetchPrivacyItems = async () => {
     try {
-      const response = await axios.post(`${API_URL}/personal_info/List`, {
+      const response = await axiosPost(`${API_URL}/personal_info/List`, {
         project_id: project
       });
       if (response.status === 200) {
@@ -98,7 +98,7 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
     let data = JSON.parse(str);
     setUserData(data)
 
-    let response = await axios.post(`${API_URL}/user/Detail`, {
+    let response = await axiosPost(`${API_URL}/user/Detail`, {
       id: data.user_id
     })
 
@@ -208,7 +208,7 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
         selectedItems: selectedItems
       }
 
-      const response = await axios.post(`${API_URL}/project_detail/SetStatus`, {
+      const response = await axiosPost(`${API_URL}/project_detail/SetStatus`, {
         project_id: project,
         company_id: userData.company_id,
         status: JSON.stringify(data)
@@ -219,7 +219,7 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
       if (response.data.result == 'SUCCESS') {
         
         sessionStorage.setItem('consignee_status', '')
-        setModalMsg1('정확히 보관되었습니다.')
+        setModalMsg1('정확히 저장되었습니다.')
         setShowModal1(true)
 
         let aa: { id: any; self_check_result: string; attachment: string; attachment_name: string; check_result: string; additional: string; modify_time: string; result: string; lock: string; current_status: string; modify_request: string; check_suggestion: string; }[] = [];
@@ -241,13 +241,13 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
           })
         });
 
-        const response = await axios.post(`${API_URL}/project_detail/Update`, {
+        const response = await axiosPost(`${API_URL}/project_detail/Update`, {
           id: ii,
           first_check_consignee_temp_data: JSON.stringify(aa)
         });
       }
       else {
-        setModalMsg1('보관이 실패하였습니다.\n' + response.data.error_message)
+        setModalMsg1('저장이 실패하였습니다.\n' + response.data.error_message)
         setShowModal1(true)
       }
     } else {
@@ -270,7 +270,7 @@ const StatusLayout = ({project, setNoStatus}: Props) => {
   const [modalMsg1, setModalMsg1] = React.useState('')
   const onClose1 = () => {
     setShowModal1(false)
-    if (modalMsg1 == '정확히 보관되었습니다.')
+    if (modalMsg1 == '정확히 저장되었습니다.')
       setNoStatus(false)
   }
 

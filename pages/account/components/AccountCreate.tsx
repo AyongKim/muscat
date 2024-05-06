@@ -36,14 +36,14 @@ import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { IconCheck } from '@tabler/icons-react';
 import { Row } from 'antd';
 import { Router, useRouter } from 'next/router';
-import axios from 'axios';
+import axiosPost from '@pages/axiosWrapper';
 import { API_URL } from '@pages/constant';
 
 // Assuming these are the functions that would actually perform API calls.
 // You would need to replace them with real API calls in your application.
 const checkDuplicateId = async (id: string): Promise<boolean> => {
   try {
-    const response = await axios.post(`${API_URL}/user/CheckId`,{
+    const response = await axiosPost(`${API_URL}/user/CheckId`,{
       "id": id
     });
     return response.data.result=='fail';
@@ -56,7 +56,7 @@ const checkDuplicateId = async (id: string): Promise<boolean> => {
 // 사업자 등록번호 확인 API 호출
 const checkBusinessNumber = async (number: string): Promise<string> => {
   try {
-    const response = await axios.post(`${API_URL}/company/Check`,{
+    const response = await axiosPost(`${API_URL}/company/Check`,{
       "register_num": number
     });
     return response.data.data;
@@ -163,7 +163,7 @@ const AccountTab: React.FC = () => {
       return;
     }
 
-    axios.post(`${API_URL}/user/Signup`, {
+    axiosPost(`${API_URL}/user/Signup`, {
       user_type: accountType, // 계정 유형에 따라 값 설정
       user_email: email, 
       user_password: password,
@@ -202,6 +202,7 @@ const AccountTab: React.FC = () => {
  
   // Dialog close handler
   const handleDialog2Close = () => {
+    setIdChecked(true); 
     if (dialogContent.includes('사용 가능한 아이디입니다.')) {
       setIdChecked(true); 
     }else if(dialogContent.includes('업체 명')) {

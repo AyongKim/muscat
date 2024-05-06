@@ -16,6 +16,7 @@ import HorizontalBarWidget from './components/HorizontalBarWidget';
 import StatusAll from './StatusAll'
 import Image from "next/image";
 import StatusIndividual from './StatusIndividual';
+import axiosPost from '@pages/axiosWrapper';
 const BCrumb = [
   {
     to: '/',
@@ -29,31 +30,32 @@ const BCrumb = [
 export default function EcomProductList() {
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [year, setYear] = React.useState(0);
-  const [years, setYears] = React.useState([]);
-  const [projectNames, setProjectNames] = React.useState([]);
-  const [project, setProject] = React.useState(0);
+  const [years, setYears] = React.useState([]); 
+  const [project_id, setProjectId] = React.useState(0);
   const [projectList, setProjectList] = React.useState([]);
   const [consignor, setConsignor] = React.useState(0);
   const [consignorList, setConsignorList] = React.useState([]);
   const [consignee, setConsignee] = React.useState(0);
   const [consigneeList, setConsigneeList] = React.useState([]);
-
-  async function fetchData() {
+  const [checklistData, setChecklistData] = React.useState([]);
+ 
+  async function fetchProjectList() {
     try {
-      const response = await axios.post(`${API_URL}/project/List`, {
+      const response = await axiosPost(`${API_URL}/project/List`, {
         year: year,
       });
       // setRows(response.data)
       setProjectList(response.data)
+      if(response.data.length > 0)
+         setProjectId(response.data[0].id)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   }
   async function fetchYears() {
     try {
-      const response = await axios.post(`${API_URL}/project/SearchItem`);
-      setYears(response.data.years)
-      setProjectNames(response.data.names)
+      const response = await axiosPost(`${API_URL}/project/SearchItem`,{});
+      setYears(response.data.years) 
 
       if (response.data.years.length)
         setYear(response.data.years[0])
@@ -64,8 +66,8 @@ export default function EcomProductList() {
 
   async function fetchConsignees() {
     try {
-      const response = await axios.post(`${API_URL}/project_detail/List`, {
-        project_id: project
+      const response = await axiosPost(`${API_URL}/project_detail/List`, {
+        project_id: project_id
       });
 
       setConsigneeList(response.data)
@@ -81,13 +83,13 @@ export default function EcomProductList() {
   }, []);
 
   React.useEffect(() => {
-    fetchData();
+    fetchProjectList();
   }, [year])
 
   React.useEffect(() => {
     fetchConsignees();
 
-    const project_data = projectList.find((x) => x.id == project);
+    const project_data = projectList.find((x) => x.id == project_id);
     if (project_data) {
       setConsignorList([{
         id: project_data.company_id,
@@ -96,12 +98,12 @@ export default function EcomProductList() {
 
       setConsignor(project_data.company_id)
     }
-  }, [project])
+  }, [project_id])
 
   const [consigneeData, setConsigneeData] = React.useState(null);
   const [type, setType] = React.useState('none')
   const handleSearch = (event: any) => {
-    if (year != 0 && project != 0 && consignor != 0) {
+    if (year != 0 && project_id != 0 && consignor != 0) {
       if (consignee == -1) {
         setType('all');
       }
@@ -149,10 +151,10 @@ export default function EcomProductList() {
           labelId="month-dd"
           id="month-dd"
           size="small" 
-          value={project}
+          value={project_id}
           sx={{width:200, mr:2}}
           onChange = {(e:any) => {
-            setProject(e.target.value);
+            setProjectId(e.target.value);
           }}
         >
           {projectList.map((x:any, index: number) => {
@@ -218,10 +220,14 @@ export default function EcomProductList() {
       </Box>
 
       {
-        type == 'individual' && <StatusIndividual consigneeData={consigneeData}/>
+        type == 'individual' && <StatusIndividual consignor={consignorList.filter((x:any, index: number) => {
+          return x.company_id == consignor;
+        }).length > 0 ? consignorList.filter((x:any, index: number) => {
+          return x.company_id == consignor;
+        })[0].company_nam : '' } consigneeData={consigneeData}/>
       }
       {
-        type == 'all' && <StatusAll consigneeList={consigneeList}/>
+        type == 'all' && <StatusAll consigneeList={consigneeList}  />
       }
        
     </PageContainer>

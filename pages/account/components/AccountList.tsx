@@ -24,7 +24,7 @@ import {  IconSearch,   } from '@tabler/icons-react';
 import BlankCard from '@src/components/shared/BlankCard';
 import Link from 'next/link';
 import DeleteUser from './DeleteUser';
-import axios from 'axios';
+import axiosPost from '@pages/axiosWrapper';
 import { API_URL } from '@pages/constant';
  
 
@@ -138,7 +138,7 @@ const AccountList = ({ register_num }: { register_num: string }) => {
       setIsMaster(true)
     else setIsMaster(false)
 
-    const response = await axios.post(`${API_URL}/user/List`);
+    const response = await axiosPost(`${API_URL}/user/List`,{});
 
     console.log(type)
     let data = response.data

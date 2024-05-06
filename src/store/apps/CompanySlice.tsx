@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosPost,{axiosDelete} from '@pages/axiosWrapper';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { CompanyType } from '../../types/apps/company'; 
 import { apiUrl } from '../../utils/commonValues';
@@ -22,7 +22,7 @@ export const registerCompany = createAsyncThunk(
   "company/Register",
   async (companyData: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/Register`, companyData);
+      const response = await axiosPost(`${API_URL}/Register`, companyData);
       return { ...response.data, companyData: { ...companyData,id:response.data.id }  }; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -34,7 +34,7 @@ export const deleteCompanies = createAsyncThunk(
   'companies/deleteMultiple',
   async (companyIds: string, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`${API_URL}/Delete`, {
+      const response = await axiosDelete(`${API_URL}/Delete`, {
         data: { str_ids: companyIds }
       });
       
@@ -53,7 +53,7 @@ export const fetchCompanies = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       console.log(`${API_URL}/List`);
-      const response = await axios.post(`${API_URL}/List`);
+      const response = await axiosPost(`${API_URL}/List`,{});
       return response.data;
     } catch (error: any) {
       console.log(error);

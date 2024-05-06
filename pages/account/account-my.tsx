@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText,  DialogTitle, Divider, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography, Input, MenuItem } from '@mui/material';
 import { useRouter } from 'next/router'; // Import useRouter from Next.js
 import { apiUrl } from '@src/utils/commonValues';
-import axios from 'axios'; 
+import axiosPost from '@pages/axiosWrapper'; 
 import { UserType } from '@src/types/apps/account';
 import { AppDispatch, useDispatch } from '@src/store/Store';
 import { updateUser } from '@src/store/apps/UserSlice';
@@ -50,7 +50,7 @@ export default function AccountDetailTable() {
         const id = JSON.parse(str).user_id
 
         // 파라미터에서 받아온 공지사항 정보 설정
-        const response = await axios.post(`${API_URL}/user/Detail`, { id: id });
+        const response = await axiosPost(`${API_URL}/user/Detail`, { id: id });
         setUserInfo(response.data);
       } catch (error) {
         console.error('Error fetching user info:', error);
@@ -79,7 +79,7 @@ export default function AccountDetailTable() {
         updateInfo.user_password = newPassword
       }
 
-      const response = await axios.post(`${API_URL}/user/Update`, updateInfo); // 사용자의 ID를 기반으로 업데이트 요청
+      const response = await axiosPost(`${API_URL}/user/Update`, updateInfo); // 사용자의 ID를 기반으로 업데이트 요청
 
       if (response.data.result == 'success') {
         setModalMsg('수정이 성공하였습니다.')

@@ -9,7 +9,7 @@ import {
   DialogContentText,
   Typography,
 } from '@mui/material';
-import axios from 'axios';
+import axiosPost from '@pages/axiosWrapper';
 import { apiUrl } from '@src/utils/commonValues';
 import { useSelector } from '@src/store/Store';
 interface AddInquiryProps {
@@ -47,7 +47,7 @@ const AddInquiry : React.FC<AddInquiryProps> = ({  onClose }) => {
 
     const API_URL = `http://${apiUrl}inquiry`;
     try {
-      const response = await axios.post(`${API_URL}/Register`, inquiryData);
+      const response = await axiosPost(`${API_URL}/Register`, inquiryData);
 
       if (response.status === 200) {
         // Handle successful response

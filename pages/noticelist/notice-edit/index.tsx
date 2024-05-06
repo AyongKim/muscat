@@ -35,6 +35,7 @@ import { fetchProjects } from '@src/store/apps/ProjectSlice';
 import { ProjectType } from '@src/types/apps/project'; 
 const axios = require('axios');
 import { API_URL } from '@pages/constant';
+import axiosPost from '@pages/axiosWrapper';
 // ReactQuill 동적 import
 const ReactQuill: any = dynamic(
   async () => {
@@ -78,6 +79,7 @@ export default function QuillEditor() {
   const [projectName, setProjectName] = useState('');
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isMaster, setIsMaster] = useState(false) ;
 
   const handleClosePopup = () => {
     // Close both success and error popups
@@ -85,10 +87,11 @@ export default function QuillEditor() {
   };
 
   const fetchDetail = async () => {
+
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get('id') || ''; 
-      const response = await axios.post(`${API_URL}/notice/Detail`, { id: id });
+      const response = await axiosPost(`${API_URL}/notice/Detail`, { id: id });
       console.log(response);
       // 파라미터에서 받아온 공지사항 정보 설정
       setId(id);
@@ -109,12 +112,18 @@ export default function QuillEditor() {
   };
 
   const fetchProjects = async() => {
-    const response = await axios.post(`${API_URL}/project/List`, {
+    const response = await axiosPost(`${API_URL}/project/List`, {
       
     });
     setProjects(response.data)
   }
   useEffect(() => {
+    const str = sessionStorage.getItem('user')
+    let data = JSON.parse(str); 
+    if (data.type == 1 || data.type == 2 ) { 
+    } else{
+      setIsMaster(true)
+    }
     fetchProjects()
     fetchDetail();
   }, []); // 페이지 로드시 한번만 실행 
@@ -194,13 +203,13 @@ export default function QuillEditor() {
       <DashboardCard
         title="글 작성"
         action={
-          <Box>
+          isMaster && <Box>
             {isEditing ? (
               <Button variant="contained" onClick={handleSave} sx={{ mr: 1 }}>
                 저장
               </Button>
-            ) : (
-              <Button variant="contained" onClick={handleEdit} sx={{ mr: 1 }}>
+            ) :  (
+               <Button variant="contained" onClick={handleEdit} sx={{ mr: 1 }}>
                 수정
               </Button>
             )}
@@ -363,7 +372,7 @@ export default function QuillEditor() {
       </DashboardCard>
       <Dialog open={showSuccess} onClose={handleClosePopup}> 
         <DialogContent sx={{width:200}} >
-          <DialogContentText>정확히 보관되었습니다.</DialogContentText>
+          <DialogContentText>정확히 저장되었습니다.</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClosePopup}>OK</Button>

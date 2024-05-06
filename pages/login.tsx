@@ -4,7 +4,7 @@ import { TextField, Button, Box, Typography, Link, CircularProgress, FormControl
 import { nowEpoch } from '../src/utils/commonFunctions'
 import { loginSuccess } from '../src/store/authSlice';
 import { AppDispatch, useDispatch } from '../src/store/Store';
-import axios from 'axios';
+import axiosPost from '@pages/axiosWrapper';
 import { apiUrl } from '../src/utils/commonValues';
 import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
 import Cookies from 'js-cookie';
@@ -78,9 +78,9 @@ export default function Login() {
        let response: { [key: string]: any };
        response = {};
        if (authSent) {
-        response = await axios.post(`${API_URL}/Login`, { email: email, password: password, code: validCode });  
+        response = await axiosPost(`${API_URL}/Login`, { email: email, password: password, code: validCode });  
        }else{
-        response = await  axios.post(`${API_URL}/Login`, { email: email, password: password });   
+        response = await  axiosPost(`${API_URL}/Login`, { email: email, password: password });   
        }
     
 

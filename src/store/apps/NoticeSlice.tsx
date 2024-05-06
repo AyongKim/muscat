@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosPost,{axiosDelete} from '@pages/axiosWrapper';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { NoticeType } from '../../types/apps/notice'; // Assuming NoticeType is defined elsewhere
 import { apiUrl } from '../../utils/commonValues';
@@ -22,7 +22,7 @@ export const registerNotice = createAsyncThunk(
   "notice/Register",
   async (noticeData: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/Register`, noticeData);
+      const response = await axiosPost(`${API_URL}/Register`, noticeData);
       return { ...response.data, noticeData: { ...noticeData, id: response.data.id } };
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -34,7 +34,7 @@ export const deleteNotices = createAsyncThunk(
   'notices/deleteMultiple',
   async (noticeIds: string, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`${API_URL}/Delete`, {
+      const response = await axiosDelete(`${API_URL}/Delete`, {
         data: { str_ids: noticeIds }
       });
       
@@ -49,7 +49,7 @@ export const fetchNotices = createAsyncThunk(
   "notice/List",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/List`);
+      const response = await axiosPost(`${API_URL}/List`,{});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
