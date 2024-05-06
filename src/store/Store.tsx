@@ -1,8 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import CustomizerReducer from './customizer/CustomizerSlice';
 import CompanyReducer from './apps/CompanySlice'; 
-import NoticeReducer from './apps/NoticeSlice'; 
-import ProjectReducer from './apps/ProjectSlice';  
+import NoticeReducer from './apps/NoticeSlice';  
 import { combineReducers } from 'redux';
 import {
   useDispatch as useAppDispatch,
@@ -19,8 +18,7 @@ export const store = configureStore({
     auth: authReducer,
     customizer: CustomizerReducer, 
     companyReducer: CompanyReducer, 
-    noticeReducer:NoticeReducer,
-    projectReducer:ProjectReducer,
+    noticeReducer:NoticeReducer, 
     user: userReducer,
   },
 });
@@ -29,8 +27,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   customizer: CustomizerReducer, 
   companyReducer: CompanyReducer, 
-  noticeReducer:NoticeReducer,
-  projectReducer:ProjectReducer,
+  noticeReducer:NoticeReducer, 
   user: userReducer,
 });
 

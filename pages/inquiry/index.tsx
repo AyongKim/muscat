@@ -143,7 +143,7 @@ const InquiryList = () => {
   const fetchData = async () => {
     const API_URL = `http://${apiUrl}inquiry`;
     try {
-      const response = await axiosPost(`${API_URL}/List`);
+      const response = await axiosPost(`${API_URL}/List`,{});
       if (response.status === 200) {
         // Handle successful response (status code 200)
         const { data } = response;

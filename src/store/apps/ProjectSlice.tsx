@@ -1,4 +1,4 @@
-import axiosPost from '@pages/axiosWrapper';
+import axiosPost, {axiosDelete} from '@pages/axiosWrapper';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ProjectType } from '../../types/apps/project'; // Assuming ProjectType is defined elsewhere
 import { apiUrl } from '../../utils/commonValues';
@@ -36,8 +36,7 @@ export const deleteProjects = createAsyncThunk(
     try {
       const response = await axiosDelete(`${API_URL}/Delete`, {
         data: { str_ids: projectIds }
-      });
-      
+      }); 
       return { ...response.data, deletedProjectIds: projectIds};
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -49,7 +48,7 @@ export const fetchProjects = createAsyncThunk(
   "project/List",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosPost(`${API_URL}/List`);
+      const response = await axiosPost(`${API_URL}/List`,{});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -96,6 +95,5 @@ export const ProjectSlice = createSlice({
 export const {  
   setSearchQuery, 
 } = ProjectSlice.actions;
- 
+  
 
-export default ProjectSlice.reducer;

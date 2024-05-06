@@ -121,7 +121,7 @@ export default function MainPage() {
     },
     set: false,
   })
-  const [selectConsignee, setSelectConsignee] = useState();
+  const [selectConsignee, setSelectConsignee] = useState<any>();
   const [userData, setUserData] = React.useState({
     type: 0,
     user_id: 0,
@@ -158,7 +158,8 @@ export default function MainPage() {
   const [personInChargeContact, setPersonInChargeContact] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [privacyItems, setPrivacyItems] = useState([]);
-  const sendMemo = async ( ) => { 
+  const sendMemo = async ( ) => {
+    if(!selectConsignee) return; 
     try {  
       const response1 = await axiosPost(`${API_URL}/memo_details/Register`, { 
         memo_id: selectConsignee.issue_id,
