@@ -347,7 +347,7 @@ const ProductTableList = () => {
         'privacy_type': privacyPolicy
       }
 
-      const response = await axiosPost('http://localhost:5001/project/Register', data);
+      const response = await axiosPost(`${API_URL}/project/Register`, data);
       fetchData()
       setEditMode(false)
     }
@@ -393,7 +393,7 @@ const ProductTableList = () => {
 
   const showSchedule = async(id:any) => {
     setEditId(id)
-    const response = await axiosPost('http://localhost:5001/project/Schedule', {
+    const response = await axiosPost(`${API_URL}/project/Schedule`, {
       id: id
     });
     
@@ -448,7 +448,7 @@ const ProductTableList = () => {
       return;
     }
 
-    const response = await axios.put('http://localhost:5001/project/Schedule', {
+    const response = await axios.put(`${API_URL}/project/Schedule`, {
       id: editId,
       create_from: createFrom,
       create_to: createTo,

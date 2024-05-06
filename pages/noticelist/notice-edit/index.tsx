@@ -176,7 +176,7 @@ export default function QuillEditor() {
     formData.append('content', content);
     
   
-    fetch('http://localhost:5001/notice/Update', {
+    fetch(`${API_URL}/notice/Update`, {
       method: 'POST',
       body: formData
     })
@@ -329,7 +329,7 @@ export default function QuillEditor() {
                       
                       
                       </Row>: 
-                      <a href={`http://localhost:5001/notice/Attachment?id=${id}`}>{attachment}</a> 
+                      <a href={`${API_URL}/notice/Attachment?id=${id}`}>{attachment}</a> 
                       }
                     </TableCell>
                   </TableRow>

@@ -103,7 +103,7 @@ export default function QuillEditor() {
     formData.append('content', content);
     formData.append('create_by', name);
   
-    fetch('http://localhost:5001/notice/Register', {
+    fetch(`${API_URL}/notice/Register`, {
       method: 'POST',
       body: formData
     })

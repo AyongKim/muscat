@@ -374,7 +374,7 @@ const ProjectDetail = ({setMode, data}: {setMode:any, data:any}) => {
     formData.append('project_id', data.id);
   
     e.target.value = null;
-    fetch('http://localhost:5001/project_detail/RegisterExcel', {
+    fetch(`${API_URL}/project_detail/RegisterExcel`, {
       method: 'POST',
       body: formData
     })
