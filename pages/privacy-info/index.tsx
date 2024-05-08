@@ -3,7 +3,7 @@ import PageContainer from '@src/components/container/PageContainer';
 import React, { useEffect, useState } from 'react';
 import { Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, Typography } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import axiosPost from '@pages/axiosWrapper';
 import { Row } from 'antd';
  
@@ -37,8 +37,7 @@ interface PrivacyProps {
   selectedItem: PrivacyItem;
   initPrivacyItems: PrivacyItem[];
   onClose?: () => void;
-}
-const API_URL = `http://${apiUrl}personal_info`;
+} 
 const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItems, onClose }) => {
   const [privacyItems, setPrivacyItems] = useState<PrivacyItem[]>(initPrivacyItems);
   const [privacyImport, setPrivacyImport] = useState<PrivacyItem>(selectedItem);
@@ -49,7 +48,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
 
   const fetchPrivacyInfo = async ( category_id :number ) => {
     try {
-      const response = await axiosPost(`${API_URL}/List`,{
+      const response = await axiosPost(`${API_URL}/personal_info/List`,{
         "category_id": category_id
       })
       if (response.data) {
@@ -302,7 +301,7 @@ const PrivacyInfoTable: React.FC<PrivacyProps> = ({selectedItem, initPrivacyItem
   const handleSave = async () => {
     setWillSave(false);
     try {
-      const response = await axiosPost(`${API_URL}/Register`,{
+      const response = await axiosPost(`${API_URL}/personal_info/Register`,{
         "id": selectedItem.id,
         "data": privacyInfos
       })

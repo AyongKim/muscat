@@ -1,5 +1,5 @@
-import { apiUrl } from '@src/utils/commonValues';
-import axios from 'axios';
+import { API_URL } from '@pages/constant';
+import axios from 'axios'; 
 async function getClientIPAddress(): Promise<string> {
   try {
       const response = await axios.get('https://api.ipify.org?format=json');
@@ -32,7 +32,7 @@ async function registerLog(url: string, values1: any, response : any) {
     if(str){
       const type = JSON.parse(str).type  
       
-      await axios.post(`http://${apiUrl}system_log/Register`, {
+      await axios.post(`${API_URL}/system_log/Register`, {
         'category': '접속기록',
         'api_name': url,
         'ip_address': id_address,
@@ -44,7 +44,7 @@ async function registerLog(url: string, values1: any, response : any) {
         'log_response': JSON.stringify(response)
       }); 
     }else{
-      await axios.post(`http://${apiUrl}system_log/Register`, {
+      await axios.post(`${API_URL}/system_log/Register`, {
         'category': '접속기록',
         'api_name': url,
         'ip_address': id_address,

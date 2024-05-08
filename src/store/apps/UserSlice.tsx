@@ -1,10 +1,9 @@
 import axios from "axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiUrl } from '../../utils/commonValues';
+import { API_URL } from '@pages/constant';
 import { UserType } from "../../types/apps/account";
 import axiosPost,{axiosDelete} from "@pages/axiosWrapper";
-
-const API_URL = `http://${apiUrl}user`;
+ 
 
 interface StateType {
   users: UserType[];
@@ -23,7 +22,7 @@ export const registerUser = createAsyncThunk(
   "user/register",
   async (userData: any, { rejectWithValue }) => {
     try {
-      const response = await axiosPost(`${API_URL}/Signup`, userData);
+      const response = await axiosPost(`${API_URL}/user/Signup`, userData);
       return { ...response.data, userData: { ...userData,id:response.data.id }  }; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -36,7 +35,7 @@ export const deleteUsers = createAsyncThunk(
   'user/deleteMultiple',
   async (userIds: string, { rejectWithValue }) => {
     try {
-      const response = await axiosDelete(`${API_URL}/Delete`, {data: { str_ids: userIds  }} );
+      const response = await axiosDelete(`${API_URL}/user/Delete`, {data: { str_ids: userIds  }} );
       return { ...response.data, userIds: userIds };
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -49,7 +48,7 @@ export const updateUser = createAsyncThunk(
   "user/update",
   async (userData: UserType, { rejectWithValue }) => {
     try {
-      const response = await axiosPost(`${API_URL}/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
+      const response = await axiosPost(`${API_URL}/user/Update`, userData); // 사용자의 ID를 기반으로 업데이트 요청
       return response.data as UserType; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -63,7 +62,7 @@ export const fetchUsers = createAsyncThunk(
   "user/fetch",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosPost(`${API_URL}/List`,{});
+      const response = await axiosPost(`${API_URL}/user/List`,{});
       return response.data as UserType[]; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data);

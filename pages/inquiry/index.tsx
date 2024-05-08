@@ -25,7 +25,7 @@ import {   IconSearch,   } from '@tabler/icons-react';
 import { InquiryType } from '@src/types/apps/inquiry';
 import BlankCard from '@src/components/shared/BlankCard';
 import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import axiosPost from '@pages/axiosWrapper';
 import DeleteInquiry from './components/DeleteInquiry';
 import AddInquiry from './components/AddInquiry';
@@ -140,10 +140,9 @@ const InquiryList = () => {
     .catch(error => console.error('Error occurred:', error));
    
   };
-  const fetchData = async () => {
-    const API_URL = `http://${apiUrl}inquiry`;
+  const fetchData = async () => { 
     try {
-      const response = await axiosPost(`${API_URL}/List`,{});
+      const response = await axiosPost(`${API_URL}/inquiry/List`,{});
       if (response.status === 200) {
         // Handle successful response (status code 200)
         const { data } = response;
@@ -163,10 +162,9 @@ const InquiryList = () => {
     }
   };
 
-  const fetchComments = async (id : any) => {
-    const API_URL = `http://${apiUrl}comments`;
+  const fetchComments = async (id : any) => { 
     try {
-      const response = await axiosPost(`${API_URL}/List`, {inquiry_id : id});
+      const response = await axiosPost(`${API_URL}/comments/List`, {inquiry_id : id});
       if (response.status === 200) {
         // Handle successful response (status code 200)
         const { data } = response ;
@@ -287,10 +285,9 @@ const InquiryList = () => {
   const [newComment, setNewComment] = React.useState('');
 
     // 댓글을 전송하는 함수
-    const sendComment = async () => {
-      const API_URL = `http://${apiUrl}comments`;
+    const sendComment = async () => { 
       try {
-        const response = await axiosPost(`${API_URL}/Register`, { inquiry_id: selectedInquiry.id, author: author, text:newComment });
+        const response = await axiosPost(`${API_URL}/comments/Register`, { inquiry_id: selectedInquiry.id, author: author, text:newComment });
         
         if (response.data.result === 'success') {
           fetchComments(selectedInquiry.id)

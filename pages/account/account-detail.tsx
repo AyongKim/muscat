@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText,  DialogTitle, Divider, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography, Input, MenuItem } from '@mui/material';
 import { useRouter } from 'next/router'; // Import useRouter from Next.js
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import axiosPost from '@pages/axiosWrapper'; 
 import { UserType } from '@src/types/apps/account';
 import { AppDispatch, useDispatch } from '@src/store/Store';
@@ -42,9 +42,8 @@ export default function AccountDetailTable() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('id') || ''; 
-        // 파라미터에서 받아온 공지사항 정보 설정
-        const API_URL = `http://${apiUrl}user`;
-        const response = await axiosPost(`${API_URL}/Detail`, { id: id });
+        // 파라미터에서 받아온 공지사항 정보 설정 
+        const response = await axiosPost(`${API_URL}/user/Detail`, { id: id });
         console.log(response);
         setUserInfo(response.data);
       } catch (error) {

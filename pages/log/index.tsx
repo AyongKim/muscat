@@ -3,11 +3,10 @@ import axiosPost from '@pages/axiosWrapper';
 import { Box, Button, Checkbox, Collapse, Fab, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, MenuItem, InputAdornment, Divider } from '@mui/material';
 import { IconPlus, IconSearch } from '@tabler/icons-react';
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
 import { Row } from 'antd';
-
-const API_URL = `http://${apiUrl}system_log`; // 서버 API 주소로 수정 필요
+ 
 
 interface LogItem {
   category: string;
@@ -59,7 +58,7 @@ export default function LogPage() {
 
   const fetchLogItems = async () => {
     try {
-      const response = await axiosPost(`${API_URL}/List`, {});
+      const response = await axiosPost(`${API_URL}/system_log/List`, {});
       if (response.status === 200) {
         setTotalItems(response.data);
       } else {

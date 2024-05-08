@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axiosPost,{axiosDelete} from '@pages/axiosWrapper';
 import {  Box, Button,  Checkbox,  Dialog,  DialogActions,  DialogContent,  DialogTitle,  IconButton,   Paper,  Table,  TableBody,  TableCell,  TableContainer, TableHead, TableRow,  TextField,  Toolbar,  Typography,} from '@mui/material'; 
 import { IconCheck, IconX } from '@tabler/icons-react';
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import { alpha, useTheme } from '@mui/material/styles'; 
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
-import PrivacyInfoTable from '@pages/privacy-info';
-const API_URL = `http://${apiUrl}personal_category`;
+import PrivacyInfoTable from '@pages/privacy-info'; 
 interface PrivacyItem {
   id: number;
   personal_category: string;
@@ -29,7 +28,7 @@ export default function PrivacyItemManagement() {
   // 서버로부터 모든 개인정보 항목을 불러오는 함수
   const fetchPrivacyItems = async () => {
     try {
-      const response = await axiosPost(`${API_URL}/List`,{});
+      const response = await axiosPost(`${API_URL}/personal_category/List`,{});
       if (response.status === 200) {
         setPrivacyItems(response.data);
         setIsAddingNewItem(false);
@@ -54,7 +53,7 @@ export default function PrivacyItemManagement() {
     }
     
     try {
-      const response = await axiosPost(`${API_URL}/Register`, newItem);
+      const response = await axiosPost(`${API_URL}/personal_category/Register`, newItem);
       if (response.status === 200) {
         fetchPrivacyItems(); // 성공 후 목록 새로고침
         
@@ -70,7 +69,7 @@ export default function PrivacyItemManagement() {
   // 선택된 개인정보 항목들을 삭제하는 함수
   const handleDeleteSelectedItems = async () => {
     try {
-      const response = await axiosDelete(`${API_URL}/Delete`, { data:{id: selected.join(',')}  });
+      const response = await axiosDelete(`${API_URL}/personal_category/Delete`, { data:{id: selected.join(',')}  });
       if (response.status === 200) {
         fetchPrivacyItems(); // 성공 후 목록 새로고침
         setSelected([]);

@@ -3,7 +3,7 @@ import PageContainer from '@src/components/container/PageContainer';
 import React, { useEffect, useState } from 'react';
 import { Button, Table, Input,TableBody, TableCell,Typography, TableContainer, TableRow, Paper, Box, TextField, InputLabel, MenuItem, TableHead, Chip, TextareaAutosize } from '@mui/material';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import axiosPost, { axiosPost2 } from '@pages/axiosWrapper'; 
 import {  Row } from 'antd';
 import { CloudUpload, CloudUploadOutlined } from '@mui/icons-material';
@@ -65,8 +65,7 @@ interface CheckProps {
   selectedItem: ChecklistItem;
   initChecklistItems: ChecklistItem[];
   onClose?: () => void;
-}
-const API_URL = `http://${apiUrl}checkinfo`;
+} 
 const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems, onClose }) => {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(initChecklistItems);
   const [checklistImport, setChecklistImport] = useState<ChecklistItem>(selectedItem);
@@ -77,7 +76,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
 
   const fetchCheckInfo = async ( category_id :number) => {
     try {
-      const response = await axiosPost(`${API_URL}/List`,{
+      const response = await axiosPost(`${API_URL}/checkinfo/List`,{
         "category_id": category_id
       });
       if (response.status === 200) {
@@ -384,7 +383,7 @@ const CheckInfoTable: React.FC<CheckProps> = ({selectedItem, initChecklistItems,
       sortedFiles.forEach((file, index) => {
         formData.append(`file${index+1}`, file.file);
       }); 
-      const response = await axiosPost2(`${API_URL}/Register`, formData, {
+      const response = await axiosPost2(`${API_URL}/checkinfo/Register`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

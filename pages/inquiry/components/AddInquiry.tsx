@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import axiosPost from '@pages/axiosWrapper';
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import { useSelector } from '@src/store/Store';
 interface AddInquiryProps {
   onClose?: () => void;
@@ -44,10 +44,9 @@ const AddInquiry : React.FC<AddInquiryProps> = ({  onClose }) => {
       author,
       created_date: new Date().toDateString(),
     };
-
-    const API_URL = `http://${apiUrl}inquiry`;
+ 
     try {
-      const response = await axiosPost(`${API_URL}/Register`, inquiryData);
+      const response = await axiosPost(`${API_URL}/inquiry/Register`, inquiryData);
 
       if (response.status === 200) {
         // Handle successful response

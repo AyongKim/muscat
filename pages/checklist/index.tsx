@@ -4,10 +4,9 @@ import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitl
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { alpha, useTheme } from '@mui/material/styles';
 import Breadcrumb from '@src/layouts/full/shared/breadcrumb/Breadcrumb';
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import CheckInfoTable from '@pages/check-info';
-
-const API_URL = `http://${apiUrl}checklist`; // 서버 API 주소로 수정 필요
+ 
 
 interface ChecklistItem {
   id: number;
@@ -32,7 +31,7 @@ export default function ChecklistManagement() {
 
   const fetchChecklistItems = async () => {
     try {
-      const response = await axiosPost(`${API_URL}/List`,{});
+      const response = await axiosPost(`${API_URL}/checklist/List`,{});
       if (response.status === 200) {
         setChecklistItems(response.data);
         setIsAddingNewItem(false);
@@ -56,7 +55,7 @@ export default function ChecklistManagement() {
     }
 
     try {
-      const response = await axiosPost(`${API_URL}/Register`, newItem);
+      const response = await axiosPost(`${API_URL}/checklist/Register`, newItem);
       if (response.status === 200) {
         fetchChecklistItems();
       } else {
@@ -69,7 +68,7 @@ export default function ChecklistManagement() {
 
   const handleDeleteSelectedItems = async () => {
     try {
-      const response = await axiosDelete(`${API_URL}/Delete`, { data: { id: selected.join(',') } });
+      const response = await axiosDelete(`${API_URL}/checklist/Delete`, { data: { id: selected.join(',') } });
       if (response.status === 200) {
         fetchChecklistItems();
         setSelected([]);

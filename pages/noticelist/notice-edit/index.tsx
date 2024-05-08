@@ -329,7 +329,8 @@ export default function QuillEditor() {
                       
                       
                       </Row>: 
-                      <a href={`${API_URL}/notice/Attachment?id=${id}`}>{attachment}</a> 
+                      <a href={`${API_URL}
+                      /notice/Attachment?id=${id}`}>{attachment}</a> 
                       }
                     </TableCell>
                   </TableRow>

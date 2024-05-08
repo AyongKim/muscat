@@ -5,7 +5,7 @@ import { nowEpoch } from '../src/utils/commonFunctions'
 import { loginSuccess } from '../src/store/authSlice';
 import { AppDispatch, useDispatch } from '../src/store/Store';
 import axiosPost from '@pages/axiosWrapper';
-import { apiUrl } from '../src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import CustomCheckbox from '@src/components/forms/theme-elements/CustomCheckbox';
 import Cookies from 'js-cookie';
 
@@ -16,8 +16,7 @@ interface LoginResponse {
     userEmail: string;
   };
   authRequired?: boolean;
-}
-const API_URL = `http://${apiUrl}user`;
+} 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState(''); 
@@ -27,7 +26,7 @@ export default function Login() {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [authSent, setAuthSent] = useState(false);
   const [timer, setTimer] = useState<number>(180);
-  const [checkTwo, setCheckTwo] = React.useState(false)
+  const [checkTwo, setCheckTwo] = React.useState(false)//??
   const router = useRouter();
   const dispatch: AppDispatch = useDispatch();  
 
@@ -78,9 +77,9 @@ export default function Login() {
        let response: { [key: string]: any };
        response = {};
        if (authSent) {
-        response = await axiosPost(`${API_URL}/Login`, { email: email, password: password, code: validCode });  
+        response = await axiosPost(`${API_URL}/user/Login`, { email: email, password: password, code: validCode });  
        }else{
-        response = await  axiosPost(`${API_URL}/Login`, { email: email, password: password });   
+        response = await  axiosPost(`${API_URL}/user/Login`, { email: email, password: password });   
        }
     
 
@@ -153,7 +152,7 @@ export default function Login() {
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled={loading}>
             {loading ? <CircularProgress size={24} /> : '로그인'}
           </Button>
-          <FormControlLabel
+          {/* <FormControlLabel
             sx={{mr:2}}
             control={
               <CustomCheckbox
@@ -164,7 +163,7 @@ export default function Login() {
               />
             }
             label="2단계 인증"
-          />
+          /> */}
           {errorMessage && <Typography color="error">{errorMessage}</Typography>}
         </Box>
       </Box>

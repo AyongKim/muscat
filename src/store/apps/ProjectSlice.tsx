@@ -1,10 +1,9 @@
 import axiosPost, {axiosDelete} from '@pages/axiosWrapper';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ProjectType } from '../../types/apps/project'; // Assuming ProjectType is defined elsewhere
-import { apiUrl } from '../../utils/commonValues';
+import { API_URL } from '@pages/constant';
 import { dispatch } from '../Store';
-
-const API_URL = `http://${apiUrl}project`; // Assuming project API endpoint is different
+ 
 
 interface StateType {
   projects: ProjectType[]; // Assuming ProjectType is defined elsewhere
@@ -22,7 +21,7 @@ export const registerProject = createAsyncThunk(
   "project/Register",
   async (projectData: any, { rejectWithValue }) => {
     try {
-      const response = await axiosPost(`${API_URL}/Register`, projectData);
+      const response = await axiosPost(`${API_URL}/project/Register`, projectData);
       return { ...response.data, projectData: { ...projectData, id: response.data.id } };
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -34,7 +33,7 @@ export const deleteProjects = createAsyncThunk(
   'projects/deleteMultiple',
   async (projectIds: string, { rejectWithValue }) => {
     try {
-      const response = await axiosDelete(`${API_URL}/Delete`, {
+      const response = await axiosDelete(`${API_URL}/project/Delete`, {
         data: { str_ids: projectIds }
       }); 
       return { ...response.data, deletedProjectIds: projectIds};
@@ -48,7 +47,7 @@ export const fetchProjects = createAsyncThunk(
   "project/List",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosPost(`${API_URL}/List`,{});
+      const response = await axiosPost(`${API_URL}/project/List`,{});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data);

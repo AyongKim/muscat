@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText,  DialogTitle, Divider, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography, Input, MenuItem } from '@mui/material';
 import { useRouter } from 'next/router'; // Import useRouter from Next.js
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import axiosPost from '@pages/axiosWrapper'; 
 import { UserType } from '@src/types/apps/account';
 import { AppDispatch, useDispatch } from '@src/store/Store';

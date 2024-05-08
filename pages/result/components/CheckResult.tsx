@@ -11,7 +11,7 @@ import DetailOn from "public/images/img/detail_on.png";
 import DetailOff from "public/images/img/detail_off.png";
 import LockOn from "public/images/img/lock_on.png";
 import LockOff from "public/images/img/lock_off.png";
-import { apiUrl } from '@src/utils/commonValues';
+import { API_URL } from '@pages/constant';
 import { Send } from '@mui/icons-material';
  
 const CheckResult = ({consignor,  userType , consigneeData}:  { consignor: string,  userType: number , consigneeData : any;}) => { 

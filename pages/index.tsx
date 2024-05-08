@@ -39,8 +39,7 @@ import { IconPlus } from '@tabler/icons-react';
 import { InquiryType } from '@src/types/apps/inquiry';
 import ChildCard from '@src/components/shared/ChildCard';
 import axiosPost from '@pages/axiosWrapper';
-import { apiUrl } from '@src/utils/commonValues';
-import { API_URL } from './constant';
+import { API_URL } from '@pages/constant';
 import { NoticeType } from '@src/types/apps/notice';
 import Link from '@src/components/shared/Link';
 import CustomSelect from '@src/components/forms/theme-elements/CustomSelect';
@@ -280,10 +279,9 @@ export default function MainPage() {
     const response = await axiosPost(`${API_URL}/user/ApprovalList`,{});
     setApproveCount(response.data.filter((x:any) => x.approval == 0).length);
   }
-  const fetchInqa = async () => {
-    const API_URL = `http://${apiUrl}inquiry`;
+  const fetchInqa = async () => { 
     try {
-      const response = await axiosPost(`${API_URL}/List`,{});
+      const response = await axiosPost(`${API_URL}/inquiry/List`,{});
       if (response.status === 200) {
         // Handle successful response (status code 200)
         const { data } = response;
