@@ -108,6 +108,7 @@ export default function MainPage() {
   const [checkingDetail, setCheckingDetail] = useState([]) 
   const [scheduleCheckDetail, setScheduleCheckDetail] = useState([]) 
   const [detailsDialogOpen, setDetailsDialogOpen] = React.useState(false);
+  const [detailsDialogIssue, setDetailsDialogIssue] = React.useState(false);
   const [projectDetail, setProjectDetail] = useState({
     id: 0,
     create_date: '',
@@ -188,8 +189,8 @@ export default function MainPage() {
       router.replace('/consignee_main')
     }
     fetchAdmins(); 
-    fetchInqa();
-   
+    
+    fetchInqa(); 
     fetchNotices();
     fetchApproveCount();
     setLoading(false);
@@ -279,6 +280,24 @@ export default function MainPage() {
     const response = await axiosPost(`${API_URL}/user/ApprovalList`,{});
     setApproveCount(response.data.filter((x:any) => x.approval == 0).length);
   }
+  
+  const fetchProjectsByConsignee = async (id:any, notices:any) => {
+    const response = await axiosPost(`${API_URL}/project/List`, {
+      consignee_id: id, 
+    }); 
+    const projects = response.data;   
+    const noticeFilter = notices.filter((x:any) => projects.some((project:any) => project.project_id === x.project_id || '전체' === x.project_name));
+    console.log(noticeFilter) 
+    setNotice(noticeFilter.slice(0, Math.min(2, noticeFilter.length)  ));  
+  };
+  const fetchProjectsByConsignor = async (id:any, notices:any) => { 
+    const response = await axiosPost(`${API_URL}/project/List`, { 
+      consignor_id: id
+    }); 
+    const projects = response.data;   
+    const noticeFilter = notices.filter((x:any) => projects.some((project:any) => project.project_id === x.project_id || '전체' === x.project_name));
+    setNotice(noticeFilter.slice(0, Math.min(2, noticeFilter.length)  ));  
+  };
   const fetchInqa = async () => { 
     try {
       const response = await axiosPost(`${API_URL}/inquiry/List`,{});
@@ -299,23 +318,6 @@ export default function MainPage() {
       // Handle any other errors (e.g., network issues, invalid URL, etc.)
       console.error('Error fetching data from API:', error.message);
     }
-  };
-  const fetchProjectsByConsignee = async (id:any, notices:any) => {
-    const response = await axiosPost(`${API_URL}/project/List`, {
-      consignee_id: id, 
-    }); 
-    const projects = response.data;   
-    const noticeFilter = notices.filter((x:any) => projects.some((project:any) => project.project_id === x.project_id || '전체' === x.project_name));
-    console.log(noticeFilter) 
-    setNotice(noticeFilter.slice(0, Math.min(2, noticeFilter.length)  ));  
-  };
-  const fetchProjectsByConsignor = async (id:any, notices:any) => { 
-    const response = await axiosPost(`${API_URL}/project/List`, { 
-      consignor_id: id
-    }); 
-    const projects = response.data;   
-    const noticeFilter = notices.filter((x:any) => projects.some((project:any) => project.project_id === x.project_id || '전체' === x.project_name));
-    setNotice(noticeFilter.slice(0, Math.min(2, noticeFilter.length)  ));  
   };
   const fetchNotices = async() => {
     const response = await axiosPost(`${API_URL}/notice/List` ,{});
@@ -374,7 +376,28 @@ export default function MainPage() {
                 const response = await axiosPost(`${API_URL}/memo_details/List`,{memo_id : item.issue_id});
                 setSelectedMemo(response.data); 
                 setSelectConsignee(item);
+                let data = JSON.parse(item.status); 
+                console.log(item)
+                console.log(data)
+                setCompanyName(data.companyName)
+                setManagerName(data.managerName)
+                setManagerPhoen(data.managerPhoen)
+                setAddress(data.address)
+                setContractContent(data.contractContent) 
+                setContractEndDate(data.contractEndDate)
+                setRepresentativeIndustry(data.representativeIndustry)
+                setTotalEmployees(data.totalEmployees)
+                setAnnualPersonalInformation(data.annualPersonalInformation)
+                setYearlyPrivacyHandle(data.yearlyPrivacyHandle) 
+                setSelectedItems((data.selectedItems))
+                setSystemUsageStatus(data.systemUsageStatus)
+                setRetrustStatus(data.retrustStatus)
+                setThirdPartyStatus(data.thirdPartyStatus)
+                setSystemUsageStatusText(data.systemUsageStatusText)
+                setRetrustStatusText(data.retrustStatusText)
+                setThirdPartyStatusText(data.thirdPartyStatusText)
                 setDetailsDialogOpen(true);
+                setDetailsDialogIssue(true);
               }}> 
                 <ListItemText primary={item.company_name} secondary={item.create_date} /> 
                 <Typography color="error" variant="caption" style={{ marginLeft: 'auto' }}>
@@ -464,7 +487,7 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
               <Collapse in={open} timeout="auto" unmountOnExit> 
               <StatusItem label="최초 검수" count={checkingDetail.filter((x:any) => x.state == 1).length} bgcolor={checking_type==0? "lightblue": "lightgrey"}  onClick={() => setCheckingType(0)} />
               <Divider  flexItem />
-              <StatusItem label="이행 검수" count={checkingDetail.filter((x:any) => x.state == 1).length} bgcolor={checking_type==1? "lightblue": "lightgrey"}  onClick={() => setCheckingType(1)} /> 
+              <StatusItem label="이행 검수" count={checkingDetail.filter((x:any) => x.state == 2).length} bgcolor={checking_type==1? "lightblue": "lightgrey"}  onClick={() => setCheckingType(1)} /> 
 
               <Typography variant="h6" sx={{mt:1}}>
                 총 {checkingDetail.filter((x:any) => x.state == checking_type+1).length} 건
@@ -476,7 +499,28 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                       const response = await axiosPost(`${API_URL}/memo_details/List`,{memo_id : item.issue_id});
                       setSelectedMemo(response.data); 
                       setSelectConsignee(item);
+                      let data = JSON.parse(item.status); 
+                      console.log(item)
+                      console.log(data)
+                      setCompanyName(data.companyName)
+                      setManagerName(data.managerName)
+                      setManagerPhoen(data.managerPhoen)
+                      setAddress(data.address)
+                      setContractContent(data.contractContent) 
+                      setContractEndDate(data.contractEndDate)
+                      setRepresentativeIndustry(data.representativeIndustry)
+                      setTotalEmployees(data.totalEmployees)
+                      setAnnualPersonalInformation(data.annualPersonalInformation)
+                      setYearlyPrivacyHandle(data.yearlyPrivacyHandle) 
+                      setSelectedItems((data.selectedItems))
+                      setSystemUsageStatus(data.systemUsageStatus)
+                      setRetrustStatus(data.retrustStatus)
+                      setThirdPartyStatus(data.thirdPartyStatus)
+                      setSystemUsageStatusText(data.systemUsageStatusText)
+                      setRetrustStatusText(data.retrustStatusText)
+                      setThirdPartyStatusText(data.thirdPartyStatusText)
                       setDetailsDialogOpen(true);
+                      setDetailsDialogIssue(false);
                     }}> 
                       <ListItemText primary={item.company_name} secondary={item.create_date} /> 
                       <Typography color="error" variant="caption" style={{ marginLeft: 'auto' }}>
@@ -532,18 +576,22 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                    :  x.state == 2 &&  x.sub_state == 2
                    ).length} 건
               </Typography>
-              <List >
+              <List > 
                   {scheduleCheckDetail.filter((x:any) =>
                    schedule_type==0? x.state == 1 &&  x.sub_state == 1
                    : schedule_type==1? x.state == 1 &&  x.sub_state == 2
                    : schedule_type==2? x.state == 2 &&  x.sub_state == 1
                    :  x.state == 2 &&  x.sub_state == 2
                    ).map((item, index) => (
-                    <ListItem key={index} button onClick={ async()=>{ 
+                    <ListItem key={index} button 
+                    onClick={ async()=>{ 
                       const response = await axiosPost(`${API_URL}/memo_details/List`,{memo_id : item.issue_id});
                       setSelectedMemo(response.data); 
+                      
                       setSelectConsignee(item);
-                      let data = JSON.parse(item.status);  
+                      let data = JSON.parse(item.status); 
+                      console.log(item)
+                      console.log(data)
                       setCompanyName(data.companyName)
                       setManagerName(data.managerName)
                       setManagerPhoen(data.managerPhoen)
@@ -553,7 +601,8 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                       setRepresentativeIndustry(data.representativeIndustry)
                       setTotalEmployees(data.totalEmployees)
                       setAnnualPersonalInformation(data.annualPersonalInformation)
-                      setYearlyPrivacyHandle(data.yearlyPrivacyHandle)
+                      setYearlyPrivacyHandle(data.yearlyPrivacyHandle) 
+                      setSelectedItems((data.selectedItems))
                       setSystemUsageStatus(data.systemUsageStatus)
                       setRetrustStatus(data.retrustStatus)
                       setThirdPartyStatus(data.thirdPartyStatus)
@@ -561,10 +610,11 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                       setRetrustStatusText(data.retrustStatusText)
                       setThirdPartyStatusText(data.thirdPartyStatusText)
                       setDetailsDialogOpen(true);
+                      setDetailsDialogIssue(false);
                     }}> 
                       <ListItemText primary={item.company_name} secondary={item.create_date} /> 
                       <Typography color="error" variant="caption" style={{ marginLeft: 'auto' }}>
-                        { item.self_check_date==new Date().toDateString() ? '!New' : ''}
+                        { item.self_check_date==new Date().toDateString() ? '!New' : ''} 
                       </Typography>
                     </ListItem>
                   ))}
@@ -598,42 +648,42 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
   return (
     <PageContainer>
       <Box>
-      <Box display={'flex'} sx={{margin:1}} alignItems="center"> 
-          <Typography sx={{mr:1}} >담당자 명</Typography>
+        <Box display={'flex'} sx={{margin:1}} alignItems="center"> 
+            <Typography sx={{mr:1}} >담당자 명</Typography>
+            <CustomSelect
+              id="account-type-select"
+              sx={{mr:4}}
+              value={admin} 
+              onChange={(event:any) => {
+                setAdmin(event.target.value);
+                fetchProjects(event.target.value);
+              }}
+            >
+              {admins.map((x, i) => {
+                  return (
+                  <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+                );
+              })
+              }
+            </CustomSelect>
+          <Typography sx={{mr:1}} >프로젝트 명</Typography>
           <CustomSelect
             id="account-type-select"
-            sx={{mr:4}}
-            value={admin} 
+            sx={{mr:2, width: 200}}
+            value={project_id} 
             onChange={(event:any) => {
-              setAdmin(event.target.value);
-              fetchProjects(event.target.value);
+              console.log('hi')
+              setProject(event.target.value)
             }}
           >
-            {admins.map((x, i) => {
-                return (
-                <MenuItem key={i} value={x.user_id}>{x.name}</MenuItem>
+            {projects.map((x, i) => { 
+              return (
+                <MenuItem key={i} value={x.project_id}>{x.name}</MenuItem>
               );
-            })
-            }
-          </CustomSelect>
-        <Typography sx={{mr:1}} >프로젝트 명</Typography>
-        <CustomSelect
-          id="account-type-select"
-          sx={{mr:2, width: 200}}
-          value={project_id} 
-          onChange={(event:any) => {
-            console.log('hi')
-            setProject(event.target.value)
-          }}
-        >
-          {projects.map((x, i) => { 
-            return (
-              <MenuItem key={i} value={x.project_id}>{x.name}</MenuItem>
-            );
-          })}
-        </CustomSelect> 
-      </Box>
-       
+            })}
+          </CustomSelect> 
+        </Box>
+        
         <Grid container spacing={3}>
           {/* column */}
             <Grid item xs={6} lg={6}>    
@@ -759,15 +809,23 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
               </ChildCard>
             </Grid>
             <Grid item xs={2} lg={2}>
-              <ChildCard
-                title="주소변경">
-                <Typography display={'flex'} justifyContent={'center'} fontSize={30} underline={'always'} component={Link}  href="/">{approveCount}</Typography>        
-              </ChildCard>  
-            </Grid>
+              <Box >
+                <ChildCard
+                  title="주소변경">
+                  <Typography display={'flex'} justifyContent={'center'} fontSize={30} underline={'always'} component={Link}  href="/">0</Typography>        
+                </ChildCard>  
+                <Link href="/notes" underline="always" sx={{height:30, color: 'black', fontSize: 16, ml: 3, mt:30}}>
+                    메모발신이력 
+                </Link> 
+                
+              </Box>
+              
+            </Grid> 
+           
         </Grid>  
 
 
-        <Dialog  open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="sm" fullWidth>
+        <Dialog  open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="md" fullWidth>
               
               <DialogContent> 
               <Grid container spacing={2}>
@@ -835,7 +893,7 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                           개인정보취급자수
                         </Typography>
                         <Typography>
-                          {privacyHandlers}명
+                          {totalEmployees}명
                         </Typography>
                       </Box>
 
@@ -852,8 +910,7 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                         <Typography sx={{width: 150}}>
                           개인정보처리시스템
                         </Typography>
-                        <Typography>
-                          시스템명
+                        <Typography> 
                         </Typography>
                       </Box>
 
@@ -861,23 +918,25 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                         <Typography sx={{width: 150}}>
                           재위탁/제3자제공
                         </Typography>
-                        <Typography>
-                          재위탁사명/제3자제공 업체명
+                        <Typography> 
                         </Typography>
                       </Box>
                       <Box sx={{display: 'flex', mt: '4px', alignItems: 'center'}}>
                         <Typography sx={{width: 150}}>
                           개인정보 취급 항목
                         </Typography>
-                        <Box sx={{borderRadius: 0, backgroundColor: 'red', p: '3px'}}>
-                          1등급
-                        </Box>
-                        <Box sx={{borderRadius: 0, backgroundColor: '', p: '3px', ml: 1}}>
-                          2등급
-                        </Box>
-                        <Box sx={{borderRadius: 0, backgroundColor: 'yellow', p: '3px', ml: 1}}>
-                          3등급
-                        </Box>
+                        {selectedItems.map((item, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              borderRadius: 0, 
+                              p: '3px',
+                              ml: 1
+                            }}
+                          >
+                            {`${item.name}`}
+                          </Box>
+                        ))}
                       </Box>
                     </Box>
                   </Box>
@@ -893,7 +952,7 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                           현업 부서
                         </Typography>
                         <Typography>
-                          부서명
+                          {companyName}
                         </Typography>
                       </Box>
 
@@ -902,7 +961,7 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                           보안 담당자
                         </Typography>
                         <Typography>
-                          {totalEmployees}
+                         
                         </Typography>
                       </Box>
 
@@ -911,13 +970,13 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                           이메일
                         </Typography>
                         <Typography>
-                          test@test.com
+                           
                         </Typography>
                       </Box>
                     </Box>
                   </Box>
                 </Box>
-                <Box m={1} >
+                {detailsDialogIssue && <Box m={1} >
                   <List style={{ display: 'block' }}>
                         {selectedMemo.map((item: any, index) => (
                           <ListItem key={index}>
@@ -939,30 +998,30 @@ const DelayCard: React.FC<{ delayCount1: number, delayCount2: number }> = ({ del
                             />
                           </ListItem>
                         ))}
-                      </List>
-                      <TextField
-                        label="메모 작성"
-                        variant="outlined"
-                        fullWidth
-                        value={newMemo}
-                        onChange={(e) => setNewMemo(e.target.value)}
-                        margin="normal"
-                        InputProps={{
-                          endAdornment: (
-                            <IconButton onClick={sendMemo} color="primary">
-                              <Send/>
-                            </IconButton>
-                          )
-                        }}
-                      />   
-                  </Box>
-                  </Box>
+                  </List>
+                  <TextField
+                    label="메모 작성"
+                    variant="outlined"
+                    fullWidth
+                    value={newMemo}
+                    onChange={(e) => setNewMemo(e.target.value)}
+                    margin="normal"
+                    InputProps={{
+                      endAdornment: (
+                        <IconButton onClick={sendMemo} color="primary">
+                          <Send/>
+                        </IconButton>
+                      )
+                    }}
+                  />   
+                </Box>}
+              </Box>
               </Grid> 
                 
 
               </DialogContent>
               <DialogActions>
-                <Button onClick={() => setDetailsDialogOpen(false)}>Close</Button>
+                <Button onClick={() => setDetailsDialogOpen(false)}>닫기</Button>
               </DialogActions>
             </Dialog>
         <Welcome />

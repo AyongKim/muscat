@@ -12,8 +12,7 @@ import PlusOneIcon from '@mui/icons-material/PlusOne';
 import AddIcon from '@mui/icons-material/Add';
 import { Select,  InputLabel, FormControl, Chip,  Box } from '@mui/material';
 import { API_URL } from '@pages/constant';
-import axiosPost from '@pages/axiosWrapper';
-import { API_URL } from '@pages/constant';
+import axiosPost from '@pages/axiosWrapper'; 
 
 interface PrivacyItem {
   id: number;

@@ -70,35 +70,8 @@ export const AdminMenuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: '메인',
     icon: IconAperture,
-    href: '/',
-    //chip: 'New',
-    chipColor: 'secondary',
-    children: [
-       {
-         id: uniqueId(),
-         title: '메인',
-         icon: IconPoint,
-         href: '/',
-       },
-       {
-         id: uniqueId(),
-         title: '메모 발신 이력',
-         icon: IconPoint,
-         href: '/notes',
-       },
-       {
-         id: uniqueId(),
-         title: '공지사항',
-         icon: IconPoint,
-         href: '/noticelist',
-       },
-       {
-         id: uniqueId(),
-         title: '회원가입 승인',
-         icon: IconPoint,
-         href: '/account/account-accept',
-       }
-     ],
+    href: '/', 
+    chipColor: 'secondary', 
   },
   {
     id: uniqueId(),
