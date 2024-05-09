@@ -26,7 +26,7 @@ export default function Login() {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [authSent, setAuthSent] = useState(false);
   const [timer, setTimer] = useState<number>(180);
-  const [checkTwo, setCheckTwo] = React.useState(false)//??
+  const [checkTwo, setCheckTwo] = React.useState(true)//??
   const router = useRouter();
   const dispatch: AppDispatch = useDispatch();  
 
